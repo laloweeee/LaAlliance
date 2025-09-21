@@ -34,15 +34,6 @@ namespace ASI.Basecode.Services.Services
             return user != null ? LoginResult.Success : LoginResult.Failed;
         }
 
-        public async Task<User> AuthenticateUserAsync(string email, string password)
-        {
-            var passwordKey = PasswordManager.EncryptPassword(password);
-            var user = _repository.GetUsers().Where(x => x.Email == email &&
-                                                     x.Password == passwordKey).FirstOrDefault();
-
-            return await Task.FromResult(user);
-        }
-
         public bool IsCustomer(User user)
         {
             return user?.Role == UserRole.Customer.ToString();
