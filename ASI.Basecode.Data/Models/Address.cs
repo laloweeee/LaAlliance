@@ -14,8 +14,8 @@ namespace ASI.Basecode.Data.Models
         public string State { get; set; }
         public string ZipCode { get; set; }
         public string Country { get; set; }
-        public decimal XCoorderinates { get; set; }
-        public decimal YCoorderinates { get; set; }
+        public decimal XCoordinates { get; set; }
+        public decimal YCoordinates { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime UpdatedTime { get; set; }
     }
