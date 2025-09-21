@@ -23,5 +23,23 @@
             Success = 0,
             Failed = 1,
         }
+
+        /// <summary>
+        /// User Role
+        /// </summary>
+        public enum UserRole
+        {
+            Customer = 0,
+            Restaurant = 1
+        }
+
+        /// <summary>
+        /// Restaurant Permission
+        /// </summary>
+        public enum RestaurantPermission
+        {
+            Admin = 0,
+            Staff = 1,
+        }
     }
 }

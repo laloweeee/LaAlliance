@@ -40,6 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\Customer\" />
+    <Folder Include="Models\Restaurant\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>
 </Project>
