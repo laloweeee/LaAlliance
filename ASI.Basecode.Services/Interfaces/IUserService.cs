@@ -8,7 +8,6 @@ namespace ASI.Basecode.Services.Interfaces
     public interface IUserService
     {
         LoginResult AuthenticateUser(string email, string password, ref User user);
-        Task<User> AuthenticateUserAsync(string email, string password);
         bool IsCustomer(User user);
         bool IsRestaurant(User user);
         // bool IsRestaurantAdmin(User user);
