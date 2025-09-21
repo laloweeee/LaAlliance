@@ -25,14 +25,12 @@ namespace ASI.Basecode.Data
                 entity.HasIndex(e => e.UserId, "UQ__Users__1788CC4D5F4A160F")
                     .IsUnique();
 
-                entity.Property(e => e.CreatedBy)
+                entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.CreatedTime).HasColumnType("datetime");
-
-                entity.Property(e => e.Name)
+                entity.Property(e => e.Role)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
@@ -42,17 +40,9 @@ namespace ASI.Basecode.Data
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.UpdatedBy)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.UpdatedTime).HasColumnType("datetime");
 
-                entity.Property(e => e.UserId)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                entity.Property(e => e.CreatedTime).HasColumnType("datetime");
             });
 
             OnModelCreatingPartial(modelBuilder);

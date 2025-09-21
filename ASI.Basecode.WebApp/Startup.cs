@@ -111,6 +111,26 @@ namespace ASI.Basecode.WebApp
             // Authorization (Add Policy)
             this.ConfigureAuthorization();
 
+            // RBAC
+            services.AddAuthorization(options =>
+            {
+                // Role base policies for Customer and Restaurant   
+                options.AddPolicy("Customer", policy =>
+                    policy.RequireRole("Customer"));
+
+                options.AddPolicy("Restaurant", policy =>
+                    policy.RequireRole("Restaurant"));
+
+                // Permission base policies for Restaurant
+                options.AddPolicy("Admin", policy => 
+                    policy.RequireRole("Restaurant")
+                        .RequireClaim("RestaurantPermission", "Admin"));
+
+                options.AddPolicy("Staff", policy =>
+                    policy.RequireRole("Restaurant")
+                        .RequireClaim("RestaurantPermission", "Staff", "Admin"));
+            });
+
             services.Configure<FormOptions>(options =>
             {
                 options.ValueLengthLimit = 1024 * 1024 * 100;
