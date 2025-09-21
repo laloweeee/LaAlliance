@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 using ASI.Basecode.Data.Models;
 
 namespace ASI.Basecode.Data
@@ -18,31 +15,47 @@ namespace ASI.Basecode.Data
         }
 
         public virtual DbSet<User> Users { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasIndex(e => e.UserId, "UQ__Users__1788CC4D5F4A160F")
-                    .IsUnique();
+                entity.ToTable("Users");
+
+                entity.HasKey(e => e.UserId);
+
+                entity.Property(e => e.UserId)
+                    .HasColumnName("UserId")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Email)
+                    .HasColumnName("Email")
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Role)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.Password)
+                    .HasColumnName("Password")
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                    .HasMaxLength(255);
 
-                entity.Property(e => e.UpdatedTime).HasColumnType("datetime");
+                entity.Property(e => e.Role)
+                    .HasColumnName("Role")
+                    .IsRequired()
+                    .HasMaxLength(50);
 
-                entity.Property(e => e.CreatedTime).HasColumnType("datetime");
+                entity.Property(e => e.IsEmailVerified)
+                    .HasColumnName("IsEmailVerified")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.UpdatedTime)
+                    .HasColumnName("UpdatedTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.CreatedTime)
+                    .HasColumnName("CreatedTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             OnModelCreatingPartial(modelBuilder);

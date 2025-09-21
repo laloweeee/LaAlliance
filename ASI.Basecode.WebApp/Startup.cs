@@ -85,9 +85,10 @@ namespace ASI.Basecode.WebApp
             // Register SQL database configuration context as services.
             services.AddDbContext<AsiBasecodeDBContext>(options =>
             {
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"),
-                    sqlServerOptions => sqlServerOptions.CommandTimeout(120));
+                options.UseMySql(
+                    Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 32)),
+                    mysqloptions => mysqloptions.CommandTimeout(120));
+                    
             });
 
             services.AddControllersWithViews();
