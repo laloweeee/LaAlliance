@@ -42,6 +42,8 @@
   <ItemGroup>
     <Folder Include="Models\Customer\" />
     <Folder Include="Models\Restaurant\" />
+    <Folder Include="Views\Customer\Shared\" />
+    <Folder Include="Views\Restaurant\Shared\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>
 </Project>
