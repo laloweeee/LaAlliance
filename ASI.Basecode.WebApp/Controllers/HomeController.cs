@@ -36,6 +36,7 @@ namespace ASI.Basecode.WebApp.Controllers
         [AllowAnonymous]
         public IActionResult Index()
         {
+            ViewData["Layout"] = "_Layout";
             return View();
         }
     }

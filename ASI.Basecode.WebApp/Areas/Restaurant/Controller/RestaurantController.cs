@@ -1,4 +1,5 @@
-﻿using ASI.Basecode.WebApp.Mvc;
+﻿using ASI.Basecode.Data.Models;
+using ASI.Basecode.WebApp.Mvc;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -7,9 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
-namespace ASI.Basecode.WebApp.Controllers
+namespace ASI.Basecode.WebApp.Areas.Restaurant.Controller
 {
     [Authorize(Policy = "Restaurant")]
+    [Area("Restaurant")]
     public class RestaurantController : ControllerBase<RestaurantController>
     {
         public RestaurantController(IHttpContextAccessor httpContextAccessor,
