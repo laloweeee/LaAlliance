@@ -12,17 +12,12 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    <partial name="Shared/HeaderNavbar" />
+    <partial name="_HeaderNavbar" />
     <div class="container">
         <main role="main">
             @RenderBody()
         </main>
     </div>
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            @Copyright
-        </div>
-    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
