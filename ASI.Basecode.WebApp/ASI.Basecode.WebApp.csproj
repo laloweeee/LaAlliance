@@ -40,10 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Customer\" />
-    <Folder Include="Models\Restaurant\" />
-    <Folder Include="Views\Customer\Shared\" />
-    <Folder Include="Views\Restaurant\Shared\" />
+    <Folder Include="Areas\Customer\Models\" />
+    <Folder Include="Areas\Customer\Views\Shared\" />
+    <Folder Include="Areas\Restaurant\Models\" />
+    <Folder Include="Areas\Restaurant\Views\Shared\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>
 </Project>
