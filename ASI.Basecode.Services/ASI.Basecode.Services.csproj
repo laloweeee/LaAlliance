@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Utilities\**" />
+    <EmbeddedResource Remove="Utilities\**" />
+    <None Remove="Utilities\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="EFCore.BulkExtensions" Version="9.0.1" />
@@ -20,10 +26,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ASI.Basecode.Data\ASI.Basecode.Data.csproj" />
     <ProjectReference Include="..\ASI.Basecode.Resources\ASI.Basecode.Resources.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Utilities\" />
   </ItemGroup>
 
 </Project>

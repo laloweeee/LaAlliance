@@ -1,4 +1,5 @@
-﻿using ASI.Basecode.WebApp.Mvc;
+﻿using ASI.Basecode.WebApp.Authentication;
+using ASI.Basecode.WebApp.Mvc;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -34,9 +35,9 @@ namespace ASI.Basecode.WebApp.Controllers
         /// </summary>
         /// <returns> Home View </returns>
         [AllowAnonymous]
+        [ServiceFilter(typeof(AuthenticationUserFilters))]
         public IActionResult Index()
         {
-            ViewData["Layout"] = "_Layout";
             return View();
         }
     }

@@ -16,11 +16,13 @@ namespace ASI.Basecode.Services.Services
     {
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IVerificationCodeStore _verificationStore;
 
-        public UserService(IUserRepository repository, IMapper mapper)
+        public UserService(IUserRepository repository, IMapper mapper, IVerificationCodeStore verificationStore)
         {
             _mapper = mapper;
             _repository = repository;
+            _verificationStore = verificationStore;
         }
 
         public LoginResult AuthenticateUser(string email, string password, ref User user)
@@ -34,6 +36,11 @@ namespace ASI.Basecode.Services.Services
             return user != null ? LoginResult.Success : LoginResult.Failed;
         }
 
+        /// <summary>
+        /// Determines whether the specified user has the role of a customer.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public bool IsCustomer(User user)
         {
             return user?.Role == UserRole.Customer.ToString();

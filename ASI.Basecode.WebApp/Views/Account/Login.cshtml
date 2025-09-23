@@ -1,8 +1,6 @@
 ﻿@model LoginViewModel
 @using static ASI.Basecode.Resources.Views.Screen
-@section styles {
-    <link rel="stylesheet" href="~/css/login.css" />
-}
+
 @{
     ViewBag.LoginView = true;
     ViewData["Title"] = "Login Page";
@@ -47,7 +45,7 @@
                     </button>
                 </form>
                 <div class="mt-6 text-center">
-                    <p class="text-gray-600">Don't have an account? <button onclick="showSignUp()" class="text-green-600 font-medium hover:text-green-700">Sign up</button></p>
+                    <p class="text-gray-600">Don't have an account? <a asp-controller="Account" asp-action="Register" class="text-green-600 font-medium hover:text-green-700">Sign up</a></p>
                 </div>
             </div>
         </div>

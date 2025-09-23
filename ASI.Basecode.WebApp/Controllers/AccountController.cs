@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using static ASI.Basecode.Resources.Constants.Enums;
 
@@ -65,6 +66,7 @@ namespace ASI.Basecode.WebApp.Controllers
         /// <returns>Created response view</returns>
         [HttpGet]
         [AllowAnonymous]
+        [ServiceFilter(typeof(AuthenticationUserFilters))]
         public ActionResult Login()
         {
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
@@ -110,6 +112,7 @@ namespace ASI.Basecode.WebApp.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [ServiceFilter(typeof(AuthenticationUserFilters))]
         public IActionResult Register()
         {
             return View();
@@ -122,6 +125,7 @@ namespace ASI.Basecode.WebApp.Controllers
             try
             {
                 _userService.AddUser(model);
+
                 return RedirectToAction("Login", "Account");
             }
             catch(InvalidDataException ex)

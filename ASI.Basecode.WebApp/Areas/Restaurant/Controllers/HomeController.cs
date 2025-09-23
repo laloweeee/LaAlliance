@@ -8,13 +8,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
-namespace ASI.Basecode.WebApp.Areas.Customer.Controller
+namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
-    [Authorize(Policy = "Customer")]
-    [Area("Customer")]
-    public class CustomerController : ControllerBase<CustomerController>
+    [Authorize(Policy = "Restaurant")]
+    [Area("Restaurant")]
+    public class HomeController : ControllerBase<HomeController>
     {
-        public CustomerController(IHttpContextAccessor httpContextAccessor,
+        public HomeController(IHttpContextAccessor httpContextAccessor,
                               ILoggerFactory loggerFactory,
                               IConfiguration configuration,
                               IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
@@ -25,7 +25,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controller
         public IActionResult Index()
         {
             ViewBag.UserEmail = User.Identity.Name;
-            ViewBag.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
+            ViewBag.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return View();
         }
     }

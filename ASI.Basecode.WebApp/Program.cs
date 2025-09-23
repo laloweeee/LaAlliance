@@ -32,6 +32,16 @@ var app = appBuilder.Build();
 configurer.ConfigureApp(app, app.Environment);
 
 app.MapControllerRoute(
+    name: "customer_default",
+    pattern: "Customer/{action=Index}/{id?}",
+    defaults: new { area = "Customer", controller = "Customer" });
+
+app.MapControllerRoute(
+    name: "restaurant_default",
+    pattern: "Restaurant/{action=Index}/{id?}",
+    defaults: new { area = "Restaurant", controller = "Restaurant" });
+
+app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}");
 
