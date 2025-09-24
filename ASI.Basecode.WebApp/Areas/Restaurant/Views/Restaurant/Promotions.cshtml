@@ -35,7 +35,7 @@
 
 <!-- Campaigns -->
 <div id="tab-campaigns" class="promo-tab section">
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div id="campaignGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <!-- Card -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between">
@@ -67,7 +67,7 @@
 
 <!-- Events -->
 <div id="tab-events" class="promo-tab section hidden">
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div id="eventsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between">
                 <h3 class="font-semibold">Burger Festival Weekend</h3>
@@ -98,7 +98,7 @@
                         <th class="px-4 py-3">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y">
+                <tbody id="discountsTableBody" class="divide-y">
                     <tr>
                         <td class="px-4 py-3 font-medium">OPEN20</td>
                         <td class="px-4 py-3">Percent</td>
@@ -204,5 +204,170 @@
             options: { responsive: true, maintainAspectRatio: false }
           });
         }
+
+        // --- Create Campaign → append card
+        (function initCreateCampaign(){
+          const form = document.getElementById('createCampaignForm');
+          const grid = document.getElementById('campaignGrid');
+          if (!form || !grid) return;
+          form.addEventListener('submit', function(e){
+            e.preventDefault();
+            const name = form.querySelector('input[type="text"]')?.value?.trim() || 'New Campaign';
+            const desc = form.querySelector('textarea')?.value?.trim() || '';
+            const start = form.querySelector('input[type="date"]')?.value || '';
+            const end   = form.querySelectorAll('input[type="date"]')[1]?.value || '';
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow p-6';
+            card.innerHTML = `
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold"></h3>
+                <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Active</span>
+              </div>
+              <p class="text-gray-600 mt-2"></p>
+              <div class="mt-4 text-sm text-gray-500"></div>
+              <div class="mt-4 flex gap-2">
+                <button class="px-3 py-1 rounded border hover:bg-gray-50">Edit</button>
+                <button class="px-3 py-1 rounded border text-red-600 hover:bg-red-50">Stop</button>
+              </div>
+            `;
+            card.querySelector('h3').textContent = name;
+            card.querySelector('p').textContent = desc || 'No description provided';
+            const runs = (start && end) ? `Runs: ${start} → ${end}` : '';
+            card.querySelector('.text-sm.text-gray-500').textContent = runs;
+
+            grid.appendChild(card);
+            if (typeof closeModal === 'function') closeModal('createCampaignModal');
+            form.reset();
+            // Scroll to the new card
+            card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          });
+        })();
+
+        // --- Campaign card: Stop ↔ Continue and Active ↔ Inactive
+        (function initCampaignToggle(){
+          const grid = document.getElementById('campaignGrid');
+          if (!grid) return;
+
+          function setStatus(card, isActive){
+            const badge = card.querySelector('span.rounded-full');
+            const toggleBtn = Array.from(card.querySelectorAll('button')).find(b=>/Stop|Continue/i.test(b.textContent || ''));
+            if (!badge || !toggleBtn) return;
+            if (isActive){
+              badge.textContent = 'Active';
+              badge.className = 'text-xs px-2 py-1 rounded-full bg-green-100 text-green-700';
+              toggleBtn.textContent = 'Stop';
+              toggleBtn.className = 'px-3 py-1 rounded border text-red-600 hover:bg-red-50';
+            } else {
+              badge.textContent = 'Inactive';
+              badge.className = 'text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700';
+              toggleBtn.textContent = 'Continue';
+              toggleBtn.className = 'px-3 py-1 rounded border text-emerald-600 hover:bg-emerald-50';
+            }
+          }
+
+          grid.addEventListener('click', function(e){
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const label = (btn.textContent || '').trim();
+            if (!/^(Stop|Continue)$/i.test(label)) return;
+            const card = btn.closest('.bg-white.rounded-lg.shadow.p-6') || btn.closest('.bg-white');
+            if (!card) return;
+            e.preventDefault();
+            const toInactive = /^Stop$/i.test(label);
+            setStatus(card, !toInactive);
+          });
+        })();
+
+        // --- Create Event → append card
+        (function initCreateEvent(){
+          const form = document.getElementById('createEventForm');
+          const grid = document.getElementById('eventsGrid');
+          if (!form || !grid) return;
+          form.addEventListener('submit', function(e){
+            e.preventDefault();
+            const title = form.querySelector('input[type="text"]')?.value?.trim() || 'New Event';
+            const date  = form.querySelector('input[type="date"]')?.value || '';
+            const time  = form.querySelector('input[type="time"]')?.value || '';
+            const details = form.querySelector('textarea')?.value?.trim() || '';
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow p-6';
+            card.innerHTML = `
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold"></h3>
+                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">Upcoming</span>
+              </div>
+              <p class="text-gray-600 mt-2"></p>
+              <div class="mt-4 text-sm text-gray-500"></div>
+              <div class="mt-4 flex gap-2">
+                <button class="px-3 py-1 rounded border hover:bg-gray-50">Edit</button>
+                <button class="px-3 py-1 rounded border text-red-600 hover:bg-red-50">Cancel</button>
+              </div>
+            `;
+            card.querySelector('h3').textContent = title;
+            card.querySelector('p').textContent = details || 'No details provided';
+            const when = (date || time) ? `${date}${date && time ? ' — ' : ''}${time}` : '';
+            card.querySelector('.text-sm.text-gray-500').textContent = when;
+
+            grid.appendChild(card);
+            if (typeof closeModal === 'function') closeModal('createEventModal');
+            form.reset();
+            card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          });
+        })();
+
+        // --- Create Discount → append row
+        (function initCreateDiscount(){
+          const form = document.getElementById('createDiscountForm');
+          const tbody = document.getElementById('discountsTableBody');
+          if (!form || !tbody) return;
+          form.addEventListener('submit', function(e){
+            e.preventDefault();
+            const code  = form.querySelector('input[type="text"]')?.value?.trim() || 'NEWCODE';
+            const type  = form.querySelector('select')?.value || 'Percent';
+            const value = form.querySelector('input[type="number"]')?.value || '';
+            const dates = form.querySelectorAll('input[type="date"]');
+            const validUntil = dates[1]?.value || '';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="px-4 py-3 font-medium"></td>
+              <td class="px-4 py-3"></td>
+              <td class="px-4 py-3"></td>
+              <td class="px-4 py-3"></td>
+              <td class="px-4 py-3">
+                <button class="px-3 py-1 rounded border hover:bg-gray-50">Edit</button>
+                <button class="px-3 py-1 rounded border text-red-600 hover:bg-red-50">Disable</button>
+              </td>
+            `;
+            tr.children[0].textContent = code;
+            tr.children[1].textContent = type;
+            tr.children[2].textContent = value ? (type === 'Percent' ? `${value}%` : `₱${value}`) : '';
+            tr.children[3].textContent = validUntil;
+
+            tbody.appendChild(tr);
+            if (typeof closeModal === 'function') closeModal('createDiscountModal');
+            form.reset();
+            tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          });
+        })();
+
+        // --- Cancel button: confirm and remove card
+        (function initCancelRemoval(){
+          function handler(e){
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const label = (btn.textContent || '').trim();
+            if (!/^Cancel$/i.test(label)) return;
+            const card = btn.closest('.bg-white.rounded-lg.shadow.p-6') || btn.closest('.bg-white');
+            if (!card) return;
+            e.preventDefault();
+            const ok = window.confirm('Are you sure you want to cancel this item?');
+            if (ok) card.remove();
+          }
+          document.getElementById('tab-campaigns')?.addEventListener('click', handler);
+          document.getElementById('tab-events')?.addEventListener('click', handler);
+        })();
     </script>
 }

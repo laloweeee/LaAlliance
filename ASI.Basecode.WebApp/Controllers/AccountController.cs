@@ -149,7 +149,18 @@ namespace ASI.Basecode.WebApp.Controllers
         public async Task<IActionResult> SignOutUser()
         {
             await this._signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            return Redirect("/");
+        }
+
+        /// <summary>
+        /// Alias endpoint for logout used by views.
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout()
+        {
+            await this._signInManager.SignOutAsync();
+            return Redirect("/");
         }
     }
 }
