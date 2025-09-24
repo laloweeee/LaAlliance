@@ -3,140 +3,180 @@
     ViewData["Title"] = "Menu Management";
 }
 
-<!-- Header + Actions + Filter -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">Menu Management</h2>
+<div id="menu" class="section">
+    <!-- Header + Actions + Filter -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Menu Management</h2>
+        <div class="flex items-center gap-2">
+            <button onclick="showAddCategory()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Add Category
+            </button>
+            <button onclick="showAddItem()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Add Item
+            </button>
 
-    <div class="flex items-center gap-2">
-        <!-- matches sample buttons -->
-        <button type="button" onclick="showAddCategory()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-            <i class="fas fa-plus mr-2"></i>Add Category
-        </button>
-
-        <button type="button" onclick="showAddItem()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-            <i class="fas fa-plus mr-2"></i>Add Item
-        </button>
-
-        <!-- Category Filter -->
-        <label for="categoryFilter" class="sr-only">Filter by Category</label>
-        <select id="categoryFilter"
-                class="px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none"
-                onchange="applyCategoryFilter && applyCategoryFilter(this.value)">
-            <option value="ALL">All Categories</option>
-            <!-- sample categories; your JS can add more -->
-            <option value="Burgers">Burgers</option>
-            <option value="Pasta">Pasta</option>
-            <option value="Drinks">Drinks</option>
-        </select>
-    </div>
-</div>
-
-<!-- Items Table -->
-<div class="bg-white rounded-lg shadow overflow-hidden mb-8">
-    <div class="px-4 py-3 border-b">
-        <h3 class="text-lg font-semibold text-gray-800">Menu Items</h3>
+            <!-- Category Filter -->
+            <label for="categoryFilter" class="sr-only">Filter by Category</label>
+            <select id="categoryFilter" class="px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none"
+                    onchange="applyCategoryFilter && applyCategoryFilter(this.value)">
+                <option value="ALL">All Categories</option>
+                <!-- More options can be injected by JS -->
+            </select>
+        </div>
     </div>
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-gray-700">
-                <tr class="text-left">
-                    <th class="px-4 py-3 font-semibold">Item</th>
-                    <th class="px-4 py-3 font-semibold">Category</th>
-                    <th class="px-4 py-3 font-semibold">Price</th>
-                    <th class="px-4 py-3 font-semibold">Available</th>
-                    <th class="px-4 py-3 font-semibold">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="itemsTbody" class="divide-y">
-                <!-- Sample rows (replace with server data later) -->
-                <tr data-category="Burgers">
-                    <td class="px-4 py-3 font-medium">Classic Burger</td>
-                    <td class="px-4 py-3">Burgers</td>
-                    <td class="px-4 py-3">₱199.00</td>
-                    <td class="px-4 py-3">
-                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Yes</span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-gray-50" onclick="showAddItem('Classic Burger')">Edit</button>
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600" onclick="openModal('deleteConfirmModal')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-
-                <tr data-category="Drinks">
-                    <td class="px-4 py-3 font-medium">Iced Tea</td>
-                    <td class="px-4 py-3">Drinks</td>
-                    <td class="px-4 py-3">₱59.00</td>
-                    <td class="px-4 py-3">
-                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Yes</span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-gray-50" onclick="showAddItem('Iced Tea')">Edit</button>
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600" onclick="openModal('deleteConfirmModal')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Items Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+        <div class="px-4 py-3 border-b">
+            <h3 class="text-lg font-semibold text-gray-800">Menu Items</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-700">
+                    <tr class="text-left">
+                        <th class="px-4 py-3 font-semibold">Item</th>
+                        <th class="px-4 py-3 font-semibold">Category</th>
+                        <th class="px-4 py-3 font-semibold">Price</th>
+                        <th class="px-4 py-3 font-semibold">Stock Qty</th>
+                        <th class="px-4 py-3 font-semibold">Status</th>
+                        <th class="px-4 py-3 font-semibold">Last Updated</th>
+                        <th class="px-4 py-3 font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody" class="divide-y">
+                    <!-- Example static rows (replace with JS-rendered rows if you prefer) -->
+                    <tr data-item-id="1">
+                        <td class="px-4 py-3 font-medium">Classic Burger</td>
+                        <td class="px-4 py-3">Burgers</td>
+                        <td class="px-4 py-3">$12.99</td>
+                        <td class="px-4 py-3">25</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Available</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500">—</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <button onclick="editMenuItem(1)" class="px-2 py-1 rounded border hover:bg-gray-50" title="Edit Item">
+                                    Edit
+                                </button>
+                                <button onclick="deleteMenuItem(1)" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600" title="Delete Item">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-item-id="2">
+                        <td class="px-4 py-3 font-medium">Margherita Pizza</td>
+                        <td class="px-4 py-3">Pizza</td>
+                        <td class="px-4 py-3">$18.99</td>
+                        <td class="px-4 py-3">3</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">Low Stock</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500">—</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <button onclick="editMenuItem(2)" class="px-2 py-1 rounded border hover:bg-gray-50" title="Edit Item">
+                                    Edit
+                                </button>
+                                <button onclick="deleteMenuItem(2)" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600" title="Delete Item">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-item-id="3">
+                        <td class="px-4 py-3 font-medium">Coca Cola</td>
+                        <td class="px-4 py-3">Beverages</td>
+                        <td class="px-4 py-3">$2.99</td>
+                        <td class="px-4 py-3">50</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Available</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500">—</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <button onclick="editMenuItem(3)" class="px-2 py-1 rounded border hover:bg-gray-50" title="Edit Item">
+                                    Edit
+                                </button>
+                                <button onclick="deleteMenuItem(3)" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600" title="Delete Item">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<!-- Categories Table -->
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="px-4 py-3 border-b">
-        <h3 class="text-lg font-semibold text-gray-800">Categories</h3>
+    <!-- Categories Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-4 py-3 border-b flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-800">Categories</h3>
+            <button onclick="showAddCategory()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Add Category
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-700">
+                    <tr class="text-left">
+                        <th class="px-4 py-3 font-semibold">Category</th>
+                        <th class="px-4 py-3 font-semibold">Items</th>
+                        <th class="px-4 py-3 font-semibold">Visible</th>
+                        <th class="px-4 py-3 font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categoriesTableBody" class="divide-y">
+                    <tr data-category-id="burgers">
+                        <td class="px-4 py-3 font-medium">Burgers</td>
+                        <td class="px-4 py-3">—</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Yes</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <button onclick="editCategory('burgers')" class="px-2 py-1 rounded border hover:bg-gray-50">Edit</button>
+                                <button onclick="deleteCategory('burgers')" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-category-id="pizza">
+                        <td class="px-4 py-3 font-medium">Pizza</td>
+                        <td class="px-4 py-3">—</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Yes</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <button onclick="editCategory('pizza')" class="px-2 py-1 rounded border hover:bg-gray-50">Edit</button>
+                                <button onclick="deleteCategory('pizza')" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-category-id="beverages">
+                        <td class="px-4 py-3 font-medium">Beverages</td>
+                        <td class="px-4 py-3">—</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Yes</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <button onclick="editCategory('beverages')" class="px-2 py-1 rounded border hover:bg-gray-50">Edit</button>
+                                <button onclick="deleteCategory('beverages')" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-gray-700">
-                <tr class="text-left">
-                    <th class="px-4 py-3 font-semibold">Category</th>
-                    <th class="px-4 py-3 font-semibold">Items</th>
-                    <th class="px-4 py-3 font-semibold">Default Visible</th>
-                    <th class="px-4 py-3 font-semibold">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                <tr data-category-id="Burgers">
-                    <td class="px-4 py-3 font-medium">Burgers</td>
-                    <td class="px-4 py-3">8</td>
-                    <td class="px-4 py-3">
-                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Yes</span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-gray-50" onclick="editCategory('Burgers')">Edit</button>
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600" onclick="openModal('deleteCategoryModal')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr data-category-id="Drinks">
-                    <td class="px-4 py-3 font-medium">Drinks</td>
-                    <td class="px-4 py-3">12</td>
-                    <td class="px-4 py-3">
-                        <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">No</span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-gray-50" onclick="editCategory('Drinks')">Edit</button>
-                            <button type="button" class="px-2 py-1 rounded border hover:bg-red-50 text-red-600" onclick="openModal('deleteCategoryModal')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 
 @await Html.PartialAsync("_MenuModals")
 
 @section Scripts {
     <script>
-        // sample filter; matches behavior from the sample page
         window.applyCategoryFilter = function (value) {
           const rows = document.querySelectorAll('#itemsTbody tr');
           rows.forEach(r => {
