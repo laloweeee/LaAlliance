@@ -173,6 +173,17 @@ namespace ASI.Basecode.WebApp
 
             this._app.UseAuthentication();
             this._app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                // Enables support for Areas (Admin/Restaurant in your case)
+                endpoints.MapControllerRoute(
+                    name: "areas",
+                    pattern: "{area:exists}/{controller=Restaurant}/{action=Dashboard}/{id?}");
+
+                // Default fallback (non-area controllers/views)
+                endpoints.MapDefaultControllerRoute();
+            });
         }
     }
 }

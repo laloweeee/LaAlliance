@@ -1,10 +1,5 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-    ViewData["Title"] = "FoodPanda";
+﻿@{
+	Layout = "~/Areas/Restaurant/Views/Shared/_LayoutAdmin.cshtml";
+	ViewData["Title"] = "Dashboard Overview";
 }
-
-<div>
-    <h1>Welcome to La Allaince Restaurant</h1>
-</div>
+@await Html.PartialAsync("Dashboard")
