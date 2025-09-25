@@ -21,7 +21,7 @@ namespace ASI.Basecode.WebApp.Authentication
                 var redirectResult = userRole switch
                 {
                     "Customer" => new RedirectToActionResult("Index", "Customer", new { area = "Customer" }),
-                    "Restaurant" => new RedirectToActionResult("Index", "Restaurant", new { area = "Restaurant" }),
+                    "Restaurant" => new RedirectToActionResult("Index", "Dashboard", new { area = "Restaurant" }),
                     _ => null
                 };
 

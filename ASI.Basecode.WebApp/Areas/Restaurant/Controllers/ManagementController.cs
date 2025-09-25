@@ -7,33 +7,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
-using ASI.Basecode.WebApp.Areas.Restaurant.Models; // for RestaurantProfileViewModel
+using ASI.Basecode.WebApp.Areas.Restaurant.Models;
 
 namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
     [Authorize(Policy = "Restaurant")]
     [Area("Restaurant")]
-    public class RestaurantController : ControllerBase<RestaurantController>
+    public class ManagementController : ControllerBase<ManagementController>
     {
-        public RestaurantController(
+        public ManagementController(
             IHttpContextAccessor httpContextAccessor,
             ILoggerFactory loggerFactory,
             IConfiguration configuration,
-            IMapper mapper = null
+            IMapper mapper
         ) : base(httpContextAccessor, loggerFactory, configuration, mapper) { }
-
-        // =======================
-        // Landing / Redirect
-        // =======================
-        public IActionResult Index()
-        {
-            // Keep user info available if needed
-            ViewBag.UserEmail = User.Identity?.Name;
-            ViewBag.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Always redirect to Dashboard after login
-            return RedirectToAction(nameof(Dashboard));
-        }
 
         // =======================
         // Dashboard
@@ -41,7 +28,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         [HttpGet]
         public IActionResult Dashboard()
         {
-            return View(); // Views/Restaurant/Dashboard.cshtml
+            // Keep user info available if needed
+            ViewBag.UserEmail = User.Identity?.Name;
+            ViewBag.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Always redirect to Dashboard after login
+            return View("Dashboard");
         }
 
         // =======================

@@ -1,62 +1,54 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    // figure out which action is active
-    var current = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLower();
+    // Get both controller and action for more precise matching
+    var currentAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLower();
+    var currentController = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "").ToLower();
 
-    string ItemClass(string action)
-        => $"nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors " +
-           (current == action.ToLower()
-                ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                : "text-gray-900 hover:bg-gray-100");
+    string IsActive(string controller, string action = "index")
+    {
+        return currentController.Equals(controller.ToLower()) && 
+               (action == "*" || currentAction.Equals(action.ToLower())) 
+               ? "bg-emerald-500 text-white font-bold hover:bg-emerald-600" 
+               : "text-gray-900 hover:bg-gray-100";
+    }
 
-    string IconClass(string action)
-        => "w-5 " + (current == action.ToLower() ? "text-white" : "text-black");
+    string ItemClass(string controller, string action = "index")
+        => $"nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {IsActive(controller, action)}";
+
+    string IconClass(string controller, string action = "index")
+        => "w-5 " + (IsActive(controller, action).Contains("text-white") ? "text-white" : "text-black");
 }
 <div class="w-64 bg-white h-screen flex flex-col">
     <nav class="space-y-2 p-4 flex-1 flex flex-col overflow-y-auto">
-        <div class="flex items-center gap-3 mb-7 px-1">
-            <div class="h-12 w-12 rounded-2xl bg-emerald-500"></div>
-            <div class="flex flex-col leading-tight">
-                <span class="text-xl font-bold text-gray-900">La Alliance</span>
-                <span class="text-sm text-gray-500">Restaurant Dashboard</span>
-            </div>
-        </div>
-        <a asp-area="Restaurant" asp-controller="Restaurant" asp-action="Dashboard"
-           class="@(ItemClass("Dashboard") + " mt-2")">
+        <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index" class="@(ItemClass("Dashboard") + " mt-2")">
             <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
             <span>Dashboard</span>
         </a>
 
-        <a asp-area="Restaurant" asp-controller="Restaurant" asp-action="RestaurantProfile"
-           class="@ItemClass("RestaurantProfile")">
+        <a asp-area="Restaurant" asp-controller="Profile" asp-action="Index" class="@ItemClass("RestaurantProfile")">
             <i class="fas fa-store @IconClass("RestaurantProfile")"></i>
             <span>Restaurant Profile</span>
         </a>
 
-        <a asp-area="Restaurant" asp-controller="Restaurant" asp-action="Menu"
-           class="@ItemClass("Menu")">
+        <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
             <i class="fas fa-utensils @IconClass("Menu")"></i>
             <span>Menu Management</span>
         </a>
 
-        <a asp-area="Restaurant" asp-controller="Restaurant" asp-action="Promotions"
-           class="@ItemClass("Promotions")">
+        <a asp-area="Restaurant" asp-controller="Promotions" asp-action="Index" class="@ItemClass("Promotions")">
             <i class="fas fa-bullhorn @IconClass("Promotions")"></i>
             <span>Promotions</span>
         </a>
 
-        <a asp-area="Restaurant" asp-controller="Restaurant" asp-action="Reports"
-           class="@ItemClass("Reports")">
+        <a asp-area="Restaurant" asp-controller="Analytics" asp-action="Index" class="@ItemClass("Analytics")">
             <i class="fas fa-chart-line @IconClass("Reports")"></i>
             <span>Reports &amp; Analytics</span>
         </a>
 
-        <a asp-area="Restaurant" asp-controller="Restaurant" asp-action="Staff"
-           class="@ItemClass("Staff")">
+        <a asp-area="Restaurant" asp-controller="Staff" asp-action="Index" class="@ItemClass("Staff")">
             <i class="fas fa-users @IconClass("Staff")"></i>
             <span>Staff Management</span>
         </a>
-
     </nav>
 
     <div class="p-4 border-t border-gray-200 flex justify-center">

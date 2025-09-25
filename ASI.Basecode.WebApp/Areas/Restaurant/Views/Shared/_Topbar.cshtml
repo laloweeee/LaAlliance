@@ -1,12 +1,12 @@
-﻿<div id="topbar" class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+﻿@using Microsoft.AspNetCore.Http
+
+<div id="topbar" class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
     <div class="flex items-center justify-between">
-        <div class="flex items-center">
-            <button class="mr-4 text-gray-500 md:hidden" id="menu-toggle">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
-                <p class="text-sm text-gray-500">Welcome back, John! Here's what's happening today.</p>
+        <div class="flex items-center gap-3 px-1">
+            <img src="~/img/LaAlliance-logo.png" alt="logo" class="h-12 w-auto" />
+            <div class="flex flex-col leading-tight">
+                <span class="text-xl font-bold text-gray-900">LaAlliance</span>
+                <span class="text-sm text-gray-500">Restaurant Portal</span>
             </div>
         </div>
 

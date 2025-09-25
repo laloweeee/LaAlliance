@@ -177,10 +177,9 @@ namespace ASI.Basecode.WebApp
 
             app.UseEndpoints(endpoints =>
             {
-                // Enables support for Areas (Admin/Restaurant in your case)
                 endpoints.MapControllerRoute(
                     name: "areas",
-                    pattern: "{area:exists}/{controller=Restaurant}/{action=Dashboard}/{id?}");
+                    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
                 // Default fallback (non-area controllers/views)
                 endpoints.MapDefaultControllerRoute();

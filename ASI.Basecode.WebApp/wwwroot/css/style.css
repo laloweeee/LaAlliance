@@ -1,25 +1,3 @@
 ﻿/* Main CSS Here */
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
-}
-
-:root {
-    --background-color1: #fafaff; /* white */
-    --background-color2: #ffffff; /* white */
-    --background-color3: #D1D5DB; /* light gray */
-    --primary-color: #16A34A;
-    --secondary-color: #0c007d;
-    --Border-color: #3f0097;
-    --one-use-color: #4AB772;
-    --two-use-color: #5500cb;
-}
-
-body {
-    
-}
