@@ -1,6 +1,6 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    // figure out which action is active
+    // figure out which action is active.
     var current = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLower();
 
     string ItemClass(string action)
