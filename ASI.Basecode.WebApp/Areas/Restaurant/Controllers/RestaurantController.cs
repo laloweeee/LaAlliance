@@ -13,7 +13,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
     [Authorize(Policy = "Restaurant")]
     [Area("Restaurant")]
-    public class HomeController : ControllerBase<HomeController>
+    public class RestaurantController : ControllerBase<RestaurantController>
     {
         public RestaurantController(
             IHttpContextAccessor httpContextAccessor,
