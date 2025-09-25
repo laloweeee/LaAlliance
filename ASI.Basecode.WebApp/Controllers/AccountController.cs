@@ -12,10 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using static ASI.Basecode.Resources.Constants.Enums;
 
@@ -29,7 +26,8 @@ namespace ASI.Basecode.WebApp.Controllers
         private readonly TokenProviderOptionsFactory _tokenProviderOptionsFactory;
         private readonly IConfiguration _appConfiguration;
         private readonly IUserService _userService;
-
+        private readonly IMailSender _mailSender;
+        private readonly IOtpService _otpService;
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountController"/> class.
         /// </summary>
@@ -49,6 +47,8 @@ namespace ASI.Basecode.WebApp.Controllers
                             IConfiguration configuration,
                             IMapper mapper,
                             IUserService userService,
+                            IMailSender mailSender,
+                            IOtpService otpService,
                             TokenValidationParametersFactory tokenValidationParametersFactory,
                             TokenProviderOptionsFactory tokenProviderOptionsFactory) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
@@ -58,6 +58,8 @@ namespace ASI.Basecode.WebApp.Controllers
             this._tokenValidationParametersFactory = tokenValidationParametersFactory;
             this._appConfiguration = configuration;
             this._userService = userService;
+            this._mailSender = mailSender;
+            this._otpService = otpService;
         }
 
         /// <summary>
@@ -120,23 +122,105 @@ namespace ASI.Basecode.WebApp.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult Register(UserViewModel model)
+        public async Task<IActionResult> Register(UserViewModel model)
         {
             try
             {
                 _userService.AddUser(model);
 
-                return RedirectToAction("Login", "Account");
+                int otpCode = _otpService.GenerateOtp();
+                DateTime timestamp = DateTime.UtcNow;
+                string hashOtp = _otpService.HashOtp(otpCode, timestamp);
+
+                _otpService.StoreOtpForUser(model.Email, hashOtp, timestamp);
+
+                await _mailSender.SendEmailVerificationAsync(model.Email, otpCode);
+
+                TempData["SuccessMessage"] = "Registration successful! Please check your email for verification code.";
+
+                return RedirectToAction("Verification", "Account", new { email = model.Email });
             }
-            catch(InvalidDataException ex)
+            catch (InvalidDataException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
             }
-            catch(Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error during registration");
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
             }
-            return View();
+            return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Verification(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Register");
+            }
+
+            var model = new EmailVerificationModel { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult VerifyOtp(EmailVerificationModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View("Verification", model);
+                }
+
+                if (_otpService.VerifyOtp(model.Email, int.Parse(model.OtpCode)))
+                {
+                    _otpService.MarkVerified(model.Email);
+                    TempData["SuccessMessage"] = "Email verified successfully.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                TempData["ErrorMessage"] = "Invalid or expired OTP. Please try again.";
+                return View("Verification", model);
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "An error occurred during verification.";
+                return View("Verification", model);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendCode(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            try
+            {
+                int otpCode = _otpService.GenerateOtp();
+                DateTime timestamp = DateTime.UtcNow;
+                string hashedOtp = _otpService.HashOtp(otpCode, timestamp);
+
+                _otpService.StoreOtpForUser(email, hashedOtp, timestamp);
+
+                await _mailSender.SendEmailVerificationAsync(email, otpCode);
+
+                TempData["SuccessMessage"] = "Verification code resent. Please check your email.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resending verification code");
+                TempData["ErrorMessage"] = "Failed to resend verification code.";
+            }
+
+            return RedirectToAction("Verification", new { email });
         }
 
         [HttpGet]

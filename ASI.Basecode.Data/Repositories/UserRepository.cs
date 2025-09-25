@@ -37,5 +37,12 @@ namespace ASI.Basecode.Data.Repositories
             GetDbSet<User>().Add(user);
             UnitOfWork.SaveChanges();
         }
+
+        public void UpdateUser(User user)
+        {
+            user.UpdatedTime = DateTime.UtcNow;
+            GetDbSet<User>().Update(user);
+            UnitOfWork.SaveChanges();
+        }
     }
 }

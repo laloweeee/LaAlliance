@@ -16,13 +16,11 @@ namespace ASI.Basecode.Services.Services
     {
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
-        private readonly IVerificationCodeStore _verificationStore;
 
-        public UserService(IUserRepository repository, IMapper mapper, IVerificationCodeStore verificationStore)
+        public UserService(IUserRepository repository, IMapper mapper)
         {
             _mapper = mapper;
             _repository = repository;
-            _verificationStore = verificationStore;
         }
 
         public LoginResult AuthenticateUser(string email, string password, ref User user)

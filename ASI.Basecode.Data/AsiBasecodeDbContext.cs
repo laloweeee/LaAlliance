@@ -47,6 +47,22 @@ namespace ASI.Basecode.Data
                     .HasColumnName("IsEmailVerified")
                     .HasDefaultValue(false);
 
+                entity.Property(e => e.EmailHashToken)
+                    .HasColumnName("EmailHashToken")
+                    .HasMaxLength(512);
+
+                entity.Property(e => e.EmailTokenExpiry)
+                    .HasColumnName("EmailTokenExpiry")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.ResetPasswordHashToken)
+                    .HasColumnName("ResetPasswordHashToken")
+                    .HasMaxLength(512);
+
+                entity.Property(e => e.ResetTokenExpiry)
+                    .HasColumnName("ResetTokenExpiry")
+                    .HasColumnType("datetime");
+
                 entity.Property(e => e.UpdatedTime)
                     .HasColumnName("UpdatedTime")
                     .HasColumnType("datetime")
