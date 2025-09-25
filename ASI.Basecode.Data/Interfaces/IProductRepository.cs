@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ASI.Basecode.Services.Interfaces
+namespace ASI.Basecode.Data.Interfaces
 {
-    public interface IMailService
+    public interface IProductRepository
     {
-
     }
 }

@@ -34,6 +34,11 @@ namespace ASI.Basecode.Services.Services
             return user != null ? LoginResult.Success : LoginResult.Failed;
         }
 
+        /// <summary>
+        /// Determines whether the specified user has the role of a customer.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public bool IsCustomer(User user)
         {
             return user?.Role == UserRole.Customer.ToString();

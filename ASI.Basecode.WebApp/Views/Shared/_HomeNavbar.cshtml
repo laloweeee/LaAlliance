@@ -1,17 +1,57 @@
 ﻿@using Microsoft.AspNetCore.Http
-<div class="w-full h-20 px-24 py-[5px] bg-green-600 inline-flex justify-between items-center overflow-hidden">
-    <div class="justify-start text-white text-2xl font-medium font-['Hepta_Slab']">LaAlliance</div>
-    <div class="flex justify-start items-center gap-7">
-        <div class="justify-start text-white text-lg font-bold font-['Gothic_A1']">Home</div>
-        <div class="justify-start text-white text-lg font-bold font-['Gothic_A1']">Menu</div>
-        <div class="justify-start text-white text-lg font-bold font-['Gothic_A1']">About</div>
-    </div>  
-    <div class="flex gap-2">
-        <button class=" h-10 bg-white text-green-600 font-bold rounded-md hover:bg-green-100 px-4">
-            Choose Location
-        </button>
-        <a asp-controller="Account" asp-action="Login" class="bg-green-600 text-white px-8 rounded-lg font-semibold text-lg shadow hover:bg-green-700 transition-all">
-            Login
-        </a>
+<!-- Navbar -->
+<div id="navbar" class="bg-transparent fixed top-0 left-0 z-50 w-full transition-colors duration-300 ease-in-out">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
+        <!-- Logo -->
+        <h1 class="text-white text-2xl font-black">
+            LaAlliancé
+        </h1>
+
+        <!-- Nav + Login Container -->
+        <div class="flex items-center gap-7">
+            <!-- Navigation Links (hidden on mobile) -->
+            <div class="hidden md:flex items-center gap-7">
+                <a href="#"
+                   class="relative text-white text-lg font-medium cursor-pointer transition duration-300 ease-in-out hover:text-green-300">
+                    Home
+                </a>
+                <a href="#"
+                   class="relative text-white text-lg font-medium cursor-pointer transition duration-300 ease-in-out hover:text-green-300">
+                    Menu
+                </a>
+                <a href="#"
+                   class="relative text-white text-lg font-medium cursor-pointer transition duration-300 ease-in-out hover:text-green-300">
+                    About
+                </a>
+            </div>
+
+            <!-- Login Button (always visible) -->
+            <a asp-controller="Account" asp-action="Login" id="loginButton" class="text-white bg-green-600 font-bold rounded-md px-6 py-2 transition duration-300 ease-in-out hover:bg-green-200 hover:text-green-600 hover:scale-105 hover:shadow-lg">
+                Login
+            </a>
+        </div>
     </div>
 </div>
+
+
+<!-- JS to toggle background color on scroll -->
+<script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) {
+            navbar.classList.add('bg-green-600');
+            navbar.classList.remove('bg-transparent');
+            loginButton.classList.remove('bg-green-600');
+            loginButton.classList.add('text-green-600');
+            loginButton.classList.add('bg-white');
+            loginButton.classList.remove('text-white');
+        } else {
+            navbar.classList.add('bg-transparent');
+            navbar.classList.remove('bg-green-600');
+            login-button.classList.remove('text-green-600');
+            login-button.classList.remove('bg-white');
+            login-button.classList.add('bg-green-600');
+            login-button.classList.add('text-white');
+        }
+    });
+</script>

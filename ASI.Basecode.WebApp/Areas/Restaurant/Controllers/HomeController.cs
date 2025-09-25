@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using ASI.Basecode.WebApp.Areas.Restaurant.Models; // for RestaurantProfileViewModel
 
-namespace ASI.Basecode.WebApp.Areas.Restaurant.Controller
+namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
     [Authorize(Policy = "Restaurant")]
     [Area("Restaurant")]
-    public class RestaurantController : ControllerBase<RestaurantController>
+    public class HomeController : ControllerBase<HomeController>
     {
         public RestaurantController(
             IHttpContextAccessor httpContextAccessor,

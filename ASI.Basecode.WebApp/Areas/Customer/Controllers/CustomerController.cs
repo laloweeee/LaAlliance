@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
-namespace ASI.Basecode.WebApp.Areas.Customer.Controller
+namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
     [Authorize(Policy = "Customer")]
     [Area("Customer")]
