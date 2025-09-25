@@ -6,17 +6,18 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class Address
+    public class Address
     {
         public int AddressId { get; set; }
-        public string Street { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string ZipCode { get; set; }
-        public string Country { get; set; }
-        public decimal XCoordinates { get; set; }
-        public decimal YCoordinates { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime UpdatedTime { get; set; }
+        public int UserId { get; set; }
+        public string streetAddress { get; set; }
+        public string barangay { get; set; }
+        public string city { get; set; }
+        public string province { get; set; }
+        public int zipCode { get; set; }
+        public string country { get;  } = "Philippines";
+        public string addressNote { get; set; }
+        public bool isDefault { get; set; }
+
     }
 }

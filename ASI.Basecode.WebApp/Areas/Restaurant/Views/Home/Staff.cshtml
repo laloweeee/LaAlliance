@@ -1,0 +1,275 @@
+﻿@{
+    Layout = "~/Areas/Restaurant/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Staff Management";
+}
+
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Staff Management</h2>
+    <div class="flex items-center gap-2">
+        <input id="staffSearch" type="text" placeholder="Search staff…" class="px-3 py-2 border rounded-lg" oninput="filterStaff()">
+        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700" onclick="openModal('addStaffModal')">Add Staff</button>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm" id="staffTable">
+            <thead class="bg-gray-50">
+                <tr class="text-left">
+                    <th class="px-4 py-3 font-semibold">Name</th>
+                    <th class="px-4 py-3 font-semibold">Email</th>
+                    <th class="px-4 py-3 font-semibold">Role</th>
+                    <th class="px-4 py-3 font-semibold">Status</th>
+                    <th class="px-4 py-3 font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="staffTbody" class="divide-y">
+                <tr>
+                    <td class="px-4 py-3 font-medium">Angela Reyes</td>
+                    <td class="px-4 py-3">angela@laalliance.com</td>
+                    <td class="px-4 py-3">Manager</td>
+                    <td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Active</span></td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-2">
+                            <button class="px-3 py-1 rounded border hover:bg-gray-50 staff-edit-btn">Edit</button>
+                            <button class="px-3 py-1 rounded border text-amber-700 hover:bg-amber-50 staff-toggle-btn">Deactivate</button>
+                            <button class="px-3 py-1 rounded border text-gray-700 hover:bg-gray-50 staff-reset-btn">Reset Password</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 font-medium">Jose Santos</td>
+                    <td class="px-4 py-3">jose@laalliance.com</td>
+                    <td class="px-4 py-3">Cashier</td>
+                    <td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Inactive</span></td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-2">
+                            <button class="px-3 py-1 rounded border hover:bg-gray-50 staff-edit-btn">Edit</button>
+                            <button class="px-3 py-1 rounded border text-emerald-700 hover:bg-emerald-50 staff-toggle-btn">Activate</button>
+                            <button class="px-3 py-1 rounded border text-gray-700 hover:bg-gray-50 staff-reset-btn">Reset Password</button>
+                        </div>
+                    </td>
+                </tr>
+                <!-- add more sample rows as needed -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Staff Modal -->
+<div id="addStaffModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white w-full max-w-lg rounded-lg shadow-lg overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold">Add Staff</h3>
+            <button type="button" class="text-gray-500 hover:text-gray-700" onclick="closeModal('addStaffModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6">
+            <form id="addStaffForm" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input id="addStaffName" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., Juan Dela Cruz">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input id="addStaffEmail" type="email" class="w-full px-4 py-2 border rounded-lg" placeholder="name@company.com">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                        <select id="addStaffRole" class="w-full px-3 py-2 border rounded-lg">
+                            <option>Manager</option>
+                            <option>Cashier</option>
+                            <option>Cook</option>
+                            <option>Wait Staff</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
+                        <input id="addStaffTempPass" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="Auto-generated or manual">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="px-4 py-2 rounded border" onclick="closeModal('addStaffModal')">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Staff Modal -->
+<div id="editStaffModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white w-full max-w-lg rounded-lg shadow-lg overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold">Edit Staff</h3>
+            <button type="button" class="text-gray-500 hover:text-gray-700" onclick="closeModal('editStaffModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6">
+            <form class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input id="editStaffName" type="text" class="w-full px-4 py-2 border rounded-lg" value="Angela Reyes">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input id="editStaffEmail" type="email" class="w-full px-4 py-2 border rounded-lg" value="angela@laalliance.com">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                        <select id="editStaffRole" class="w-full px-3 py-2 border rounded-lg">
+                            <option selected>Manager</option>
+                            <option>Cashier</option>
+                            <option>Cook</option>
+                            <option>Wait Staff</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="editStaffStatus" class="w-full px-3 py-2 border rounded-lg">
+                            <option selected>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="px-4 py-2 rounded border" onclick="closeModal('editStaffModal')">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // simple client-side search demo
+        function filterStaff(){
+          const q = (document.getElementById('staffSearch').value || '').toLowerCase();
+          const rows = document.querySelectorAll('#staffTable tbody tr');
+          rows.forEach(r => {
+            r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none';
+          });
+        }
+
+        // Staff interactions: edit, activate/deactivate, reset password
+        (function initStaffActions(){
+          const table = document.getElementById('staffTable');
+          const tbody = document.getElementById('staffTbody');
+          const editModalId = 'editStaffModal';
+
+          function getRowCells(btn){
+            const row = btn.closest('tr');
+            if (!row) return null;
+            const cells = row.querySelectorAll('td');
+            return { row, cells };
+          }
+
+          // Open edit with prefill
+          table.addEventListener('click', function(e){
+            const editBtn = e.target.closest('.staff-edit-btn');
+            if (!editBtn) return;
+            const ref = getRowCells(editBtn);
+            if (!ref) return;
+            const [nameCell, emailCell, roleCell, statusCell] = ref.cells;
+            document.getElementById('editStaffName').value = nameCell.textContent.trim();
+            document.getElementById('editStaffEmail').value = emailCell.textContent.trim();
+            document.getElementById('editStaffRole').value = roleCell.textContent.trim();
+            const badgeText = (statusCell.querySelector('span')?.textContent || '').trim();
+            const isActive = badgeText === 'Active';
+            document.getElementById('editStaffStatus').value = isActive ? 'Active' : 'Inactive';
+            openModal(editModalId);
+
+            // On save, write back to table
+            const form = document.getElementById('editStaffForm');
+            form.onsubmit = function(ev){
+              ev.preventDefault();
+              nameCell.textContent = document.getElementById('editStaffName').value.trim();
+              emailCell.textContent = document.getElementById('editStaffEmail').value.trim();
+              roleCell.textContent = document.getElementById('editStaffRole').value;
+              const statusVal = document.getElementById('editStaffStatus').value;
+              setStatus(statusCell, ref.row, statusVal === 'Active');
+              closeModal(editModalId);
+            };
+          });
+
+          // Activate / Deactivate toggle
+          function setStatus(statusCell, row, isActive){
+            const badge = statusCell.querySelector('span');
+            if (!badge) return;
+            if (isActive){
+              badge.textContent = 'Active';
+              badge.className = 'px-2 py-1 text-xs rounded-full bg-green-100 text-green-700';
+              const toggleBtn = row.querySelector('.staff-toggle-btn');
+              toggleBtn.textContent = 'Deactivate';
+              toggleBtn.className = 'px-3 py-1 rounded border text-amber-700 hover:bg-amber-50 staff-toggle-btn';
+            } else {
+              badge.textContent = 'Inactive';
+              badge.className = 'px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700';
+              const toggleBtn = row.querySelector('.staff-toggle-btn');
+              toggleBtn.textContent = 'Activate';
+              toggleBtn.className = 'px-3 py-1 rounded border text-emerald-700 hover:bg-emerald-50 staff-toggle-btn';
+            }
+          }
+
+          table.addEventListener('click', function(e){
+            const toggleBtn = e.target.closest('.staff-toggle-btn');
+            if (!toggleBtn) return;
+            const ref = getRowCells(toggleBtn);
+            if (!ref) return;
+            const statusCell = ref.cells[3];
+            const badgeText = (statusCell.querySelector('span')?.textContent || '').trim();
+            const currentlyActive = badgeText === 'Active';
+            setStatus(statusCell, ref.row, !currentlyActive);
+          });
+
+          // Reset password: confirm and show alert (mock)
+          table.addEventListener('click', function(e){
+            const resetBtn = e.target.closest('.staff-reset-btn');
+            if (!resetBtn) return;
+            const ref = getRowCells(resetBtn);
+            if (!ref) return;
+            const name = ref.cells[0].textContent.trim();
+            const ok = window.confirm(`Reset password for ${name}?`);
+            if (ok) {
+              setTimeout(()=> alert('Temporary password has been emailed.'), 50);
+            }
+          });
+
+          // Add staff: append row
+          const addForm = document.getElementById('addStaffForm');
+          addForm?.addEventListener('submit', function(e){
+            e.preventDefault();
+            const name = document.getElementById('addStaffName').value.trim();
+            const email = document.getElementById('addStaffEmail').value.trim();
+            const role = document.getElementById('addStaffRole').value;
+            if (!name || !email) { alert('Name and email are required.'); return; }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="px-4 py-3 font-medium"></td>
+              <td class="px-4 py-3"></td>
+              <td class="px-4 py-3"></td>
+              <td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Inactive</span></td>
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap gap-2">
+                  <button class="px-3 py-1 rounded border hover:bg-gray-50 staff-edit-btn">Edit</button>
+                  <button class="px-3 py-1 rounded border text-emerald-700 hover:bg-emerald-50 staff-toggle-btn">Activate</button>
+                  <button class="px-3 py-1 rounded border text-gray-700 hover:bg-gray-50 staff-reset-btn">Reset Password</button>
+                </div>
+              </td>`;
+            tr.children[0].textContent = name;
+            tr.children[1].textContent = email;
+            tr.children[2].textContent = role;
+            tbody.appendChild(tr);
+            closeModal('addStaffModal');
+            addForm.reset();
+            tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          });
+        })();
+    </script>
+}

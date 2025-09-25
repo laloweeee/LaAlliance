@@ -34,16 +34,31 @@ namespace ASI.Basecode.Services.Services
             return user != null ? LoginResult.Success : LoginResult.Failed;
         }
 
+        /// <summary>
+        /// Determines whether the specified user has the role of a customer.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public bool IsCustomer(User user)
         {
             return user?.Role == UserRole.Customer.ToString();
         }
 
+        /// <summary>
+        /// Determines whether the specified user has the role of a restaurant.
+        /// </summary>
+        /// <param name="user">The user to evaluate. Must not be <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> if the user's role is "Restaurant"; otherwise, <see langword="false"/>.</returns>
         public bool IsRestaurant(User user)
         {
             return user?.Role == UserRole.Restaurant.ToString();
         }
 
+        /// <summary>
+        /// Add user function
+        /// </summary>
+        /// <param name="model"></param>
+        /// <exception cref="InvalidDataException"></exception>
         public void AddUser(UserViewModel model)
         {
             var user = new User();
@@ -52,7 +67,7 @@ namespace ASI.Basecode.Services.Services
                 _mapper.Map(model, user);
                 user.Email = model.Email;
                 user.Password = PasswordManager.EncryptPassword(model.Password);
-                user.Role = UserRole.Restaurant.ToString();
+                user.Role = UserRole.Customer.ToString();
                 user.CreatedTime = DateTime.Now;
                 user.UpdatedTime = DateTime.Now;
 
