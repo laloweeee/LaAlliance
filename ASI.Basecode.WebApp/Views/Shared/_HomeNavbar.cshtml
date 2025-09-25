@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Http
+<div class="w-full h-20 px-24 py-[5px] bg-green-600 inline-flex justify-between items-center overflow-hidden">
+    <div class="justify-start text-white text-2xl font-medium font-['Hepta_Slab']">LaAlliance</div>
+    <div class="flex justify-start items-center gap-7">
+        <div class="justify-start text-white text-lg font-bold font-['Gothic_A1']">Home</div>
+        <div class="justify-start text-white text-lg font-bold font-['Gothic_A1']">Menu</div>
+        <div class="justify-start text-white text-lg font-bold font-['Gothic_A1']">About</div>
+    </div>  
+    <div class="flex gap-2">
+        <button class=" h-10 bg-white text-green-600 font-bold rounded-md hover:bg-green-100 px-4">
+            Choose Location
+        </button>
+        <a asp-controller="Account" asp-action="Login" class="bg-green-600 text-white px-8 rounded-lg font-semibold text-lg shadow hover:bg-green-700 transition-all">
+            Login
+        </a>
+    </div>
+</div>

@@ -32,8 +32,13 @@ var app = appBuilder.Build();
 configurer.ConfigureApp(app, app.Environment);
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}");
+
+app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}");
+    pattern: "{controller=Home}/{action=Index}");
+
 app.MapControllers();
 app.MapRazorPages();
 

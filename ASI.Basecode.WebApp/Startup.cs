@@ -85,9 +85,10 @@ namespace ASI.Basecode.WebApp
             // Register SQL database configuration context as services.
             services.AddDbContext<AsiBasecodeDBContext>(options =>
             {
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"),
-                    sqlServerOptions => sqlServerOptions.CommandTimeout(120));
+                options.UseMySql(
+                    Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 32)),
+                    mysqloptions => mysqloptions.CommandTimeout(120));
+                    
             });
 
             services.AddControllersWithViews();
@@ -172,6 +173,17 @@ namespace ASI.Basecode.WebApp
 
             this._app.UseAuthentication();
             this._app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                // Enables support for Areas (Admin/Restaurant in your case)
+                endpoints.MapControllerRoute(
+                    name: "areas",
+                    pattern: "{area:exists}/{controller=Restaurant}/{action=Dashboard}/{id?}");
+
+                // Default fallback (non-area controllers/views)
+                endpoints.MapDefaultControllerRoute();
+            });
         }
     }
 }
