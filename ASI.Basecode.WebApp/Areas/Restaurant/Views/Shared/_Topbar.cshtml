@@ -1,30 +1,37 @@
 ﻿@using Microsoft.AspNetCore.Http
 
-<div id="topbar" class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+<div id="topbar" class="border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3 px-1">
             <img src="~/img/LaAlliance-logo.png" alt="logo" class="h-12 w-auto" />
             <div class="flex flex-col leading-tight">
-                <span class="text-xl font-bold text-gray-900">LaAlliance</span>
+                <span class="text-xl font-bold text-gray-900">LaAlliancé</span>
                 <span class="text-sm text-gray-500">Restaurant Portal</span>
             </div>
         </div>
 
-        <div class="flex items-center space-x-4">
+        <div class="align-center flex flex-row items-center gap-2">
             <div class="relative hidden md:block">
-                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <i class="fas fa-search -translate-y-1/2 absolute left-3 top-1/2 transform text-gray-400"></i>
+                <input type="text" placeholder="Search..." class="rounded-lg border border-gray-200 py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-green-500">
             </div>
 
-            <button class="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+            <button class="relative rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
                 <i class="fas fa-bell text-xl"></i>
                 <span class="notification-dot"></span>
             </button>
 
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
                     <i class="fas fa-user text-green-600"></i>
                 </div>
+            </div>
+
+            <div class="flex items-center">
+                <a asp-controller="Account" asp-action="Logout"
+                   class="items-center rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
             </div>
         </div>
     </div>

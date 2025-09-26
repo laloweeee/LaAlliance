@@ -1,0 +1,111 @@
+﻿@model ASI.Basecode.Services.ServiceModels.CategoryViewModel
+
+<div id="categoryModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="relative w-full max-w-lg rounded-xl bg-white p-4 shadow-lg">
+        <div class="border-b border-gray-200 mb-4 pb-3">
+            <div class="flex justify-between items-center">
+                <h3 id="modalTitle" class="text-lg font-semibold text-gray-800">Add Category</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div>
+            <p id="modalDescription" class="text-gray-600 mb-4">Add a new category to organize your menu items
+                effectively.</p>
+            <form id="categoryForm" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="categoryId" name="CategoryId" value="">
+                <input type="text" id="categoryName" name="Name" class="w-full border px-3 py-4 rounded-lg"
+                    placeholder="Enter category name" required>
+                <div class="mt-4 flex gap-2">
+                    <button type="submit" id="submitBtn"
+                        class="w-1/2 rounded bg-green-600 px-2 py-1 text-white hover:bg-green-700">
+                        Add
+                    </button>
+                    <button type="button"
+                        class="w-1/2 cancel-btn rounded bg-gray-600 px-2 py-1 text-white hover:bg-gray-700">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('categoryModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const cancelBtn = modal.querySelector('.cancel-btn');
+        const addCategoryBtn = document.getElementById('addCategoryBtn');
+        const editCategoryBtns = document.querySelectorAll('.edit-category-btn');
+        const categoryForm = document.getElementById('categoryForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDescription = document.getElementById('modalDescription');
+        const submitBtn = document.getElementById('submitBtn');
+        const categoryIdInput = document.getElementById('categoryId');
+        const categoryNameInput = document.getElementById('categoryName');
+
+        function disableModalControls() {
+            const modal = document.getElementById('categoryModal');
+            modal.querySelectorAll('button, input, select, textarea').forEach(el => {
+                el.disabled = true;
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+        }
+
+        function enableModalControls() {
+            const modal = document.getElementById('categoryModal');
+            modal.querySelectorAll('button, input, select, textarea').forEach(el => {
+                el.disabled = false;
+                el.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        }
+
+        function openAddModal() {
+            modalTitle.textContent = 'Add Category';
+            modalDescription.textContent = 'Add a new category to organize your menu items effectively.';
+            submitBtn.textContent = 'Add';
+            categoryForm.action = '/Restaurant/Menu/AddCategory';
+            categoryIdInput.value = '';
+            categoryNameInput.value = '';
+            modal.classList.remove('hidden');
+        }
+
+        function openEditModal(categoryId, categoryName) {
+            modalTitle.textContent = 'Edit Category';
+            modalDescription.textContent = 'Update the category name.';
+            submitBtn.textContent = 'Update';
+            categoryForm.action = '/Restaurant/Menu/EditCategory';
+            categoryIdInput.value = categoryId;
+            categoryNameInput.value = categoryName;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        if (addCategoryBtn) {
+            addCategoryBtn.addEventListener('click', openAddModal);
+        }
+
+        editCategoryBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const categoryId = this.getAttribute('data-category-id');
+                const categoryName = this.getAttribute('data-category-name');
+                openEditModal(categoryId, categoryName);
+            });
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        window.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    });
+</script>

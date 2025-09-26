@@ -24,8 +24,8 @@ namespace ASI.Basecode.Services.Services
             try
             {
                 _logger.LogInformation($"Sending welcome email to {toEmail}");
-                var subject = "Welcome to LaAlliance!";
-                var htmlContent = $"Welcome to LaAlliance {userName}";
+                var subject = "Welcome to LaAlliancé!";
+                var htmlContent = $"Welcome to LaAlliancé {userName}";
 
                 await sendCustomEmailAsync(toEmail, subject, htmlContent);
                 _logger.LogInformation($"Welcome email sent to {toEmail}");
@@ -41,7 +41,7 @@ namespace ASI.Basecode.Services.Services
         {
             try
             {
-                var subject = "Reset Your Password - LaAlliance";
+                var subject = "Reset Your Password - LaAlliancé";
                 var htmlContent = $"Your OTP Code: {otpCode}";
 
                 await sendCustomEmailAsync(toEmail, subject, htmlContent);
@@ -57,17 +57,17 @@ namespace ASI.Basecode.Services.Services
         {
             try
             {
-                var subject = "Verify Your Email - LaAlliance";
+                var subject = "Verify Your Email - LaAlliancé";
                 var htmlContent = $@"
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
                 <h2 style='color: #4CAF50;'>Verify Your Email Address</h2>
-                <p>Thank you for registering with LaAlliance! To complete your registration, please use the verification code below:</p>
+                <p>Thank you for registering with LaAlliancé! To complete your registration, please use the verification code below:</p>
                 <div style='background-color: #f2f2f2; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;'>
                     {otpCode}
                 </div>
                 <p>This code will expire in 10 minutes.</p>
-                <p>If you didn't create an account with LaAlliance, you can safely ignore this email.</p>
-                <p>Thank you,<br>The LaAlliance Team</p>
+                <p>If you didn't create an account with LaAlliancé, you can safely ignore this email.</p>
+                <p>Thank you,<br>The LaAlliancé Team</p>
             </div>";
 
                 await sendCustomEmailAsync(toEmail, subject, htmlContent);

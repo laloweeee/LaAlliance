@@ -78,5 +78,10 @@ namespace ASI.Basecode.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserExists);
             }
         }
+
+        public IQueryable<User> GetUserById(int userID)
+        {
+            return _repository.GetUserById(userID);
+        }
     }
 }

@@ -37,9 +37,11 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IUserService, UserService>();
             this._services.AddScoped<IMailSender, MailSenderService>();
             this._services.AddScoped<IOtpService, OtpService>();
+            this._services.AddScoped<ICategoryService, CategoryService>();
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
+            this._services.AddScoped<ICategoryRepository, CategoryRepository>();
 
             // Manager Class
             this._services.AddScoped<SignInManager>();

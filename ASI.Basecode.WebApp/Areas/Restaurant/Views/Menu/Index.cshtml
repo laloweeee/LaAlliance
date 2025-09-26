@@ -1,72 +1,224 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard Overview";
+    ViewData["Title"] = "LaAlliancé";
 }
 
-<div id="dashboard" class="section active">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h2>
+@model IEnumerable<ASI.Basecode.Data.Models.Category>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white p-6 rounded-lg shadow">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Today's Revenue</p>
-                    <p class="text-2xl font-bold text-gray-800">$2,847</p>
+<div class="bg-gradient-to-br from-gray-50 to-gray-100" style="height: calc(100vh - 150px); overflow: hidden;">
+    <div class="max-w-auto mx-auto p-2 h-full flex flex-col">
+        <!-- Header -->
+        <div class="mb-6 flex-shrink-0">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2 flex items-center">
+                <i class="fas fa-utensils text-emerald-600 mr-3"></i>
+                Menu Management
+            </h1>
+            <p class="text-gray-600">Manage your restaurant categories and products</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+            <!-- CATEGORIES SIDEBAR -->
+            <div class="lg:w-1/3 xl:w-1/4 flex flex-col min-h-0">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col h-full">
+                    <!-- Category Header -->
+                    <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-6 text-white flex-shrink-0">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="text-xl font-bold">Categories</h3>
+                                <p class="text-emerald-100 text-sm">@Model.Count() categories available</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2 mt-4">
+                            <button
+                                class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 backdrop-blur-sm"
+                                id="editModeBtn">
+                                <i class="fas fa-pencil-alt mr-2"></i>
+                                <span class="text-sm font-medium">Edit</span>
+                            </button>
+                            <button
+                                class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 backdrop-blur-sm"
+                                id="addCategoryBtn">
+                                <i class="fas fa-plus mr-2"></i>
+                                <span class="text-sm font-medium">Add</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category List -->
+                    <div class="p-4 flex-1 overflow-y-auto custom-scrollbar min-h-0">
+                        @{
+                            int index = 0;
+                        }
+                        @foreach (var category in Model)
+                        {
+                            <label class="block mb-3 group cursor-pointer">
+                                <div
+                                    class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 group-hover:shadow-md">
+                                    <input type="radio" name="categoryFilter" value="@category.CategoryID"
+                                        class="w-4 h-4 mr-4 text-emerald-600 focus:ring-emerald-500 focus:ring-2" @(index ==
+                                                                                                                                                      0 ? "checked" : "")>
+
+                                    <div class="flex-1">
+                                        <span
+                                            class="font-medium text-gray-800 group-hover:text-emerald-700 transition-colors duration-200">
+                                            @category.Name
+                                        </span>
+                                    </div>
+
+                                    <button type="button"
+                                        class="edit-category-btn opacity-0 group-hover:opacity-100 ml-3 p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-100 rounded-full transition-all duration-200"
+                                        data-category-id="@category.CategoryID" data-category-name="@category.Name"
+                                        onclick="event.stopPropagation();">
+                                        <i class="fas fa-edit text-sm"></i>
+                                    </button>
+                                </div>
+                            </label>
+                            index++;
+                        }
+
+                        @if (!Model.Any())
+                        {
+                            <div class="text-center py-8 text-gray-500 flex-1 flex flex-col items-center justify-center">
+                                <i class="fas fa-folder-open text-4xl mb-3 opacity-50"></i>
+                                <p>No categories available</p>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Orders Today</p>
-                    <p class="text-2xl font-bold text-gray-800">127</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-users text-purple-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Active Staff</p>
-                    <p class="text-2xl font-bold text-gray-800">12</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-star text-orange-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Avg Rating</p>
-                    <p class="text-2xl font-bold text-gray-800">4.8</p>
+
+            <!-- PRODUCTS MAIN CONTENT -->
+            <div class="lg:w-2/3 xl:w-3/4 flex flex-col min-h-0">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col h-full">
+                    <!-- Products Header -->
+                    <div class="bg-gradient-to-r from-gray-800 to-gray-900 p-6 text-white flex-shrink-0">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-bold">Products</h3>
+                                <p class="text-gray-300 text-sm">Manage your menu items</p>
+                            </div>
+                            <button
+                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg flex items-center transition-all duration-200 shadow-lg hover:shadow-xl">
+                                <i class="fas fa-plus mr-2"></i>
+                                <span class="font-medium">Add Product</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Products Content -->
+                    <div class="p-6 flex-1 flex flex-col min-h-0">
+                        <div class="flex flex-col items-center justify-center h-full text-gray-500">
+                            <div class="text-center">
+                                <i class="fas fa-utensils text-6xl mb-4 opacity-20"></i>
+                                <h4 class="text-xl font-semibold mb-2">Select a Category</h4>
+                                <p class="text-gray-400">Choose a category from the sidebar to view products</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sales Trend</h3>
-            <div style="height: 300px;">
-                <canvas id="salesTrendChart"></canvas>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Peak Hours</h3>
-            <div style="height: 300px;">
-                <canvas id="peakHoursChart"></canvas>
-            </div>
-        </div>
-    </div>
-
 </div>
+
+<style>
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(5, 150, 105, 0.3) rgba(243, 244, 246, 0.3);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(243, 244, 246, 0.3);
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(5, 150, 105, 0.3);
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(5, 150, 105, 0.5);
+    }
+</style>
+
+@await Html.PartialAsync("_CategoryModal", new ASI.Basecode.Services.ServiceModels.CategoryViewModel())
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editModeBtn = document.getElementById('editModeBtn');
+        const editButtons = document.querySelectorAll('.edit-category-btn');
+        let isEditMode = false;
+
+        // Initially hide all edit buttons
+        editButtons.forEach(btn => {
+            btn.style.display = 'none';
+        });
+
+        // Toggle edit mode
+        editModeBtn.addEventListener('click', function () {
+            isEditMode = !isEditMode;
+
+            editButtons.forEach(btn => {
+                btn.style.display = isEditMode ? 'block' : 'none';
+            });
+
+            // Change button appearance based on mode
+            if (isEditMode) {
+                editModeBtn.classList.add('bg-red-500', 'bg-opacity-30', 'hover:bg-red-600');
+                editModeBtn.classList.remove('bg-white', 'bg-opacity-20', 'hover:bg-opacity-30');
+                editModeBtn.innerHTML = '<i class="fas fa-times mr-2"></i><span class="text-sm font-medium">Cancel</span>';
+            } else {
+                editModeBtn.classList.add('bg-white', 'bg-opacity-20', 'hover:bg-opacity-30');
+                editModeBtn.classList.remove('bg-red-500', 'bg-opacity-30', 'hover:bg-red-600');
+                editModeBtn.innerHTML = '<i class="fas fa-pencil-alt mr-2"></i><span class="text-sm font-medium">Edit</span>';
+            }
+        });
+
+        // Add smooth scroll behavior for category list
+        const categoryInputs = document.querySelectorAll('input[name="categoryFilter"]');
+        categoryInputs.forEach(input => {
+            input.addEventListener('change', function () {
+                // Add visual feedback for selected category
+                categoryInputs.forEach(inp => {
+                    const label = inp.closest('label');
+                    const div = label.querySelector('div');
+                    if (inp === this) {
+                        div.classList.add('border-emerald-500', 'bg-emerald-50');
+                        div.classList.remove('border-gray-200');
+                    } else {
+                        div.classList.remove('border-emerald-500', 'bg-emerald-50');
+                        div.classList.add('border-gray-200');
+                    }
+                });
+            });
+        });
+
+        // Initialize first category as selected
+        const firstInput = document.querySelector('input[name="categoryFilter"]:checked');
+        if (firstInput) {
+            firstInput.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+    <script>
+        @if (TempData["ToastrSuccess"] != null)
+            {
+                <text>toastr.success("@TempData["ToastrSuccess"]");</text>
+        }
+            @if (TempData["ToastrError"] != null)
+            {
+                <text>toastr.error("@TempData["ToastrError"]");</text>
+        }
+    </script>
+}

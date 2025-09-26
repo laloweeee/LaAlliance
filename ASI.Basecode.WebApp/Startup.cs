@@ -6,7 +6,9 @@ using ASI.Basecode.WebApp.Authentication;
 using ASI.Basecode.WebApp.Extensions.Configuration;
 using ASI.Basecode.WebApp.Models;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -83,13 +85,25 @@ namespace ASI.Basecode.WebApp
 
             services.AddMemoryCache();
 
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "DataProtection-Keys")))
+                .SetApplicationName("ASI.Basecode.WebApp");
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            });
+
             // Register SQL database configuration context as services.
             services.AddDbContext<AsiBasecodeDBContext>(options =>
             {
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 32)),
                     mysqloptions => mysqloptions.CommandTimeout(120));
-                    
+
             });
 
             services.AddControllersWithViews();
@@ -124,7 +138,7 @@ namespace ASI.Basecode.WebApp
                     policy.RequireRole("Restaurant"));
 
                 // Permission base policies for Restaurant
-                options.AddPolicy("Admin", policy => 
+                options.AddPolicy("Admin", policy =>
                     policy.RequireRole("Restaurant")
                         .RequireClaim("RestaurantPermission", "Admin"));
 
