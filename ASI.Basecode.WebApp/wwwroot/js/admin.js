@@ -90,8 +90,14 @@ window.initPromoAnalytics = function () {
     });
 };
 
+window.addEventListener('click', function (e) {
+    if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('show');
+    }
+});
+
 // =====================================================
-// Exact JavaScript from sampleAdminPortal.html (after // Navigation)
+//(after // Navigation)
 // =====================================================
 
 // Navigation

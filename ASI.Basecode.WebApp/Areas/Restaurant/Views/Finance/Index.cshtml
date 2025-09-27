@@ -1,0 +1,1058 @@
+﻿@{
+    ViewData["Title"] = "Finance Management";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Finance Management</h2>
+</div>
+
+<!-- Finance Tabs -->
+<div class="mb-6">
+    <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8 overflow-x-auto">
+            <button onclick="showFinanceTab('overview')" class="finance-tab active border-b-2 border-green-500 py-2 px-1 text-sm font-medium text-green-600 whitespace-nowrap">
+                <i class="fas fa-chart-pie mr-2"></i>Overview
+            </button>
+            <button onclick="showFinanceTab('revenue-dashboard')" class="finance-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                <i class="fas fa-chart-bar mr-2"></i>Revenue Dashboard
+            </button>
+            <button onclick="showFinanceTab('transactions')" class="finance-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                <i class="fas fa-exchange-alt mr-2"></i>Transactions
+            </button>
+            <button onclick="showFinanceTab('commissions')" class="finance-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                <i class="fas fa-percentage mr-2"></i>Commissions
+            </button>
+            <button onclick="showFinanceTab('refunds')" class="finance-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                <i class="fas fa-undo mr-2"></i>Refunds
+            </button>
+            <button onclick="showFinanceTab('promotions')" class="finance-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                <i class="fas fa-tags mr-2"></i>Promotions
+            </button>
+            <button onclick="showFinanceTab('wallet')" class="finance-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                <i class="fas fa-wallet mr-2"></i>Wallet System
+            </button>
+            <button onclick="showFinanceTab('reports')" class="finance-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                <i class="fas fa-download mr-2"></i>Reports
+            </button>
+        </nav>
+    </div>
+</div>
+
+<!-- Overview Tab -->
+<div id="overview-tab" class="finance-tab-content">
+    <!-- Financial Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-600">Total Revenue</p>
+                    <p class="text-2xl font-bold text-gray-800">$76,891</p>
+                    <p class="text-sm text-green-600">+12.5% from last month</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-credit-card text-red-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-600">Total Expenses</p>
+                    <p class="text-2xl font-bold text-gray-800">$42,156</p>
+                    <p class="text-sm text-red-600">+3.2% from last month</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-600">Net Profit</p>
+                    <p class="text-2xl font-bold text-gray-800">$34,735</p>
+                    <p class="text-sm text-green-600">+18.7% from last month</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-percentage text-purple-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-600">Profit Margin</p>
+                    <p class="text-2xl font-bold text-gray-800">45.2%</p>
+                    <p class="text-sm text-green-600">+2.1% from last month</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Flow -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Cash Flow Statement</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">This Month</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Month</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Change</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Food Sales</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$65,432</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$58,123</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">+12.6%</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Beverage Sales</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$11,459</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$10,234</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">+12.0%</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Food Costs</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">-$23,156</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">-$21,890</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">+5.8%</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Labor Costs</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">-$15,600</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">-$15,200</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">+2.6%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Revenue Dashboard Tab -->
+<div id="revenue-dashboard-tab" class="finance-tab-content hidden">
+    <!-- Revenue Period Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Today</h3>
+            <p class="text-3xl font-bold text-green-600">$2,847</p>
+            <p class="text-sm text-gray-600 mt-1">+15.3% vs yesterday</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">This Week</h3>
+            <p class="text-3xl font-bold text-blue-600">$18,923</p>
+            <p class="text-sm text-gray-600 mt-1">+8.7% vs last week</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">This Month</h3>
+            <p class="text-3xl font-bold text-purple-600">$76,891</p>
+            <p class="text-sm text-gray-600 mt-1">+12.5% vs last month</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">This Year</h3>
+            <p class="text-3xl font-bold text-orange-600">$892,456</p>
+            <p class="text-sm text-gray-600 mt-1">+18.2% vs last year</p>
+        </div>
+    </div>
+
+    <!-- Daily Revenue Breakdown -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Daily Revenue Breakdown</h3>
+            <div class="flex space-x-2">
+                <button onclick="filterRevenue('today')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">Today</button>
+                <button onclick="filterRevenue('week')" class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">This Week</button>
+                <button onclick="filterRevenue('month')" class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">This Month</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Food Sales</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Beverages</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivery</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Order</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Dec 28, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$2,145</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$456</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$246</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$2,847</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">87</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$32.72</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Dec 27, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$1,987</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$423</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$198</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$2,608</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">79</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$33.01</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Dec 26, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$2,234</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$512</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$287</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$3,033</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">92</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$32.97</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Order Transactions Tab -->
+<div id="transactions-tab" class="finance-tab-content hidden">
+    <!-- Transaction Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-green-600 mb-2">Paid Orders</h3>
+            <p class="text-3xl font-bold text-gray-800">1,247</p>
+            <p class="text-sm text-gray-600 mt-1">$68,432 total</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-yellow-600 mb-2">Pending</h3>
+            <p class="text-3xl font-bold text-gray-800">23</p>
+            <p class="text-sm text-gray-600 mt-1">$1,245 total</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-red-600 mb-2">Refunded</h3>
+            <p class="text-3xl font-bold text-gray-800">18</p>
+            <p class="text-sm text-gray-600 mt-1">$892 total</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-600 mb-2">Canceled</h3>
+            <p class="text-3xl font-bold text-gray-800">45</p>
+            <p class="text-sm text-gray-600 mt-1">$2,156 lost</p>
+        </div>
+    </div>
+
+    <!-- Transaction Details -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Order Transactions</h3>
+            <div class="flex space-x-2">
+                <select class="px-3 py-1 border border-gray-300 rounded text-sm">
+                    <option>All Status</option>
+                    <option>Paid</option>
+                    <option>Pending</option>
+                    <option>Refunded</option>
+                    <option>Canceled</option>
+                </select>
+                <input type="date" class="px-3 py-1 border border-gray-300 rounded text-sm">
+                <button onclick="exportTransactions()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                    <i class="fas fa-download mr-1"></i>Export
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Method</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#ORD-2024-001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">John Smith</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024 14:30</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">$45.67</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Credit Card</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewTransaction('ORD-2024-001')" class="text-blue-600 hover:text-blue-900 mr-2">View</button>
+                            <button onclick="refundTransaction('ORD-2024-001')" class="text-red-600 hover:text-red-900">Refund</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#ORD-2024-002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Sarah Johnson</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024 13:15</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">$32.89</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Cash</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewTransaction('ORD-2024-002')" class="text-blue-600 hover:text-blue-900 mr-2">View</button>
+                            <button onclick="confirmPayment('ORD-2024-002')" class="text-green-600 hover:text-green-900">Confirm</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#ORD-2024-003</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Mike Davis</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024 12:45</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">$28.50</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Digital Wallet</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Refunded</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewTransaction('ORD-2024-003')" class="text-blue-600 hover:text-blue-900">View</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Commission Tracking Tab -->
+<div id="commissions-tab" class="finance-tab-content hidden">
+    <!-- Commission Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Total Commission</h3>
+            <p class="text-3xl font-bold text-green-600">$3,844</p>
+            <p class="text-sm text-gray-600 mt-1">This month</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Vendor Earnings</h3>
+            <p class="text-3xl font-bold text-blue-600">$73,047</p>
+            <p class="text-sm text-gray-600 mt-1">After commission</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Commission Rate</h3>
+            <p class="text-3xl font-bold text-purple-600">5.0%</p>
+            <p class="text-sm text-gray-600 mt-1">Average rate</p>
+        </div>
+    </div>
+
+    <!-- Commission Breakdown by Vendor -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Vendor Commission Breakdown</h3>
+            <button onclick="exportCommissions()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                <i class="fas fa-download mr-1"></i>Export
+            </button>
+        </div>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Sales</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commission Rate</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commission Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendor Earnings</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Main Kitchen</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$45,230</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5.0%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$2,261</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$42,969</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">892</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Beverage Station</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$18,450</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4.5%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$830</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$17,620</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">456</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Dessert Counter</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$12,211</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">6.0%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$733</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$11,478</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">234</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Commission Per Order -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Commission Transactions</h3>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Value</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commission Rate</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commission</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendor Earning</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#ORD-2024-001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Main Kitchen</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$45.67</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5.0%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$2.28</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$43.39</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#ORD-2024-002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Beverage Station</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$18.50</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4.5%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$0.83</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$17.67</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Refund Management Tab -->
+<div id="refunds-tab" class="finance-tab-content hidden">
+    <!-- Refund Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-red-600 mb-2">Total Refunds</h3>
+            <p class="text-3xl font-bold text-gray-800">$2,847</p>
+            <p class="text-sm text-gray-600 mt-1">This month</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-yellow-600 mb-2">Pending</h3>
+            <p class="text-3xl font-bold text-gray-800">8</p>
+            <p class="text-sm text-gray-600 mt-1">$456 value</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-green-600 mb-2">Processed</h3>
+            <p class="text-3xl font-bold text-gray-800">42</p>
+            <p class="text-sm text-gray-600 mt-1">$2,391 value</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-600 mb-2">Refund Rate</h3>
+            <p class="text-3xl font-bold text-gray-800">3.7%</p>
+            <p class="text-sm text-gray-600 mt-1">Of total orders</p>
+        </div>
+    </div>
+
+    <!-- Refund Requests -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Refund Requests</h3>
+            <div class="flex space-x-2">
+                <select class="px-3 py-1 border border-gray-300 rounded text-sm">
+                    <option>All Status</option>
+                    <option>Pending</option>
+                    <option>Approved</option>
+                    <option>Processed</option>
+                    <option>Rejected</option>
+                </select>
+                <button onclick="exportRefunds()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                    <i class="fas fa-download mr-1"></i>Export
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Refund ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#REF-001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">#ORD-2024-089</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Alice Brown</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">$34.50</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Food quality issue</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="approveRefund('REF-001')" class="text-green-600 hover:text-green-900 mr-2">Approve</button>
+                            <button onclick="rejectRefund('REF-001')" class="text-red-600 hover:text-red-900">Reject</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#REF-002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">#ORD-2024-087</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Bob Wilson</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">$28.75</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Wrong order delivered</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 27, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Processed</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewRefund('REF-002')" class="text-blue-600 hover:text-blue-900">View Details</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#REF-003</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">#ORD-2024-085</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Carol Davis</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">$52.30</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Late delivery</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 26, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewRefund('REF-003')" class="text-blue-600 hover:text-blue-900">View Details</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Promotions Impact Tab -->
+<div id="promotions-tab" class="finance-tab-content hidden">
+    <!-- Promotion Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-purple-600 mb-2">Total Discounts</h3>
+            <p class="text-3xl font-bold text-gray-800">$4,523</p>
+            <p class="text-sm text-gray-600 mt-1">This month</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-blue-600 mb-2">Vouchers Used</h3>
+            <p class="text-3xl font-bold text-gray-800">234</p>
+            <p class="text-sm text-gray-600 mt-1">$2,890 value</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-green-600 mb-2">Promo Codes</h3>
+            <p class="text-3xl font-bold text-gray-800">156</p>
+            <p class="text-sm text-gray-600 mt-1">$1,633 discount</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-orange-600 mb-2">ROI Impact</h3>
+            <p class="text-3xl font-bold text-gray-800">+18.5%</p>
+            <p class="text-sm text-gray-600 mt-1">Revenue increase</p>
+        </div>
+    </div>
+
+    <!-- Active Promotions -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Active Promotions Performance</h3>
+            <button onclick="createPromotion()" class="px-3 py-1 bg-green-600 text-white rounded text-sm">
+                <i class="fas fa-plus mr-1"></i>Create Promotion
+            </button>
+        </div>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Promotion</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uses</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Discount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue Impact</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">WELCOME20</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Promo Code</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">20%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">89</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">-$1,245</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">+$3,890</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="editPromotion('WELCOME20')" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                            <button onclick="deactivatePromotion('WELCOME20')" class="text-red-600 hover:text-red-900">Deactivate</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">LUNCH15</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Time-based</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">15%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">156</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">-$1,890</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">+$5,234</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="editPromotion('LUNCH15')" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                            <button onclick="deactivatePromotion('LUNCH15')" class="text-red-600 hover:text-red-900">Deactivate</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Promotion Usage Details -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Promotion Usage</h3>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Promotion</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Original Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Final Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#ORD-2024-001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">John Smith</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-600">WELCOME20</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$56.89</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">-$11.38</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$45.51</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#ORD-2024-002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Sarah Johnson</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-600">LUNCH15</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$38.50</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">-$5.78</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$32.72</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Wallet System Tab -->
+<div id="wallet-tab" class="finance-tab-content hidden">
+    <!-- Wallet Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-blue-600 mb-2">Total Wallet Balance</h3>
+            <p class="text-3xl font-bold text-gray-800">$12,456</p>
+            <p class="text-sm text-gray-600 mt-1">Across all users</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-green-600 mb-2">Credits Added</h3>
+            <p class="text-3xl font-bold text-gray-800">$3,890</p>
+            <p class="text-sm text-gray-600 mt-1">This month</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-purple-600 mb-2">Credits Used</h3>
+            <p class="text-3xl font-bold text-gray-800">$2,234</p>
+            <p class="text-sm text-gray-600 mt-1">This month</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-semibold text-orange-600 mb-2">Active Wallets</h3>
+            <p class="text-3xl font-bold text-gray-800">456</p>
+            <p class="text-sm text-gray-600 mt-1">With balance > $0</p>
+        </div>
+    </div>
+
+    <!-- Customer Wallets -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Customer Wallet Balances</h3>
+            <div class="flex space-x-2">
+                <input type="text" placeholder="Search customer..." class="px-3 py-1 border border-gray-300 rounded text-sm">
+                <button onclick="addWalletCredit()" class="px-3 py-1 bg-green-600 text-white rounded text-sm">
+                    <i class="fas fa-plus mr-1"></i>Add Credit
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Balance</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Added</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Used</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">John Smith</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">john@email.com</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$45.67</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$150.00</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$104.33</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewWalletHistory('john@email.com')" class="text-blue-600 hover:text-blue-900 mr-2">History</button>
+                            <button onclick="adjustWalletBalance('john@email.com')" class="text-green-600 hover:text-green-900">Adjust</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Sarah Johnson</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">sarah@email.com</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">$23.45</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$100.00</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$76.55</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 27, 2024</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewWalletHistory('sarah@email.com')" class="text-blue-600 hover:text-blue-900 mr-2">History</button>
+                            <button onclick="adjustWalletBalance('sarah@email.com')" class="text-green-600 hover:text-green-900">Adjust</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Wallet Transactions -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Wallet Transactions</h3>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaction ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#WAL-001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">John Smith</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Credit</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">+$50.00</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$95.67</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Manual credit addition</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 28, 2024</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#WAL-002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Sarah Johnson</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Debit</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">-$32.72</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$23.45</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Order payment #ORD-2024-089</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 27, 2024</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Reports Tab -->
+<div id="reports-tab" class="finance-tab-content hidden">
+    <!-- Report Categories -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Financial Reports</h3>
+            <div class="space-y-3">
+                <button onclick="generateReport('revenue')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Revenue Report</h4>
+                            <p class="text-sm text-gray-600">Daily, weekly, monthly revenue</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+                <button onclick="generateReport('expenses')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Expense Report</h4>
+                            <p class="text-sm text-gray-600">Categorized expense breakdown</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+                <button onclick="generateReport('profit-loss')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">P&L Statement</h4>
+                            <p class="text-sm text-gray-600">Profit and loss analysis</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Transaction Reports</h3>
+            <div class="space-y-3">
+                <button onclick="generateReport('transactions')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">All Transactions</h4>
+                            <p class="text-sm text-gray-600">Complete transaction history</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+                <button onclick="generateReport('refunds')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Refund Report</h4>
+                            <p class="text-sm text-gray-600">Refund analysis and trends</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+                <button onclick="generateReport('commissions')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Commission Report</h4>
+                            <p class="text-sm text-gray-600">Vendor commission breakdown</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Marketing Reports</h3>
+            <div class="space-y-3">
+                <button onclick="generateReport('promotions')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Promotion Impact</h4>
+                            <p class="text-sm text-gray-600">Discount and promo analysis</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+                <button onclick="generateReport('wallet')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Wallet Report</h4>
+                            <p class="text-sm text-gray-600">Customer wallet usage</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+                <button onclick="generateReport('customer-analysis')" class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Customer Analysis</h4>
+                            <p class="text-sm text-gray-600">Customer spending patterns</p>
+                        </div>
+                        <i class="fas fa-download text-blue-600"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Report Generator -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Custom Report Generator</h3>
+        <form id="customReportForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    <option>Revenue Analysis</option>
+                    <option>Expense Analysis</option>
+                    <option>Transaction Summary</option>
+                    <option>Customer Behavior</option>
+                    <option>Promotion Performance</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    <option>Last 7 days</option>
+                    <option>Last 30 days</option>
+                    <option>Last 3 months</option>
+                    <option>Last 6 months</option>
+                    <option>Last year</option>
+                    <option>Custom range</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Format</label>
+                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    <option>CSV</option>
+                    <option>PDF</option>
+                    <option>Excel</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-download mr-2"></i>Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Finance tab switching
+    function showFinanceTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.finance-tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.finance-tab').forEach(tab => {
+            tab.classList.remove('active', 'border-green-500', 'text-green-600');
+            tab.classList.add('border-transparent', 'text-gray-500');
+        });
+
+        // Show selected tab content
+        document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+        // Add active class to selected tab
+        event.target.classList.add('active', 'border-green-500', 'text-green-600');
+        event.target.classList.remove('border-transparent', 'text-gray-500');
+    }
+
+    // Financial functions
+    function generateFinancialReport() {
+        alert('Generating comprehensive financial report...');
+    }
+
+    function filterRevenue(period) {
+        alert(`Filtering revenue data for: ${period}`);
+    }
+
+    function exportTransactions() {
+        alert('Exporting transaction data to CSV...');
+    }
+
+    function exportCommissions() {
+        alert('Exporting commission data to CSV...');
+    }
+
+    function exportRefunds() {
+        alert('Exporting refund data to CSV...');
+    }
+
+    function viewTransaction(orderId) {
+        alert(`Viewing transaction details for: ${orderId}`);
+    }
+
+    function refundTransaction(orderId) {
+        if (confirm(`Are you sure you want to process a refund for ${orderId}?`)) {
+            alert(`Refund initiated for ${orderId}`);
+        }
+    }
+
+    function confirmPayment(orderId) {
+        if (confirm(`Confirm payment received for ${orderId}?`)) {
+            alert(`Payment confirmed for ${orderId}`);
+        }
+    }
+
+    function approveRefund(refundId) {
+        if (confirm(`Approve refund request ${refundId}?`)) {
+            alert(`Refund ${refundId} approved and processed`);
+        }
+    }
+
+    function rejectRefund(refundId) {
+        if (confirm(`Reject refund request ${refundId}?`)) {
+            alert(`Refund ${refundId} rejected`);
+        }
+    }
+
+    function viewRefund(refundId) {
+        alert(`Viewing refund details for: ${refundId}`);
+    }
+
+    function createPromotion() {
+        alert('Opening promotion creation form...');
+    }
+
+    function editPromotion(promoCode) {
+        alert(`Editing promotion: ${promoCode}`);
+    }
+
+    function deactivatePromotion(promoCode) {
+        if (confirm(`Deactivate promotion ${promoCode}?`)) {
+            alert(`Promotion ${promoCode} deactivated`);
+        }
+    }
+
+    function addWalletCredit() {
+        alert('Opening wallet credit addition form...');
+    }
+
+    function viewWalletHistory(email) {
+        alert(`Viewing wallet history for: ${email}`);
+    }
+
+    function adjustWalletBalance(email) {
+        alert(`Adjusting wallet balance for: ${email}`);
+    }
+
+    function generateReport(reportType) {
+        alert(`Generating ${reportType} report...`);
+    }
+    
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9848ad4352084045',t:'MTc1ODc4Mzk2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
