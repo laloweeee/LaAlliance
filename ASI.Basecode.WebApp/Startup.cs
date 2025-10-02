@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Text;
+using Azure.Storage.Blobs;
 
 namespace ASI.Basecode.WebApp
 {
@@ -111,6 +112,14 @@ namespace ASI.Basecode.WebApp
 
             //Configuration
             services.Configure<TokenAuthentication>(Configuration.GetSection("TokenAuthentication"));
+
+            services.AddScoped<BlobContainerClient>(provider =>
+            {
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var connectionString = configuration.GetConnectionString("AzureBlobStorage");
+                var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+                return blobServiceClient.GetBlobContainerClient("products");
+            });
 
             // Session
             services.AddSession(options =>

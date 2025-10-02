@@ -16,6 +16,30 @@ namespace ASI.Basecode.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Addresses",
+                columns: table => new
+                {
+                    AddressID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StreetAddress = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Barangay = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    City = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Province = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ZipCode = table.Column<int>(type: "int", nullable: false),
+                    Country = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false, defaultValue: "Philippines")
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Addresses", x => x.AddressID);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -80,6 +104,120 @@ namespace ASI.Basecode.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "RestaurantProfiles",
+                columns: table => new
+                {
+                    RestaurantId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PhoneNumber = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LogoUrl = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CoverImageUrl = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AddressId = table.Column<int>(type: "int", nullable: false),
+                    ServiceDataId = table.Column<int>(type: "int", nullable: false),
+                    OpeningTime = table.Column<TimeOnly>(type: "TIME", nullable: false),
+                    ClosingTime = table.Column<TimeOnly>(type: "TIME", nullable: false),
+                    CreatedTime = table.Column<DateTime>(type: "DATETIME", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedTime = table.Column<DateTime>(type: "DATETIME", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    AddressId1 = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RestaurantProfiles", x => x.RestaurantId);
+                    table.ForeignKey(
+                        name: "FK_RestaurantProfiles_Addresses_AddressId",
+                        column: x => x.AddressId,
+                        principalTable: "Addresses",
+                        principalColumn: "AddressID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RestaurantProfiles_Addresses_AddressId1",
+                        column: x => x.AddressId1,
+                        principalTable: "Addresses",
+                        principalColumn: "AddressID");
+                    table.ForeignKey(
+                        name: "FK_RestaurantProfiles_Users_UpdatedBy",
+                        column: x => x.UpdatedBy,
+                        principalTable: "Users",
+                        principalColumn: "UserID",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "UserAddresses",
+                columns: table => new
+                {
+                    UserAddressId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    AddressId = table.Column<int>(type: "int", nullable: false),
+                    IsDefault = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    AddressLabel = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AddressNote = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    AddressId1 = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserAddresses", x => x.UserAddressId);
+                    table.ForeignKey(
+                        name: "FK_UserAddresses_Addresses_AddressId",
+                        column: x => x.AddressId,
+                        principalTable: "Addresses",
+                        principalColumn: "AddressID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserAddresses_Addresses_AddressId1",
+                        column: x => x.AddressId1,
+                        principalTable: "Addresses",
+                        principalColumn: "AddressID");
+                    table.ForeignKey(
+                        name: "FK_UserAddresses_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "UserProfiles",
+                columns: table => new
+                {
+                    UserProfileId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ContactNumber = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserPhoto = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedTime = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedTime = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfiles", x => x.UserProfileId);
+                    table.ForeignKey(
+                        name: "FK_UserProfiles_Users_UserProfileId",
+                        column: x => x.UserProfileId,
+                        principalTable: "Users",
+                        principalColumn: "UserID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
@@ -124,6 +262,30 @@ namespace ASI.Basecode.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ServiceData",
+                columns: table => new
+                {
+                    ServiceDataId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    RestaurantId = table.Column<int>(type: "int", nullable: false),
+                    MaxDeliveryDistance = table.Column<int>(type: "int", nullable: false),
+                    BaseDeliveryFee = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    PerKmFee = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    MinimumOrderAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceData", x => x.ServiceDataId);
+                    table.ForeignKey(
+                        name: "FK_ServiceData_RestaurantProfiles_RestaurantId",
+                        column: x => x.RestaurantId,
+                        principalTable: "RestaurantProfiles",
+                        principalColumn: "RestaurantId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "CustomizationGroups",
                 columns: table => new
                 {
@@ -133,7 +295,7 @@ namespace ASI.Basecode.Data.Migrations
                     CustomizationName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsRequired = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsSingleChoice = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    NumberOfChoice = table.Column<int>(type: "int", nullable: false),
                     CreatedTime = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     UpdatedTime = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
                 },
@@ -208,6 +370,45 @@ namespace ASI.Basecode.Data.Migrations
                 name: "IX_Products_UpdatedBy",
                 table: "Products",
                 column: "UpdatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RestaurantProfiles_AddressId",
+                table: "RestaurantProfiles",
+                column: "AddressId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RestaurantProfiles_AddressId1",
+                table: "RestaurantProfiles",
+                column: "AddressId1",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RestaurantProfiles_UpdatedBy",
+                table: "RestaurantProfiles",
+                column: "UpdatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ServiceData_RestaurantId",
+                table: "ServiceData",
+                column: "RestaurantId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAddresses_AddressId",
+                table: "UserAddresses",
+                column: "AddressId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAddresses_AddressId1",
+                table: "UserAddresses",
+                column: "AddressId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAddresses_UserId",
+                table: "UserAddresses",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -217,10 +418,25 @@ namespace ASI.Basecode.Data.Migrations
                 name: "CustomizationOptions");
 
             migrationBuilder.DropTable(
+                name: "ServiceData");
+
+            migrationBuilder.DropTable(
+                name: "UserAddresses");
+
+            migrationBuilder.DropTable(
+                name: "UserProfiles");
+
+            migrationBuilder.DropTable(
                 name: "CustomizationGroups");
 
             migrationBuilder.DropTable(
+                name: "RestaurantProfiles");
+
+            migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Addresses");
 
             migrationBuilder.DropTable(
                 name: "Categories");

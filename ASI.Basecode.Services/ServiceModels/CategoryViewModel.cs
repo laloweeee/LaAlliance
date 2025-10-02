@@ -8,5 +8,6 @@ namespace ASI.Basecode.Services.ServiceModels
         [StringLength(100, ErrorMessage = "Category name cannot exceed 20 characters")]
         public string Name { get; set; }
         public int CategoryID { get; set; }
+        public bool IsActive { get; set; }
     }
 }

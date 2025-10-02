@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public class Order
+    public partial class Order
     {
         public int OrderId { get; set; }
         public int UserId { get; set; }
@@ -19,10 +19,10 @@ namespace ASI.Basecode.Data.Models
         // TODO: public int PromotionId { get; set; }
 
         public string OrderType { get; set; }
-        public string OderStatus { get; set; }
-        public string paymentStatus { get; set; }
-        public DateTime CreatedTime { get; set; } // Timestamp of creation
-        public DateTime UpdatedTime { get; set; } // Timestamp of last update
+        public string OrderStatus { get; set; }
+        public string PaymentStatus { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public DateTime UpdatedTime { get; set; }
         public TimeOnly ElapsedTime { get; set; }
         public int ManagedBy { get; set; } // UserID of the handling staff
     }

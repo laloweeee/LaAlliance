@@ -5,6 +5,7 @@ using ASI.Basecode.Services.Manager;
 using ASI.Basecode.Services.ServiceModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,17 +17,14 @@ namespace ASI.Basecode.Services.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepository, IUserRepository userRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+
+        public CategoryService(ICategoryRepository categoryRepository, IUserRepository userRepository)
         {
             _categoryRepository = categoryRepository;
             _userRepository = userRepository;
-            _mapper = mapper;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public IQueryable<Category> GetAllCategories()
@@ -34,14 +32,13 @@ namespace ASI.Basecode.Services.Services
             return _categoryRepository.GetAllCategories();
         }
 
-        public IQueryable<Category> CategoryGetByID(int categoryID)
+        public Category GetCategoryByID(int categoryID)
         {
-            return _categoryRepository.GetCategoryByID(categoryID).Where(e => e.CategoryID == categoryID);
+            return _categoryRepository.GetCategoryByID(categoryID);
         }
 
         public void AddCategory(CategoryViewModel model, int userID)
         {
-            // Check if category name already exists
             var existingCategory = _categoryRepository.GetAllCategories()
                 .FirstOrDefault(c => c.Name.ToLower().Trim() == model.Name.ToLower().Trim());
 
@@ -51,11 +48,13 @@ namespace ASI.Basecode.Services.Services
             }
 
             var user = _userRepository.GetUserById(userID).FirstOrDefault() ?? throw new ArgumentException("Invalid CreatedBy user ID.");
+
             var category = new Category
             {
                 Name = model.Name.Trim(),
+                IsActive = model.IsActive,
                 CreatedByUser = user,
-                UpdatedByUser = user
+                UpdatedByUser = user,
             };
 
             _categoryRepository.AddCategory(category);
@@ -63,7 +62,7 @@ namespace ASI.Basecode.Services.Services
 
         public void UpdateCategory(CategoryViewModel model, int userID)
         {
-            var category = _categoryRepository.GetCategoryByID(model.CategoryID).FirstOrDefault() ?? throw new ArgumentException("Category not found.");
+            var category = _categoryRepository.GetCategoryByID(model.CategoryID) ?? throw new ArgumentException("Category not found.");
 
             var existingCategory = _categoryRepository.GetAllCategories()
                 .FirstOrDefault(c => c.Name.ToLower().Trim() == model.Name.ToLower().Trim() && c.CategoryID != model.CategoryID);
@@ -74,8 +73,11 @@ namespace ASI.Basecode.Services.Services
             }
 
             var user = _userRepository.GetUserById(userID).FirstOrDefault() ?? throw new ArgumentException("Invalid UpdatedBy user ID.");
+
             category.Name = model.Name.Trim();
+            category.IsActive = model.IsActive;
             category.UpdatedByUser = user;
+
             _categoryRepository.UpdateCategory(category);
         }
 

@@ -38,10 +38,14 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IMailSender, MailSenderService>();
             this._services.AddScoped<IOtpService, OtpService>();
             this._services.AddScoped<ICategoryService, CategoryService>();
+            this._services.AddScoped<IFileStorageService, FileStorageService>();
+            this._services.AddScoped<IFileHandlingService, FileHandlingService>();
+            this._services.AddScoped<IProductService, ProductService>();
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
             this._services.AddScoped<ICategoryRepository, CategoryRepository>();
+            this._services.AddScoped<IProductRepository, ProductRepository>();
 
             // Manager Class
             this._services.AddScoped<SignInManager>();

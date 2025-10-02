@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public class Product
+    public partial class Product
     {
         public int ProductID { get; set; }
         public int CategoryID { get; set; }
@@ -26,6 +26,6 @@ namespace ASI.Basecode.Data.Models
         public Category Category { get; set; }
 
         // Collection
-        public ICollection<CustomizationGroup> CustomizationGroups { get; set; } = new List<CustomizationGroup>();
+        public ICollection<CustomizationGroup> CustomizationGroups { get; set; } = [];
     }
 }
