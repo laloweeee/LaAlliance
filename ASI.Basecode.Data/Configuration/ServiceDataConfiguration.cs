@@ -41,7 +41,7 @@ namespace ASI.Basecode.Data.Configuration
 
             // Relationships
             entity.HasOne(e => e.RestaurantProfile)
-                  .WithOne(rp => rp.ServiceData)
+                  .WithOne()
                   .HasForeignKey<ServiceData>(e => e.RestaurantId)
                   .OnDelete(DeleteBehavior.Cascade);
         }

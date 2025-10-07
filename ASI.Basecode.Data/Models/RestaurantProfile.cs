@@ -12,7 +12,6 @@ namespace ASI.Basecode.Data.Models
         public string LogoUrl { get; set; }
         public string CoverImageUrl { get; set; }
         public int AddressId { get; set; }
-        public int ServiceDataId { get; set; }
         public TimeOnly OpeningTime { get; set; }
         public TimeOnly ClosingTime { get; set; }
         public DateTime CreatedTime { get; set; }
@@ -22,6 +21,5 @@ namespace ASI.Basecode.Data.Models
         // Navigator
         public User UpdatedByUser { get; set; }
         public Address Address { get; set; }
-        public ServiceData ServiceData { get; set; }
     }
 }

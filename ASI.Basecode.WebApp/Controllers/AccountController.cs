@@ -99,7 +99,7 @@ namespace ASI.Basecode.WebApp.Controllers
 
                 return user.Role switch
                 {
-                    "Customer" => RedirectToAction("Index", "Customer", new { area = "Customer" }),
+                    "Customer" => RedirectToAction("Index", "Home", new { area = "Customer" }),
                     "Restaurant" => RedirectToAction("Index", "Dashboard", new { area = "Restaurant" }),
                     _ => RedirectToAction("Login", "Account"),
                 };

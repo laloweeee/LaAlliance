@@ -16,6 +16,14 @@ namespace ASI.Basecode.Data.Configuration
                   .HasColumnName("AddressID")
                   .ValueGeneratedOnAdd();
 
+            entity.Property(e => e.Longitude)
+                  .HasColumnName("Longitude")
+                  .IsRequired();
+
+            entity.Property(e => e.Latitude)
+                  .HasColumnName("Latitude")
+                  .IsRequired();
+            
             entity.Property(e => e.StreetAddress)
                   .HasColumnName("StreetAddress")
                   .IsRequired()

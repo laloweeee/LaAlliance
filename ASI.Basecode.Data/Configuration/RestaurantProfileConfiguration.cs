@@ -78,11 +78,6 @@ namespace ASI.Basecode.Data.Configuration
                         entity.HasOne(e => e.Address)
                                 .WithOne()
                                 .HasForeignKey<RestaurantProfile>(e => e.AddressId);
-                        
-                        entity.HasOne(e => e.ServiceData)
-                                .WithOne(sd => sd.RestaurantProfile)
-                                .HasForeignKey<RestaurantProfile>(e => e.ServiceDataId)
-                                .OnDelete(DeleteBehavior.Cascade);
-        }
+                }
         }
 }

@@ -51,6 +51,14 @@ namespace ASI.Basecode.Data.Migrations
                         .HasDefaultValue("Philippines")
                         .HasColumnName("Country");
 
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double")
+                        .HasColumnName("Latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double")
+                        .HasColumnName("Longitude");
+
                     b.Property<string>("Province")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -344,9 +352,6 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("varchar(15)")
                         .HasColumnName("PhoneNumber");
-
-                    b.Property<int>("ServiceDataId")
-                        .HasColumnType("int");
 
                     b.Property<int>("UpdatedBy")
                         .HasColumnType("int")
@@ -670,7 +675,7 @@ namespace ASI.Basecode.Data.Migrations
             modelBuilder.Entity("ASI.Basecode.Data.Models.ServiceData", b =>
                 {
                     b.HasOne("ASI.Basecode.Data.Models.RestaurantProfile", "RestaurantProfile")
-                        .WithOne("ServiceData")
+                        .WithOne()
                         .HasForeignKey("ASI.Basecode.Data.Models.ServiceData", "RestaurantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -732,11 +737,6 @@ namespace ASI.Basecode.Data.Migrations
             modelBuilder.Entity("ASI.Basecode.Data.Models.Product", b =>
                 {
                     b.Navigation("CustomizationGroups");
-                });
-
-            modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantProfile", b =>
-                {
-                    b.Navigation("ServiceData");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>

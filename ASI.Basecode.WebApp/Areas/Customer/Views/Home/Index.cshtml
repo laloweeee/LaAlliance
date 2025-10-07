@@ -1,0 +1,270 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.HomeViewModel
+@{
+    ViewData["Title"] = "LaAlliancé";
+}
+
+<div class="min-h-screen w-full flex flex-col md:flex-row p-2">
+    <!-- Left Side (Full width on mobile, 3/4 on desktop) -->
+    <div class="flex flex-col w-full md:w-3/4">
+        <!-- TOP BAR -->
+        <div class="flex flex-col sm:flex-row justify-between items-center p-4">
+            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-8 mb-4 sm:mb-0">
+                <!-- LOGO -->
+                <div class="text-2xl font-bold">
+                    <h1>LaAlliance</h1>
+                </div>
+            </div>
+            <!-- SEARCH BAR -->
+            <div class="flex border rounded w-full sm:w-auto">
+                <input type="text" placeholder="Search for products..."
+                    class="border rounded-l px-4 py-2 w-full sm:w-64">
+                <button class="bg-emerald-500 text-white px-4 py-2 rounded-r flex-shrink-0">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+            </div>
+            <!-- PROFILE ICON -->
+            <div class="relative">
+                <button id="profileBtn"
+                    class="flex flex-row items-center space-x-2 focus:outline-none hover:opacity-80 transition-opacity">
+                    <i class="fa fa-user-circle fa-2x"></i>
+                    <h3 class="text-lg">@ViewBag.UserName</h3>
+                    <i id="chevron" class="fa fa-chevron-down ml-1 transition-transform"></i>
+                </button>
+                <!-- Dropdown Menu -->
+                <div id="dropdownMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden z-50">
+                    <div class="py-1">
+                        <a asp-area="" asp-controller="Account" asp-action="Logout" class="block px-4 py-2 text-gray-800 hover:bg-emerald-500 hover:text-white transition-colors">
+                            <i class="fa fa-sign-out mr-2"></i>Logout
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-emerald-500 hover:text-white transition-colors">
+                            <i class="fa fa-user mr-2"></i>Profile
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-emerald-500 hover:text-white transition-colors">
+                            <i class="fa fa-cog mr-2"></i>Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ANNOUNCEMENT -->
+        <div class="flex flex-col rounded-xl my-4 mx-2">
+            <div class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-6 flex items-center justify-between relative overflow-hidden">
+                <!-- Decorative elements -->
+                <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-white/20 transform -skew-x-12"></div>
+                <div class="absolute left-10 top-10 w-8 h-8 bg-white rounded-full opacity-20"></div>
+                <div class="absolute right-20 bottom-6 w-12 h-12 bg-white rounded-full opacity-10"></div>
+                <div class="absolute left-1/3 top-1/2 w-5 h-5 bg-white rounded-full opacity-20"></div>
+
+                <!-- Left side - Image and Text -->
+                <div class="flex items-center w-full">
+                    <!-- Illustration -->
+                    <div class="hidden sm:block">
+                        <img src="~/img/food-delivery.png" alt="Delivery person on scooter"
+                            class="h-56 w-auto object-contain drop-shadow-xl">
+                    </div>
+
+                    <!-- Text content -->
+                    <div class="flex flex-col w-full sm:w-2/3 items-center sm:items-start">
+                        <h1 class="text-[40px] font-bold text-white tracking-wider">Hello There!</h1>
+                        <h2 class="text-sm md:text-xl text-white/90 mt-2">Discover delicious meals delivered to your door
+                        </h2>
+                        <button class="text-sm sm:text-base md:text-lg flex items-center mt-6 bg-white text-emerald-700 px-6 py-2 rounded-lg hover:bg-emerald-100 transition-colors font-medium">
+                            <i class="fa fa-map-marker mr-3" aria-hidden="true"></i>
+                            <span>1234 Main St, City, Country</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Main Area -->
+        <div class="flex flex-col space-y-6">
+            <!-- CATEGORIES -->
+            <div class="px-2 sm:px-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Menu Categories</h2>
+                <div class="flex overflow-x-auto pb-2 hide-scrollbar">
+                    <div class="flex space-x-3">
+                        @if (Model.Categories != null && Model.Categories.Any())
+                        {
+                            var firstCategory = Model.Categories.First();
+                            var isFirst = true;
+                            
+                            foreach (var category in Model.Categories)
+                            {
+                                <div class="category-pill @(isFirst ? "bg-emerald-100 text-emerald-800" : "bg-white text-gray-700") 
+                                        px-5 py-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-emerald-100 hover:text-emerald-800
+                                        border border-gray-100 flex items-center min-w-max"
+                                    data-category-id="@category.CategoryID">
+                                    <span class="font-medium">@category.Name</span>
+                                </div>
+                                
+                                isFirst = false;
+                            }
+                        }
+                        else
+                        {
+                            <p>No categories available.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            <!-- PRODUCTS -->
+            <div class="px-2 sm:px-4">
+                <h2 class="text-2xl font-semibold mb-4">Products</h2>
+                @if (Model.Products.Count() > 0 && Model.Categories.Count() > 0)
+                {
+                    <div class="space-y-8">
+                        @foreach (var category in Model.Categories)
+                        {
+                            var productsInCategory = Model.Products.Where(p => p.CategoryID == category.CategoryID).ToList();
+                            
+                            if (productsInCategory.Any())
+                            {
+                                <div id="category-@category.CategoryID" class="category-section mb-8 scroll-mt-4">
+                                    <h3 class="text-xl font-medium text-emerald-700 mb-4 border-b pb-2">@category.Name</h3>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        @foreach (var product in productsInCategory)
+                                        {
+                                            <div class="product-card flex flex-row sm:flex-col border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                {
+                                                    <div class="w-1/4 sm:w-full">
+                                                        <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-24 sm:h-48 object-cover">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="w-1/4 sm:w-full bg-gray-200 flex items-center justify-center h-24 sm:h-48">
+                                                        <i class="fa fa-image text-gray-400 text-4xl"></i>
+                                                    </div>
+                                                }
+                                                
+                                                <div class="p-3 sm:p-4 flex flex-col justify-between w-2/4 sm:w-full">
+                                                    <div>
+                                                        <h4 class="text-base sm:text-lg font-medium">@product.Name</h4>
+                                                        <p class="text-gray-600 text-xs sm:text-sm mt-1 sm:mt-2">@(product.Description?.Length > 100 ? product.Description.Substring(0, 97) + "..." : product.Description)</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="p-2 sm:p-4 flex flex-col justify-between items-end w-1/4 sm:w-full border-l sm:border-l-0 sm:border-t">
+                                                    <div class="text-emerald-600 font-semibold text-lg sm:text-xl mb-1 sm:mb-2">₱@product.Price.ToString("0.00")</div>
+                                                    <button class="bg-emerald-500 hover:bg-emerald-600 text-white w-full py-1 sm:py-2 rounded-md transition-colors flex items-center justify-center" 
+                                                            data-product-id="@product.ProductID">
+                                                        <i class="fa fa-cart-plus mr-2"></i> Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="py-8 text-center text-gray-500">
+                        <i class="fa fa-shopping-basket text-4xl mb-3"></i>
+                        <p>No products available.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side CART AREA (Full width on mobile, 1/4 on desktop) -->
+    <div class="flex flex-col w-full md:w-1/4 space-y-1 p-4 border rounded-md m-5 md:sticky md:top-5 md:self-start">
+        <!-- CART AREA -->
+        <div class="flex flex-col items-center">
+            <h2 class="text-xl font-bold mb-4">Shopping Cart</h2>
+            <div class="w-full border rounded p-4">
+                <p>Your cart is empty.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .category-pill.bg-emerald-500 {
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        transform: translateY(-2px);
+    }
+</style>
+
+<script>
+    const profileBtn = document.getElementById('profileBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const chevron = document.getElementById('chevron');
+
+    // Toggle dropdown on button click
+    profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = dropdownMenu.classList.contains('hidden');
+
+        if (isHidden) {
+            dropdownMenu.classList.remove('hidden');
+            chevron.classList.add('rotate-180');
+        } else {
+            dropdownMenu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
+    });
+
+    // Close dropdown when clicking a link (optional)
+    dropdownMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            dropdownMenu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        });
+    });
+
+    // Category navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryPills = document.querySelectorAll('.category-pill');
+        
+        categoryPills.forEach(pill => {
+            pill.addEventListener('click', function() {
+                // Remove active state from all pills
+                categoryPills.forEach(p => {
+                    p.classList.remove('bg-emerald-100', 'text-emerald-800');
+                    p.classList.add('bg-white', 'text-gray-700');
+                });
+                
+                // Add active state to clicked pill
+                this.classList.remove('bg-white', 'text-gray-700');
+                this.classList.add('bg-emerald-100', 'text-emerald-800');
+                
+                // Scroll to the corresponding section
+                const categoryId = this.dataset.categoryId;
+                const targetSection = document.getElementById(`category-${categoryId}`);
+                
+                if (targetSection) {
+                    targetSection.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    });
+</script>

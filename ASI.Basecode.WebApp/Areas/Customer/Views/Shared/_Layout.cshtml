@@ -12,8 +12,7 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    @await Html.PartialAsync("_CustomerNavbar")
-    <main>
+    <main class="min-w-screen flex flex-row">
         @RenderBody()
     </main>
 

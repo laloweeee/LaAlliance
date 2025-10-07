@@ -51,6 +51,11 @@ namespace ASI.Basecode.Services.Services
             return _productRepository.GetProductsByCategoryID(categoryID);
         }
 
+        public IQueryable<Product> GetActiveProducts()
+        {
+            return _productRepository.GetActiveProducts();
+        }
+
         public async Task AddProduct(ProductViewModel model, int userID)
         {
             var categoryExists = _categoryService.GetCategoryByID(model.CategoryID) ?? throw new ArgumentException("The selected category does not exist.");
@@ -220,11 +225,9 @@ namespace ASI.Basecode.Services.Services
 
         private static bool HasCustomizationGroupsChanged(List<CustomizationGroup> existingGroups, List<CustomizationGroupViewModel> newGroups)
         {
-            // Check if counts differ
             if (existingGroups.Count != newGroups.Count)
                 return true;
 
-            // Compare each group
             for (int i = 0; i < existingGroups.Count; i++)
             {
                 var existing = existingGroups[i];
