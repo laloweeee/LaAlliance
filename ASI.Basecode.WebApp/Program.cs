@@ -1,10 +1,8 @@
 ﻿using System.IO;
-using ASI.Basecode.Data;
 using ASI.Basecode.WebApp;
 using ASI.Basecode.WebApp.Extensions.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -32,8 +30,13 @@ var app = appBuilder.Build();
 configurer.ConfigureApp(app, app.Environment);
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}");
+    pattern: "{controller=Home}/{action=Index}");
+
 app.MapControllers();
 app.MapRazorPages();
 

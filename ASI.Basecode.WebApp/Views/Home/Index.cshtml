@@ -1,8 +1,999 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "LaAlliancé";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<style>
+    /* Custom animations and improvements */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 1s ease-out forwards;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.6s ease-out forwards;
+    }
+
+    .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-card {
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-overlay {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(16, 185, 129, 0.3));
+    }
+
+    .slideshow-img {
+        transition: opacity 700ms ease-in-out;
+    }
+
+    /* Responsive improvements */
+    @@media (max-width: 768px) {
+        .hero-text h1 {
+            font-size: 2.5rem !important;
+        }
+        
+        .feature-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .hero-text h1 {
+            font-size: 2rem !important;
+        }
+        
+        .hero-slideshow-container {
+            height: 300px !important;
+        }
+    }
+
+    /* Smooth scroll */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Image loading optimization */
+    img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+</style>
+
+<main class="min-h-screen">
+    <!-- Hero Section -->
+    <div class="relative py-16 md:py-24 lg:py-32 overflow-hidden" 
+         style="background-image: url('https://i.pinimg.com/1200x/90/1e/0e/901e0e2c5062a2f3d95cb276b6c404d3.jpg'); 
+                background-position: center center; 
+                background-size: cover; 
+                background-repeat: no-repeat;
+                background-attachment: fixed;">
+        <!-- Enhanced Overlay -->
+        <div class="absolute inset-0 hero-overlay"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+            <!-- Hero Text -->
+            <div class="flex-1 hero-text animate-fade-in-up text-center lg:text-left">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white mb-4 lg:mb-6 leading-tight drop-shadow-2xl">
+                    Good Food For Good Health
+                </h1>
+                <p class="text-base sm:text-lg lg:text-xl text-gray-100 mb-6 lg:mb-8 max-w-2xl mx-auto lg:mx-0 drop-shadow-lg leading-relaxed">
+                    Enjoy a curated menu from top chefs and restaurants. LaAlliancé delivers fresh, delicious meals to your door, every time. Experience healthy, chef-crafted meals with fast delivery and premium service.
+                </p>
+                
+                <!-- Feature Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mt-6 lg:mt-8 max-w-2xl mx-auto lg:mx-0">
+                    <div class="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl p-4 lg:p-5 flex items-center gap-3 lg:gap-4 feature-card animate-scale-in" style="animation-delay: 0.2s;">
+                        <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-full p-3 flex-shrink-0">
+                            <i class="fas fa-shipping-fast text-white text-xl lg:text-2xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold text-gray-800 text-base lg:text-lg">Fast Delivery</div>
+                            <div class="text-xs lg:text-sm text-gray-600">Delivery within 30 minutes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl p-4 lg:p-5 flex items-center gap-3 lg:gap-4 feature-card animate-scale-in" style="animation-delay: 0.4s;">
+                        <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-full p-3 flex-shrink-0">
+                            <i class="fas fa-utensils text-white text-xl lg:text-2xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold text-gray-800 text-base lg:text-lg">Dine In</div>
+                            <div class="text-xs lg:text-sm text-gray-600">Enjoy fresh food, crispy and hot</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Address Input with GPS -->
+                <div class="mt-8 lg:mt-10">
+                    <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-4 lg:p-6 shadow-2xl max-w-2xl mx-auto lg:mx-0">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-map-marker-alt text-green-600 mr-2"></i>
+                            Enter Your Delivery Address
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex-1 relative">
+                                <input type="text" 
+                                       id="deliveryAddress" 
+                                       placeholder="Enter your street address, city..." 
+                                       class="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all text-gray-800 placeholder-gray-400"
+                                       aria-label="Delivery address">
+                                <button type="button" 
+                                        id="detectLocationBtn"
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg transition-all duration-300 hover:scale-110"
+                                        title="Detect my location"
+                                        aria-label="Detect my location">
+                                    <i class="fas fa-location-crosshairs text-lg"></i>
+                                </button>
+                            </div>
+                            <button type="button" 
+                                    id="findFoodBtn"
+                                    class="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold px-6 sm:px-8 py-3 rounded-xl hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl whitespace-nowrap">
+                                Find Food
+                                <i class="fas fa-search ml-2"></i>
+                            </button>
+                        </div>
+                        <div id="locationStatus" class="mt-3 text-sm text-gray-600 hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            <span id="locationStatusText">Detecting your location...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hero Slideshow -->
+            <div class="flex-1 flex items-center justify-center relative w-full max-w-lg lg:max-w-xl animate-fade-in" style="animation-delay: 0.3s;">
+                <div class="relative w-full hero-slideshow-container aspect-square max-h-[400px] lg:max-h-[500px] bg-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+                    <div id="heroSlideshow" class="w-full h-full relative">
+                        <img src="https://i.pinimg.com/1200x/fc/47/0d/fc470d4314244058317c663b74ede79b.jpg" 
+                             alt="Healthy Food" 
+                             class="slideshow-img object-cover w-full h-full absolute inset-0 opacity-100" 
+                             loading="eager" />
+                        <img src="https://i.pinimg.com/736x/d8/a6/ed/d8a6ed154ed3484e1373e46f58a45f8e.jpg" 
+                             alt="Fresh Ingredients" 
+                             class="slideshow-img object-cover w-full h-full absolute inset-0 opacity-0" 
+                             loading="lazy" />
+                        <img src="https://i.pinimg.com/1200x/68/81/d7/6881d79053c11639a8f9b31006fb68db.jpg" 
+                             alt="Team" 
+                             class="slideshow-img object-cover w-full h-full absolute inset-0 opacity-0" 
+                             loading="lazy" />
+                    </div>
+                    
+                    <!-- Slideshow Controls -->
+                    <button id="prevSlide" 
+                            class="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                            aria-label="Previous slide">
+                        <i class="fas fa-chevron-left text-green-700 text-sm sm:text-base"></i>
+                    </button>
+                    <button id="nextSlide" 
+                            class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                            aria-label="Next slide">
+                        <i class="fas fa-chevron-right text-green-700 text-sm sm:text-base"></i>
+                    </button>
+                    
+                    <!-- Slide Indicators -->
+                    <div class="absolute bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
+                        <button class="slide-dot w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 transition-all duration-300" 
+                                id="slideDot0" 
+                                data-slide="0"
+                                aria-label="Go to slide 1"></button>
+                        <button class="slide-dot w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/60 hover:bg-white/80 transition-all duration-300" 
+                                id="slideDot1" 
+                                data-slide="1"
+                                aria-label="Go to slide 2"></button>
+                        <button class="slide-dot w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/60 hover:bg-white/80 transition-all duration-300" 
+                                id="slideDot2" 
+                                data-slide="2"
+                                aria-label="Go to slide 3"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Section -->
+    <div id="gallery" class="py-16 md:py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                    Our Featured Menu
+                </h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    Discover our handcrafted dishes made with premium ingredients
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 lg:gap-6">
+                <!-- Card 1 - Pizza -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://i.pinimg.com/736x/1c/07/57/1c0757023c244aacef3a10699b0dc803.jpg" 
+                             alt="Signature Pizza" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            Popular
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Signature Pizza</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Margherita and Pepperoni pizzas with authentic Italian ingredients.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$12.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2 - Burgers -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400&q=80" 
+                             alt="Gourmet Burgers" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-yellow-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            New
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Gourmet Burgers</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Juicy burgers with premium ingredients and custom options.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$9.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 3 - Desserts -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://i.pinimg.com/1200x/49/8a/74/498a749dfbab1dc58fa76c7f1eeb3af5.jpg" 
+                             alt="Desserts & Treats" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-pink-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            Sweet
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Desserts & Treats</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Decadent cakes, tiramisu, and more sweet delights.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$6.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 - Pasta -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=400&q=80" 
+                             alt="Fresh Pasta" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-orange-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            Chef's Pick
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Fresh Pasta</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Handmade pasta with rich sauces and fresh ingredients.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$14.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 - Sushi -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=400&q=80" 
+                             alt="Fresh Sushi" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-blue-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            Fresh
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Fresh Sushi</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Premium sushi rolls with the freshest fish and ingredients.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$18.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6 - Salads -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=400&q=80" 
+                             alt="Healthy Salads" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-green-600 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            Healthy
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Healthy Salads</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Fresh greens with nutritious toppings and house dressings.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$8.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 7 - Tacos -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80" 
+                             alt="Street Tacos" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-red-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            Spicy
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Street Tacos</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Authentic tacos with bold flavors and fresh toppings.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$7.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 8 - Smoothies -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                    <div class="relative h-48 bg-gray-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=400&q=80" 
+                             alt="Fresh Smoothies" 
+                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                        <div class="absolute top-3 right-3 bg-purple-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold">
+                            Refreshing
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 text-gray-900">Fresh Smoothies</h3>
+                        <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                            Refreshing smoothies packed with fruits and nutrients.
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-green-600 font-bold text-base">$5.99</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold">
+                                Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Us Section -->
+    <div class="py-16 md:py-20 lg:py-24 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-16">
+                <!-- About Text -->
+                <div class="flex-1 text-center md:text-left">
+                    <span class="inline-block text-sm text-green-600 font-semibold mb-2 uppercase tracking-wider">
+                        Discover the LaAlliancé difference
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 lg:mb-6 text-gray-900 leading-tight">
+                        Premium Food Delivery, Every Time
+                    </h2>
+                    <p class="text-base sm:text-lg text-gray-700 mb-6 lg:mb-8 leading-relaxed max-w-2xl mx-auto md:mx-0">
+                        LaAlliancé is your trusted partner for premium food delivery. We combine technology and culinary expertise to bring you the best dishes from top restaurants, delivered quickly and reliably. Our mission is to make healthy, delicious food accessible to everyone, every day.
+                    </p>
+                    
+                    <!-- Stats or Features -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 lg:gap-6 mt-6 lg:mt-8">
+                        <div class="text-center md:text-left">
+                            <div class="text-3xl lg:text-4xl font-bold text-green-600 mb-1">500+</div>
+                            <div class="text-sm lg:text-base text-gray-600">Restaurants</div>
+                        </div>
+                        <div class="text-center md:text-left">
+                            <div class="text-3xl lg:text-4xl font-bold text-green-600 mb-1">10k+</div>
+                            <div class="text-sm lg:text-base text-gray-600">Happy Customers</div>
+                        </div>
+                        <div class="text-center md:text-left col-span-2 sm:col-span-1">
+                            <div class="text-3xl lg:text-4xl font-bold text-green-600 mb-1">30 Min</div>
+                            <div class="text-sm lg:text-base text-gray-600">Avg. Delivery</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- About Image -->
+                <div class="flex-1 flex items-center justify-center w-full">
+                    <div class="w-full max-w-md md:max-w-lg aspect-square max-h-[400px] lg:max-h-[500px] bg-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+                        <img src="https://i.pinimg.com/1200x/be/f6/d9/bef6d97ab4f7b3166f8f46c03ab8ab18.jpg" 
+                             alt="LaAlliancé Team" 
+                             class="object-cover w-full h-full transform hover:scale-105 transition-transform duration-500" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="py-16 md:py-20 lg:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 md:mb-16">
+                <span class="inline-block text-sm text-green-600 font-semibold mb-2 uppercase tracking-wider">
+                    Simple Process
+                </span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                    How It Works
+                </h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    Order your favorite meals in just three simple steps
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                <!-- Step 1 -->
+                <div class="relative text-center group">
+                    <div class="mb-6 flex justify-center">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                            <i class="fas fa-search text-white text-3xl sm:text-4xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Choose Your Meal</h3>
+                    <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+                        Browse our extensive menu and select your favorite dishes from top-rated restaurants in your area.
+                    </p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="relative text-center group">
+                    <div class="mb-6 flex justify-center">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                            <i class="fas fa-shopping-cart text-white text-3xl sm:text-4xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Place Your Order</h3>
+                    <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+                        Add items to your cart, customize your order, and proceed to secure checkout with multiple payment options.
+                    </p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="relative text-center group">
+                    <div class="mb-6 flex justify-center">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                            <i class="fas fa-truck text-white text-3xl sm:text-4xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Fast Delivery</h3>
+                    <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+                        Sit back and relax while we prepare and deliver your fresh, hot meal to your doorstep in 30 minutes or less.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Testimonials Section -->
+    <div class="py-16 md:py-20 lg:py-24 bg-gradient-to-br from-green-50 to-green-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 md:mb-16">
+                <span class="inline-block text-sm text-green-600 font-semibold mb-2 uppercase tracking-wider">
+                    Testimonials
+                </span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                    What Our Customers Say
+                </h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    Don't just take our word for it - hear from our satisfied customers
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-white rounded-2xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm sm:text-base mb-6 leading-relaxed italic">
+                        "The food quality is exceptional! I've been ordering from LaAlliancé for months now, and they never disappoint. Fast delivery and amazing customer service."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">SJ</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-900">Sarah Johnson</div>
+                            <div class="text-sm text-gray-500">Verified Customer</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-white rounded-2xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm sm:text-base mb-6 leading-relaxed italic">
+                        "Best food delivery app I've ever used! The interface is intuitive, the restaurants are top-notch, and the delivery is always on time. Highly recommend!"
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">MC</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-900">Michael Chen</div>
+                            <div class="text-sm text-gray-500">Verified Customer</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-white rounded-2xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm sm:text-base mb-6 leading-relaxed italic">
+                        "Love the variety of healthy options! As someone who cares about nutrition, LaAlliancé makes it easy to eat well without compromising on taste. 5 stars!"
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">ER</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-900">Emily Rodriguez</div>
+                            <div class="text-sm text-gray-500">Verified Customer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    (function() {
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('#heroSlideshow .slideshow-img');
+        const dots = [
+            document.getElementById('slideDot0'),
+            document.getElementById('slideDot1'),
+            document.getElementById('slideDot2')
+        ];
+        const prevBtn = document.getElementById('prevSlide');
+        const nextBtn = document.getElementById('nextSlide');
+        let autoplayInterval;
+
+        function showSlide(index) {
+            // Wrap around
+            if (index >= slides.length) currentSlide = 0;
+            else if (index < 0) currentSlide = slides.length - 1;
+            else currentSlide = index;
+
+            // Update slides
+            slides.forEach((slide, i) => {
+                slide.style.opacity = i === currentSlide ? '1' : '0';
+            });
+
+            // Update dots
+            dots.forEach((dot, i) => {
+                if (i === currentSlide) {
+                    dot.classList.remove('bg-white/60');
+                    dot.classList.add('bg-green-500');
+                } else {
+                    dot.classList.remove('bg-green-500');
+                    dot.classList.add('bg-white/60');
+                }
+            });
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function startAutoplay() {
+            autoplayInterval = setInterval(nextSlide, 4000);
+        }
+
+        function stopAutoplay() {
+            clearInterval(autoplayInterval);
+        }
+
+        // Event listeners
+        nextBtn.addEventListener('click', () => {
+            nextSlide();
+            stopAutoplay();
+            startAutoplay();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            prevSlide();
+            stopAutoplay();
+            startAutoplay();
+        });
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                showSlide(index);
+                stopAutoplay();
+                startAutoplay();
+            });
+        });
+
+        // Initialize
+        showSlide(0);
+        startAutoplay();
+
+        // Pause on hover
+        const slideshowContainer = document.querySelector('.hero-slideshow-container');
+        slideshowContainer.addEventListener('mouseenter', stopAutoplay);
+        slideshowContainer.addEventListener('mouseleave', startAutoplay);
+    })();
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Intersection Observer for fade-in animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe gallery cards
+    document.querySelectorAll('.card-hover').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+        observer.observe(card);
+    });
+
+    // GPS Location Detection and Address Input Functionality
+    (function() {
+        const addressInput = document.getElementById('deliveryAddress');
+        const detectLocationBtn = document.getElementById('detectLocationBtn');
+        const findFoodBtn = document.getElementById('findFoodBtn');
+
+        // Detect Location using GPS
+        detectLocationBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                return;
+            }
+
+            setDetectingState(true);
+
+            navigator.geolocation.getCurrentPosition(
+                // Success callback
+                function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    // Store latitude and longitude as a single cookie in JSON format
+                    const locationData = JSON.stringify({
+                        lat: latitude,
+                        lng: longitude,
+                        timestamp: new Date().toISOString()
+                    });
+                    setCookie('deliveryLocation', locationData, 30);
+
+                    // Use Google's reverse geocoding API
+                    // Get API key from server-side configuration via ViewBag
+                    const googleApiKey = '@ViewBag.GoogleApiKey';
+                    
+                    // Check if API key is configured
+                    if (!googleApiKey || googleApiKey === '') {
+                        console.error('Google Maps API key not configured');
+                        addressInput.value = `Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}`;
+                        showStatus('API key not configured. Coordinates saved.', 'warning');
+                        setTimeout(() => hideStatus(), 3000);
+                        setDetectingState(false);
+                        return;
+                    }
+                    
+                    fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${googleApiKey}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'OK' && data.results.length > 0) {
+                                // Get the most accurate address (usually the first result)
+                                const address = data.results[0].formatted_address;
+                                addressInput.value = address;
+                                showStatus('Location detected successfully!', 'success');
+                                setTimeout(() => hideStatus(), 3000);
+                            } else {
+                                showStatus('Could not determine address. Please enter manually.', 'error');
+                                addressInput.value = `Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}`;
+                            }
+                            setDetectingState(false);
+                        })
+                        .catch(error => {
+                            console.error('Google Geocoding error:', error);
+                            addressInput.value = `Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}`;
+                            showStatus('Location detected! (Address lookup failed)', 'warning');
+                            setTimeout(() => hideStatus(), 3000);
+                            setDetectingState(false);
+                        });
+                },
+                // Error callback
+                function(error) {
+                    let errorMessage = 'Unable to detect location. ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Please enable location permissions.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Request timed out.';
+                            break;
+                        default:
+                            errorMessage += 'Unknown error occurred.';
+                            break;
+                    }
+                    setDetectingState(false);
+                },
+                // Options
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        });
+
+        // Find Food Button Action
+        findFoodBtn.addEventListener('click', function() {
+            const address = addressInput.value.trim();
+            
+            if (!address) {
+                addressInput.focus();
+                addressInput.classList.add('border-red-500');
+                setTimeout(() => {
+                    addressInput.classList.remove('border-red-500');
+                }, 3000);
+                return;
+            }
+            
+            // Scroll to gallery section
+            setTimeout(() => {
+                const gallerySection = document.getElementById('gallery');
+                if (gallerySection) {
+                    gallerySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 1000);
+        });
+
+        // Allow Enter key to submit
+        addressInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                findFoodBtn.click();
+            }
+        });
+
+        // Helper function to set detecting state
+        function setDetectingState(isDetecting) {
+            if (isDetecting) {
+                // Disable both buttons
+                detectLocationBtn.disabled = true;
+                findFoodBtn.disabled = true;
+                
+                // Change detect button to loading spinner
+                detectLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i>';
+                detectLocationBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                
+                // Add disabled styling to Find Food button
+                findFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                // Enable both buttons
+                detectLocationBtn.disabled = false;
+                findFoodBtn.disabled = false;
+                
+                // Restore detect button icon
+                detectLocationBtn.innerHTML = '<i class="fas fa-location-crosshairs text-lg"></i>';
+                detectLocationBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                
+                // Remove disabled styling from Find Food button
+                findFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Helper function to show status messages
+        function showStatus(message, type) {
+            const locationStatus = document.getElementById('locationStatus');
+            const locationStatusText = document.getElementById('locationStatusText');
+            
+            locationStatusText.textContent = message;
+            locationStatus.classList.remove('hidden');
+            
+            // Reset classes
+            locationStatus.className = 'mt-3 text-sm flex items-center';
+            
+            // Apply styles based on type
+            switch(type) {
+                case 'loading':
+                    locationStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>' + message + '</span>';
+                    locationStatus.classList.add('text-blue-600');
+                    break;
+                case 'success':
+                    locationStatus.innerHTML = '<i class="fas fa-check-circle mr-2"></i><span>' + message + '</span>';
+                    locationStatus.classList.add('text-green-600');
+                    break;
+                case 'error':
+                    locationStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i><span>' + message + '</span>';
+                    locationStatus.classList.add('text-red-600');
+                    break;
+                case 'warning':
+                    locationStatus.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i><span>' + message + '</span>';
+                    locationStatus.classList.add('text-yellow-600');
+                    break;
+            }
+        }
+
+        // Helper function to hide status
+        function hideStatus() {
+            const locationStatus = document.getElementById('locationStatus');
+            locationStatus.classList.add('hidden');
+        }
+
+        // Cookie helper functions
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Lax";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) {
+                    return decodeURIComponent(c.substring(nameEQ.length, c.length));
+                }
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+
+        // Helper function to get location data from cookie
+        function getLocationFromCookie() {
+            const locationCookie = getCookie('deliveryLocation');
+            if (locationCookie) {
+                try {
+                    return JSON.parse(locationCookie);
+                } catch (error) {
+                    console.error('Error parsing location cookie:', error);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        // Optionally display saved location info (for debugging)
+        const savedLocation = getLocationFromCookie();
+        if (savedLocation) {
+            console.log('Saved location:', savedLocation);
+        }
+    })();
+</script>
+

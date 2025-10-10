@@ -1,11 +1,11 @@
 ﻿using ASI.Basecode.Data;
 using ASI.Basecode.Data.Interfaces;
-using ASI.Basecode.Data.Repositories;
 using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.Services.ServiceModels;
 using ASI.Basecode.Services.Services;
 using ASI.Basecode.WebApp.Authentication;
 using ASI.Basecode.WebApp.Models;
+using ASI.Basecode.Data.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -35,13 +35,23 @@ namespace ASI.Basecode.WebApp
             // Services
             this._services.TryAddSingleton<TokenValidationParametersFactory>();
             this._services.AddScoped<IUserService, UserService>();
-          
+            this._services.AddScoped<IMailSender, MailSenderService>();
+            this._services.AddScoped<IOtpService, OtpService>();
+            this._services.AddScoped<ICategoryService, CategoryService>();
+            this._services.AddScoped<IFileStorageService, FileStorageService>();
+            this._services.AddScoped<IFileHandlingService, FileHandlingService>();
+            this._services.AddScoped<IProductService, ProductService>();
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
+            this._services.AddScoped<ICategoryRepository, CategoryRepository>();
+            this._services.AddScoped<IProductRepository, ProductRepository>();
 
             // Manager Class
             this._services.AddScoped<SignInManager>();
+
+            // Filters
+            this._services.AddScoped<AuthenticationUserFilters>();
 
             this._services.AddHttpClient();
         }

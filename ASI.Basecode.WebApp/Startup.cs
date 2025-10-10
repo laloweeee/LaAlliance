@@ -1,11 +1,14 @@
 ﻿using ASI.Basecode.Data;
 using ASI.Basecode.Resources.Constants;
 using ASI.Basecode.Services.Manager;
+using ASI.Basecode.Services.ServiceModels;
 using ASI.Basecode.WebApp.Authentication;
 using ASI.Basecode.WebApp.Extensions.Configuration;
 using ASI.Basecode.WebApp.Models;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Text;
+using Azure.Storage.Blobs;
 
 namespace ASI.Basecode.WebApp
 {
@@ -82,12 +86,25 @@ namespace ASI.Basecode.WebApp
 
             services.AddMemoryCache();
 
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "DataProtection-Keys")))
+                .SetApplicationName("ASI.Basecode.WebApp");
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            });
+
             // Register SQL database configuration context as services.
             services.AddDbContext<AsiBasecodeDBContext>(options =>
             {
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"),
-                    sqlServerOptions => sqlServerOptions.CommandTimeout(120));
+                options.UseMySql(
+                    Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 32)),
+                    mysqloptions => mysqloptions.CommandTimeout(120));
+
             });
 
             services.AddControllersWithViews();
@@ -95,7 +112,15 @@ namespace ASI.Basecode.WebApp
 
             //Configuration
             services.Configure<TokenAuthentication>(Configuration.GetSection("TokenAuthentication"));
-            
+
+            services.AddScoped<BlobContainerClient>(provider =>
+            {
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var connectionString = configuration.GetConnectionString("AzureBlobStorage");
+                var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+                return blobServiceClient.GetBlobContainerClient("products");
+            });
+
             // Session
             services.AddSession(options =>
             {
@@ -122,7 +147,7 @@ namespace ASI.Basecode.WebApp
                     policy.RequireRole("Restaurant"));
 
                 // Permission base policies for Restaurant
-                options.AddPolicy("Admin", policy => 
+                options.AddPolicy("Admin", policy =>
                     policy.RequireRole("Restaurant")
                         .RequireClaim("RestaurantPermission", "Admin"));
 
@@ -172,6 +197,16 @@ namespace ASI.Basecode.WebApp
 
             this._app.UseAuthentication();
             this._app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "areas",
+                    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+                // Default fallback (non-area controllers/views)
+                endpoints.MapDefaultControllerRoute();
+            });
         }
     }
 }

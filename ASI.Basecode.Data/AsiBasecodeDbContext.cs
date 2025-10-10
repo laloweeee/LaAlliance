@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 using ASI.Basecode.Data.Models;
+using ASI.Basecode.Data.Configuration;
 
 namespace ASI.Basecode.Data
 {
@@ -18,32 +16,32 @@ namespace ASI.Basecode.Data
         }
 
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<ProductCategory> Categories { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<Restaurant> RestaurantProfiles { get; set; }
+        public virtual DbSet<UserProfile> UserProfiles { get; set; }
+        public virtual DbSet<UserAddress> UserAddresses { get; set; }
+        public virtual DbSet<Address> Addresses { get; set; }
+        public virtual DbSet<DeliveryPolicy> ServiceData { get; set; }
+
+        public virtual DbSet<Staff> Staff { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasIndex(e => e.UserId, "UQ__Users__1788CC4D5F4A160F")
-                    .IsUnique();
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new RestaurantProfileConfiguration());
+            modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
+            modelBuilder.ApplyConfiguration(new AddressConfiguration());
+            modelBuilder.ApplyConfiguration(new UserAddressConfiguration());
+            modelBuilder.ApplyConfiguration(new ServiceDataConfiguration());
 
-                entity.Property(e => e.Email)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductConfiguration());
+            modelBuilder.ApplyConfiguration(new CustomizationGroupConfiguration());
+            modelBuilder.ApplyConfiguration(new CustomizationOptionConfiguration());
 
-                entity.Property(e => e.Role)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
 
-                entity.Property(e => e.Password)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
 
-                entity.Property(e => e.UpdatedTime).HasColumnType("datetime");
-
-                entity.Property(e => e.CreatedTime).HasColumnType("datetime");
-            });
 
             OnModelCreatingPartial(modelBuilder);
         }

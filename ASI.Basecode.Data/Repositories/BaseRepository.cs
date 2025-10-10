@@ -2,8 +2,9 @@
 using ASI.Basecode.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Threading.Tasks;
 
-namespace Basecode.Data.Repositories
+namespace ASI.Basecode.Data.Repositories
 {
     public class BaseRepository
     {

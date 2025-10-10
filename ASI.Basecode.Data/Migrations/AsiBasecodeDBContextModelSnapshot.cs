@@ -18,48 +18,788 @@ namespace ASI.Basecode.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.6")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Address", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("AddressId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("AddressID");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AddressId"));
+
+                    b.Property<string>("Barangay")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Barangay");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("City");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasDefaultValue("Philippines")
+                        .HasColumnName("Country");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double")
+                        .HasColumnName("Latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double")
+                        .HasColumnName("Longitude");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Province");
+
+                    b.Property<string>("StreetAddress")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("StreetAddress");
+
+                    b.Property<int>("ZipCode")
+                        .HasColumnType("int")
+                        .HasColumnName("ZipCode");
+
+                    b.HasKey("AddressId");
+
+                    b.ToTable("Addresses", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Category", b =>
+                {
+                    b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("CategoryID");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CategoryID"));
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("CreatedBy");
 
                     b.Property<DateTime>("CreatedTime")
-                        .HasColumnType("datetime");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("CreatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true)
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("UpdatedBy");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("UpdatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+                    b.HasKey("CategoryID");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("Categories", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.CustomizationGroup", b =>
+                {
+                    b.Property<int>("CustomizationGroupID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("CustomizationGroupID");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CustomizationGroupID"));
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("CreatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("CustomizationName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("CustomizationName");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("IsRequired");
+
+                    b.Property<int>("NumberOfChoice")
+                        .HasColumnType("int")
+                        .HasColumnName("NumberOfChoice");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductID");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("UpdatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+                    b.HasKey("CustomizationGroupID");
+
+                    b.HasIndex("ProductID");
+
+                    b.ToTable("CustomizationGroups", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.CustomizationOption", b =>
+                {
+                    b.Property<int>("CustomizationOptionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("CustomizationOptionID");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CustomizationOptionID"));
+
+                    b.Property<decimal>("AdditionalPrice")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(10, 2)")
+                        .HasDefaultValue(0.00m)
+                        .HasColumnName("AdditionalPrice");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("CreatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("CustomizationGroupID")
+                        .HasColumnType("int")
+                        .HasColumnName("CustomizationGroupID");
+
+                    b.Property<string>("OptionName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("OptionName");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("UpdatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+                    b.HasKey("CustomizationOptionID");
+
+                    b.HasIndex("CustomizationGroupID");
+
+                    b.ToTable("CustomizationOptions", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Product", b =>
+                {
+                    b.Property<int>("ProductID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ProductID");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ProductID"));
+
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("int")
+                        .HasColumnName("CategoryID");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("CreatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("ImageUrl");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true)
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("Price");
+
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("UpdatedBy");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("UpdatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+                    b.HasKey("ProductID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantProfile", b =>
+                {
+                    b.Property<int>("RestaurantID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("RestaurantId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("RestaurantID"));
+
+                    b.Property<int>("AddressId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AddressId1")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("ClosingTime")
+                        .HasColumnType("TIME")
+                        .HasColumnName("ClosingTime");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("CoverImageUrl");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("DATETIME")
+                        .HasColumnName("CreatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("Description");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Email");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("LogoUrl");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Name");
+
+                    b.Property<TimeOnly>("OpeningTime")
+                        .HasColumnType("TIME")
+                        .HasColumnName("OpeningTime");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)")
+                        .HasColumnName("PhoneNumber");
+
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("UpdatedBy");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("DATETIME")
+                        .HasColumnName("UpdatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+                    b.HasKey("RestaurantID");
+
+                    b.HasIndex("AddressId")
+                        .IsUnique();
+
+                    b.HasIndex("AddressId1")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RestaurantProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Staff", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal?>("AnnualSalary")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("HireDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("LastLoginUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Role")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Staff");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.ServiceData", b =>
+                {
+                    b.Property<int>("ServiceDataId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ServiceDataId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ServiceDataId"));
+
+                    b.Property<decimal>("BaseDeliveryFee")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("BaseDeliveryFee");
+
+                    b.Property<int>("MaxDeliveryDistance")
+                        .HasColumnType("int")
+                        .HasColumnName("MaxDeliveryDistance");
+
+                    b.Property<decimal>("MinimumOrderAmount")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("MinimumOrderAmount");
+
+                    b.Property<decimal>("PerKmFee")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("PerKmFee");
+
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("int")
+                        .HasColumnName("RestaurantId");
+
+                    b.HasKey("ServiceDataId");
+
+                    b.HasIndex("RestaurantId")
+                        .IsUnique();
+
+                    b.ToTable("ServiceData", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>
+                {
+                    b.Property<int>("UserID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("UserID");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserID"));
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("CreatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Email");
+
+                    b.Property<string>("EmailHashToken")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)")
+                        .HasColumnName("EmailHashToken");
+
+                    b.Property<DateTime?>("EmailTokenExpiry")
+                        .HasColumnType("datetime")
+                        .HasColumnName("EmailTokenExpiry");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("FirstName");
+
+                    b.Property<bool>("IsEmailVerified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsEmailVerified");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("LastName");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Password");
+
+                    b.Property<string>("ResetPasswordHashToken")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)")
+                        .HasColumnName("ResetPasswordHashToken");
+
+                    b.Property<DateTime?>("ResetTokenExpiry")
+                        .HasColumnType("datetime")
+                        .HasColumnName("ResetTokenExpiry");
 
                     b.Property<string>("Role")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasDefaultValue("Customer")
+                        .HasColumnName("Role");
 
                     b.Property<DateTime>("UpdatedTime")
-                        .HasColumnType("datetime");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("UpdatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
 
-                    b.HasKey("UserId");
+                    b.HasKey("UserID");
 
-                    b.HasIndex(new[] { "UserId" }, "UQ__Users__1788CC4D5F4A160F")
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.UserAddress", b =>
+                {
+                    b.Property<int>("UserAddressId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("UserAddressId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserAddressId"));
+
+                    b.Property<int>("AddressId")
+                        .HasColumnType("int")
+                        .HasColumnName("AddressId");
+
+                    b.Property<int?>("AddressId1")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AddressLabel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("AddressLabel");
+
+                    b.Property<string>("AddressNote")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)")
+                        .HasColumnName("AddressNote");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("IsDefault");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("UserAddressId");
+
+                    b.HasIndex("AddressId")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.HasIndex("AddressId1");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAddresses", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.UserProfile", b =>
+                {
+                    b.Property<int>("UserProfileId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserProfileId");
+
+                    b.Property<string>("ContactNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)")
+                        .HasColumnName("ContactNumber");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("CreatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("UpdatedTime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserPhoto")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("UserPhoto");
+
+                    b.HasKey("UserProfileId");
+
+                    b.ToTable("UserProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Category", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASI.Basecode.Data.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.CustomizationGroup", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.Product", "Product")
+                        .WithMany("CustomizationGroups")
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.CustomizationOption", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.CustomizationGroup", "CustomizationGroup")
+                        .WithMany("CustomizationOptions")
+                        .HasForeignKey("CustomizationGroupID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomizationGroup");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Product", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASI.Basecode.Data.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASI.Basecode.Data.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantProfile", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.Address", "Address")
+                        .WithOne()
+                        .HasForeignKey("ASI.Basecode.Data.Models.RestaurantProfile", "AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASI.Basecode.Data.Models.Address", null)
+                        .WithOne("RestaurantProfile")
+                        .HasForeignKey("ASI.Basecode.Data.Models.RestaurantProfile", "AddressId1");
+
+                    b.HasOne("ASI.Basecode.Data.Models.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Address");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Staff", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.ServiceData", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.RestaurantProfile", "RestaurantProfile")
+                        .WithOne()
+                        .HasForeignKey("ASI.Basecode.Data.Models.ServiceData", "RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RestaurantProfile");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.UserAddress", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.Address", "Address")
+                        .WithOne()
+                        .HasForeignKey("ASI.Basecode.Data.Models.UserAddress", "AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASI.Basecode.Data.Models.Address", null)
+                        .WithMany("UserAddresses")
+                        .HasForeignKey("AddressId1");
+
+                    b.HasOne("ASI.Basecode.Data.Models.User", "User")
+                        .WithMany("UserAddresses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Address");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.UserProfile", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.User", "User")
+                        .WithOne("UserProfile")
+                        .HasForeignKey("ASI.Basecode.Data.Models.UserProfile", "UserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Address", b =>
+                {
+                    b.Navigation("RestaurantProfile");
+
+                    b.Navigation("UserAddresses");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Category", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.CustomizationGroup", b =>
+                {
+                    b.Navigation("CustomizationOptions");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.Product", b =>
+                {
+                    b.Navigation("CustomizationGroups");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>
+                {
+                    b.Navigation("UserAddresses");
+
+                    b.Navigation("UserProfile");
                 });
 #pragma warning restore 612, 618
         }
