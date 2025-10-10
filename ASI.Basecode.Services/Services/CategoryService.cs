@@ -27,12 +27,12 @@ namespace ASI.Basecode.Services.Services
             _userRepository = userRepository;
         }
 
-        public IQueryable<Category> GetAllCategories()
+        public IQueryable<ProductCategory> GetAllCategories()
         {
             return _categoryRepository.GetAllCategories();
         }
 
-        public Category GetCategoryByID(int categoryID)
+        public ProductCategory GetCategoryByID(int categoryID)
         {
             return _categoryRepository.GetCategoryByID(categoryID);
         }
@@ -49,7 +49,7 @@ namespace ASI.Basecode.Services.Services
 
             var user = _userRepository.GetUserById(userID).FirstOrDefault() ?? throw new ArgumentException("Invalid CreatedBy user ID.");
 
-            var category = new Category
+            var category = new ProductCategory
             {
                 Name = model.Name.Trim(),
                 IsActive = model.IsActive,

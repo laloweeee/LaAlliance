@@ -16,13 +16,13 @@ namespace ASI.Basecode.Data
         }
 
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<ProductCategory> Categories { get; set; }
         public virtual DbSet<Product> Products { get; set; }
-        public virtual DbSet<RestaurantProfile> RestaurantProfiles { get; set; }
+        public virtual DbSet<Restaurant> RestaurantProfiles { get; set; }
         public virtual DbSet<UserProfile> UserProfiles { get; set; }
         public virtual DbSet<UserAddress> UserAddresses { get; set; }
         public virtual DbSet<Address> Addresses { get; set; }
-        public virtual DbSet<ServiceData> ServiceData { get; set; }
+        public virtual DbSet<DeliveryPolicy> ServiceData { get; set; }
 
         public virtual DbSet<Staff> Staff { get; set; }
 

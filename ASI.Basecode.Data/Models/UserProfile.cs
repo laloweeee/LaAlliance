@@ -8,12 +8,11 @@ namespace ASI.Basecode.Data.Models
 {
     public partial class UserProfile
     {
-        public int UserProfileId { get; set; }
-        public int UserId { get; set; }
-        public string ContactNumber { get; set; }
-        public string UserPhoto { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime UpdatedTime { get; set; }
+        public int ProfileID { get; set; }
+        public int UserID { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int ContactNumber { get; set; }
 
         // Navigator
         public User User { get; set; }

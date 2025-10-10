@@ -10,14 +10,14 @@ namespace ASI.Basecode.Data.Repositories
         {
         }
 
-        public ServiceData GetServiceData()
+        public DeliveryPolicy GetServiceData()
         {
-            return GetDbSet<ServiceData>().FirstOrDefault();
+            return GetDbSet<DeliveryPolicy>().FirstOrDefault();
         }
 
-        public void EditServiceData(ServiceData data)
+        public void EditServiceData(DeliveryPolicy data)
         {
-            GetDbSet<ServiceData>().Update(data);
+            GetDbSet<DeliveryPolicy>().Update(data);
             UnitOfWork.SaveChanges();
         }
     }

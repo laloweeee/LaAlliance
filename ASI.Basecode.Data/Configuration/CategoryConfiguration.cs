@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Configuration
 {
-    public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+    public class CategoryConfiguration : IEntityTypeConfiguration<ProductCategory>
     {
-        public void Configure(EntityTypeBuilder<Category> entity)
+        public void Configure(EntityTypeBuilder<ProductCategory> entity)
         {
             entity.ToTable("Categories");
 

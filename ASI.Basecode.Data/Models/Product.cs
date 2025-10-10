@@ -9,23 +9,18 @@ namespace ASI.Basecode.Data.Models
     public partial class Product
     {
         public int ProductID { get; set; }
+        public string ProductName { get; set; }
         public int CategoryID { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ImageUrl { get; set; }
-        public decimal Price { get; set; }
-        public bool IsActive { get; set; }
-        public int CreatedBy { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public int UpdatedBy { get; set; }
-        public DateTime UpdatedTime { get; set; }
+        public string ProductImage { get; set; }
+        public string ProductDescription { get; set; }
+        public decimal ProductPrice { get; set; }
+        public bool IsAvailable { get; set; }
 
         // Navigator
-        public User CreatedByUser { get; set; }
-        public User UpdatedByUser { get; set; }
-        public Category Category { get; set; }
-
-        // Collection
-        public ICollection<CustomizationGroup> CustomizationGroups { get; set; } = [];
+        public CustomerProductFavorites CustomerProductFavorites { get; set; }
+        public ProductCategory ProductCategory { get; set; }
+        public ICollection<OrderItems> OrderItems { get; set; } = [];
+        public ICollection<PromotionProducts> PromotionProducts { get; set; } = [];
+        public ICollection<ProductOptionGroup> ProductOptionGroup { get; set; } = [];
     }
 }

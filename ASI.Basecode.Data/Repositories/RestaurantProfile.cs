@@ -10,14 +10,14 @@ namespace ASI.Basecode.Data.Repositories
         {
         }
 
-        public RestaurantProfile GetRestaurantProfile()
+        public Restaurant GetRestaurantProfile()
         {
-            return GetDbSet<RestaurantProfile>().FirstOrDefault();
+            return GetDbSet<Restaurant>().FirstOrDefault();
         }
 
-        public void EditRestaurantProfile(RestaurantProfile profile)
+        public void EditRestaurantProfile(Restaurant profile)
         {
-            GetDbSet<RestaurantProfile>().Update(profile);
+            GetDbSet<Restaurant>().Update(profile);
             UnitOfWork.SaveChanges();
         }
     }

@@ -8,22 +8,26 @@ namespace ASI.Basecode.Data.Models
 {
     public partial class Order
     {
-        public int OrderId { get; set; }
-        public int UserId { get; set; }
-        public int RestaurantId { get; set; }
-        public Decimal SubTotal { get; set; }
-        public Decimal Total { get; set; }
-        public Decimal DeliveryFee { get; set; }
-        public Decimal DiscountAmount { get; set; }
+        public int OrderID { get; set; }
+        public int UserID { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string Status { get; set; }
+        public decimal SubTotal { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal DiscountAmount { get; set; }
         
         // TODO: public int PromotionId { get; set; }
 
         public string OrderType { get; set; }
         public string OrderStatus { get; set; }
-        public string PaymentStatus { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime UpdatedTime { get; set; }
-        public TimeOnly ElapsedTime { get; set; }
-        public int ManagedBy { get; set; } // UserID of the handling staff
+        public string OrderAddress { get; set; }
+        public int PromotionID { get; set; }
+
+        //Navigator
+        public RestaurantPromotions RestaurantPromotions { get; set; }
+        public User User { get; set; }
+        public Address Address { get; set; }
+        public ICollection<OrderItems> OrderItems { get; set; } = [];
+        public ICollection<OrderProcessed> OrderProcessed { get; set; } = [];
     }
 }

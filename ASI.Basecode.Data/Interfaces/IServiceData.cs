@@ -4,7 +4,7 @@ namespace ASI.Basecode.Data.Interfaces
 {
     public interface IServiceData
     {
-        ServiceData GetServiceData();
-        void EditServiceData(ServiceData data);
+        DeliveryPolicy GetServiceData();
+        void EditServiceData(DeliveryPolicy data);
     }
 }

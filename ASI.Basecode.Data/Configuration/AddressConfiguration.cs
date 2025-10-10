@@ -24,7 +24,7 @@ namespace ASI.Basecode.Data.Configuration
                   .HasColumnName("Latitude")
                   .IsRequired();
             
-            entity.Property(e => e.StreetAddress)
+            entity.Property(e => e.Street)
                   .HasColumnName("StreetAddress")
                   .IsRequired()
                   .HasMaxLength(200);

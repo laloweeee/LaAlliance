@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ASI.Basecode.Data.Configuration
 {
-    public class ServiceDataConfiguration : IEntityTypeConfiguration<ServiceData>
+    public class ServiceDataConfiguration : IEntityTypeConfiguration<DeliveryPolicy>
     {
-        public void Configure(EntityTypeBuilder<ServiceData> entity)
+        public void Configure(EntityTypeBuilder<DeliveryPolicy> entity)
         {
             entity.ToTable("ServiceData");
 
@@ -42,7 +42,7 @@ namespace ASI.Basecode.Data.Configuration
             // Relationships
             entity.HasOne(e => e.RestaurantProfile)
                   .WithOne()
-                  .HasForeignKey<ServiceData>(e => e.RestaurantId)
+                  .HasForeignKey<DeliveryPolicy>(e => e.RestaurantId)
                   .OnDelete(DeleteBehavior.Cascade);
         }
     }

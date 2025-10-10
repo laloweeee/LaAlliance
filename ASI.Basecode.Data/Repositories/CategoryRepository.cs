@@ -17,18 +17,18 @@ namespace ASI.Basecode.Data.Repositories
             _dbContext = dbContext;
         }
 
-        public IQueryable<Category> GetAllCategories()
+        public IQueryable<ProductCategory> GetAllCategories()
         {
             // return GetDbSet<Category>();
             return _dbContext.Categories;
         }
 
-        public Category GetCategoryByID(int categoryID)
+        public ProductCategory GetCategoryByID(int categoryID)
         {
             return _dbContext.Categories.FirstOrDefault(c => c.CategoryID == categoryID);
         }
 
-        public void AddCategory(Category category)
+        public void AddCategory(ProductCategory category)
         {
             category.CreatedTime = DateTime.UtcNow;
             category.UpdatedTime = DateTime.UtcNow;
@@ -36,7 +36,7 @@ namespace ASI.Basecode.Data.Repositories
             UnitOfWork.SaveChanges();
         }
 
-        public void UpdateCategory(Category category)
+        public void UpdateCategory(ProductCategory category)
         {
             _dbContext.Categories.Update(category);
             UnitOfWork.SaveChanges();
@@ -47,7 +47,7 @@ namespace ASI.Basecode.Data.Repositories
             var category = GetCategoryByID(categoryID);
             if (category != null)
             {
-                GetDbSet<Category>().Remove(category);
+                GetDbSet<ProductCategory>().Remove(category);
                 UnitOfWork.SaveChanges();
             }
         }

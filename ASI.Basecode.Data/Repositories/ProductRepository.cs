@@ -70,7 +70,7 @@ namespace ASI.Basecode.Data.Repositories
             return GetProducts().Where(x => x.IsActive);
         }
 
-        public void UpdateProductCustomizations(int productId, List<CustomizationGroup> customizationGroups)
+        public void UpdateProductCustomizations(int productId, List<ProductOptionGroup> customizationGroups)
         {
             // TODO: Implement this method to update product customizations
             throw new NotImplementedException();

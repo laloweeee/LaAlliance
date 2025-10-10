@@ -90,12 +90,12 @@ namespace ASI.Basecode.Services.Services
 
             if (model.CustomizationGroups != null && model.CustomizationGroups.Count != 0)
             {
-                product.CustomizationGroups = [.. model.CustomizationGroups.Select(cg => new CustomizationGroup
+                product.CustomizationGroups = [.. model.CustomizationGroups.Select(cg => new ProductOptionGroup
                 {
                     CustomizationName = cg.CustomizationName,
                     IsRequired = cg.IsRequired,
                     NumberOfChoice = cg.NumberOfChoice,
-                    CustomizationOptions = cg.CustomizationOptions?.Select(co => new CustomizationOption
+                    CustomizationOptions = cg.CustomizationOptions?.Select(co => new ProductOptionItems
                     {
                         OptionName = co.OptionName,
                         AdditionalPrice = co.AdditionalPrice
@@ -187,12 +187,12 @@ namespace ASI.Basecode.Services.Services
                     // Add updated groups and options
                     foreach (var cg in model.CustomizationGroups)
                     {
-                        var newGroup = new CustomizationGroup
+                        var newGroup = new ProductOptionGroup
                         {
                             CustomizationName = cg.CustomizationName,
                             IsRequired = cg.IsRequired,
                             NumberOfChoice = cg.NumberOfChoice,
-                            CustomizationOptions = cg.CustomizationOptions?.Select(co => new CustomizationOption
+                            CustomizationOptions = cg.CustomizationOptions?.Select(co => new ProductOptionItems
                             {
                                 OptionName = co.OptionName,
                                 AdditionalPrice = co.AdditionalPrice
@@ -223,7 +223,7 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        private static bool HasCustomizationGroupsChanged(List<CustomizationGroup> existingGroups, List<CustomizationGroupViewModel> newGroups)
+        private static bool HasCustomizationGroupsChanged(List<ProductOptionGroup> existingGroups, List<CustomizationGroupViewModel> newGroups)
         {
             if (existingGroups.Count != newGroups.Count)
                 return true;
@@ -243,7 +243,7 @@ namespace ASI.Basecode.Services.Services
                     return true;
 
                 // Check options count
-                var existingOptions = existing.CustomizationOptions?.ToList() ?? new List<CustomizationOption>();
+                var existingOptions = existing.CustomizationOptions?.ToList() ?? new List<ProductOptionItems>();
                 var newOptions = newGroup.CustomizationOptions ?? new List<CustomizationOptionViewModel>();
 
                 if (existingOptions.Count != newOptions.Count)

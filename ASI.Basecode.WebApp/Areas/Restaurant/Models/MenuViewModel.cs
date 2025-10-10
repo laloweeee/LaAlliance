@@ -5,7 +5,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Models
 {
     public class MenuViewModel
     {
-        public IEnumerable<Category> Categories { get; set; } = new List<Category>();
+        public IEnumerable<ProductCategory> Categories { get; set; } = new List<ProductCategory>();
         public IEnumerable<Product> Products { get; set; } = new List<Product>();
     }
 }

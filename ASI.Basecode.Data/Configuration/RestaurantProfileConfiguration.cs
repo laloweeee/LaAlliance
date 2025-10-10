@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ASI.Basecode.Data.Configuration
 {
-        public class RestaurantProfileConfiguration : IEntityTypeConfiguration<RestaurantProfile>
+        public class RestaurantProfileConfiguration : IEntityTypeConfiguration<Restaurant>
         {
-                public void Configure(EntityTypeBuilder<RestaurantProfile> entity)
+                public void Configure(EntityTypeBuilder<Restaurant> entity)
                 {
                         entity.ToTable("RestaurantProfiles");
 
@@ -77,7 +77,7 @@ namespace ASI.Basecode.Data.Configuration
 
                         entity.HasOne(e => e.Address)
                                 .WithOne()
-                                .HasForeignKey<RestaurantProfile>(e => e.AddressId);
+                                .HasForeignKey<Restaurant>(e => e.AddressId);
                 }
         }
 }

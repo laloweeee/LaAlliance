@@ -17,7 +17,7 @@ namespace ASI.Basecode.Data.Interfaces
         IQueryable<Product> GetProductByID(int productID);
         IQueryable<Product> GetProductsByCategoryID(int categoryID);
         IQueryable<Product> GetActiveProducts();
-        void UpdateProductCustomizations(int productID, List<CustomizationGroup> customizations);
+        void UpdateProductCustomizations(int productID, List<ProductOptionGroup> customizations);
         IQueryable<Product> GetProductsByFilter(Expression<Func<Product, bool>> filter);
         IQueryable<Product> SearchProduct(string searchTerm);
     }

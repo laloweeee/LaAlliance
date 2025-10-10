@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Configuration
 {
-    public class CustomizationOptionConfiguration : IEntityTypeConfiguration<CustomizationOption>
+    public class CustomizationOptionConfiguration : IEntityTypeConfiguration<ProductOptionItems>
     {
-        public void Configure(EntityTypeBuilder<CustomizationOption> entity)
+        public void Configure(EntityTypeBuilder<ProductOptionItems> entity)
         {
             entity.ToTable("CustomizationOptions");
 

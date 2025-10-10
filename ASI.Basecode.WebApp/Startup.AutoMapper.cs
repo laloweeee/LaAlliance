@@ -26,7 +26,7 @@ namespace ASI.Basecode.WebApp
             public AutoMapperProfileConfiguration()
             {
                 CreateMap<UserViewModel, User>();
-                CreateMap<Category, CategoryViewModel>().ReverseMap();
+                CreateMap<ProductCategory, CategoryViewModel>().ReverseMap();
                 // Product mappings
                 CreateMap<Product, ProductViewModel>()
                     .ForMember(dest => dest.ImageFile, opt => opt.Ignore())
@@ -38,7 +38,7 @@ namespace ASI.Basecode.WebApp
                     .ForMember(dest => dest.UpdatedByUser, opt => opt.Ignore());
 
                 // CustomizationGroup mappings
-                CreateMap<CustomizationGroup, CustomizationGroupViewModel>()
+                CreateMap<ProductOptionGroup, CustomizationGroupViewModel>()
                     .ForMember(dest => dest.CustomizationOptions, opt => opt.MapFrom(src => src.CustomizationOptions))
                     .ReverseMap()
                     .ForMember(dest => dest.Product, opt => opt.Ignore())
@@ -46,7 +46,7 @@ namespace ASI.Basecode.WebApp
                     .ForMember(dest => dest.UpdatedTime, opt => opt.Ignore());
 
                 // CustomizationOption mappings
-                CreateMap<CustomizationOption, CustomizationOptionViewModel>()
+                CreateMap<ProductOptionItems, CustomizationOptionViewModel>()
                     .ReverseMap()
                     .ForMember(dest => dest.CustomizationGroup, opt => opt.Ignore())
                     .ForMember(dest => dest.CreatedTime, opt => opt.Ignore())
