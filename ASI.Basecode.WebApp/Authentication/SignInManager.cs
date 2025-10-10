@@ -85,11 +85,10 @@ namespace ASI.Basecode.WebApp.Authentication
             var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString(), ClaimValueTypes.String, Const.Issuer),
-                new Claim(ClaimTypes.Name, user.Email, ClaimValueTypes.String, Const.Issuer),
+                new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName, ClaimValueTypes.String, Const.Issuer),
                 new Claim(ClaimTypes.Email, user.Email, ClaimValueTypes.String, Const.Issuer),
                 new Claim(ClaimTypes.Role, user.Role, ClaimValueTypes.String, Const.Issuer),
                 new Claim("UserId", user.UserID.ToString(), ClaimValueTypes.String, Const.Issuer),
-                new Claim("UserEmail", user.Email, ClaimValueTypes.String, Const.Issuer),
             };
             return new ClaimsIdentity(claims, Const.AuthenticationScheme);
         }
@@ -101,8 +100,10 @@ namespace ASI.Basecode.WebApp.Authentication
         /// <returns>Created claims principal</returns>
         public IPrincipal CreateClaimsPrincipal(ClaimsIdentity identity)
         {
-            var identities = new List<ClaimsIdentity>();
-            identities.Add(identity);
+            var identities = new List<ClaimsIdentity>
+            {
+                identity
+            };
             return this.CreateClaimsPrincipal(identities);
         }
 

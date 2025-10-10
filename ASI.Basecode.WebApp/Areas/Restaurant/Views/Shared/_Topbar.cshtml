@@ -1,26 +1,83 @@
 ﻿@using Microsoft.AspNetCore.Http
 
-<div id="topbar" class="border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3 px-1">
-            <img src="~/img/LaAlliance-logo.png" alt="logo" class="h-12 w-auto" />
-            <div class="flex flex-col leading-tight">
-                <span class="text-xl font-bold text-gray-900">LaAlliancé</span>
-                <span class="text-sm text-gray-500">Restaurant Portal</span>
-            </div>
+@{
+    var currentAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLower();
+    var currentController = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "").ToLower();
+
+    string IsActive(string controller, string action = "*")
+    {
+        return currentController.Equals(controller.ToLower()) &&
+        (action == "*" || currentAction.Equals(action.ToLower()))
+        ? "bg-emerald-600 text-white font-bold hover:bg-emerald-700"
+        : "text-black hover:bg-emerald-400 hover:bg-opacity-30";
+    }
+
+    string ItemClass(string controller, string action = "*")
+    => $"nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {IsActive(controller, action)}";
+
+    string IconClass(string controller, string action = "*")
+    => currentController.Equals(controller.ToLower()) &&
+    (action == "*" || currentAction.Equals(action.ToLower()))
+    ? "w-5 text-white transition-all duration-300 ease-in-out"
+    : "w-5 text-black transition-all duration-300 ease-in-out";
+}
+
+<div id="topbar" class="px-4 py-3 md:px-6 md:py-4 w-full">
+    <div class="flex items-center justify-between w-full max-w-full">
+        <!-- Logo Section -->
+        <div class="flex items-center gap-1">
+            <img src="~/img/LaAlliance-logo.png" alt="logo" class="h-8 w-auto md:h-12" />
+            <span class="text-xl md:text-3xl font-bold sidebar-logo">LaAlliancé</span>
         </div>
 
-        <div class="align-center flex flex-row items-center gap-2">
-            <div class="relative hidden md:block">
-                <i class="fas fa-search -translate-y-1/2 absolute left-3 top-1/2 transform text-gray-400"></i>
-                <input type="text" placeholder="Search..." class="rounded-lg border border-gray-200 py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-green-500">
+        <div class="align-center flex flex-row items-center gap-2 md:gap-4">
+            <!-- Mobile Menu Toggle -->
+            <button id="mobileMenuToggle" class="lg:hidden rounded-lg p-2 text-gray-600 hover:bg-gray-100">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <!-- NAV LINKS -->
+            <div id="navLinks" class="hidden lg:flex space-x-2 xl:space-x-4 bg-gray-100 p-2 rounded-xl items-center">
+                <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index"
+                    class="@(ItemClass("Dashboard"))">
+                    <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Dashboard</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Profile" asp-action="Index" class="@ItemClass("Profile")">
+                    <i class="fas fa-store @IconClass("Profile")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Restaurant</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
+                    <i class="fas fa-utensils @IconClass("Menu")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Menu Book</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Promotions" asp-action="Index"
+                    class="@ItemClass("Promotions")">
+                    <i class="fas fa-bullhorn @IconClass("Promotions")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Promotions</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Staff" asp-action="Index" class="@ItemClass("Staff")">
+                    <i class="fas fa-users @IconClass("Staff")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Staff</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Finance" asp-action="Index" class="@ItemClass("Finance")"> 
+                    <i class="fas fa-money-bill-wave @IconClass("Finance")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Finance</span>
+                </a>
             </div>
 
+            <!-- Notification Button -->
             <button class="relative rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                <i class="fas fa-bell text-xl"></i>
+                <i class="fas fa-bell text-lg md:text-xl"></i>
                 <span class="notification-dot"></span>
             </button>
 
+            <!-- User Avatar -->
+            <div class="hidden sm:flex items-center space-x-3">
+                <div class="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-green-100">
+                    <i class="fas fa-user text-sm md:text-base text-green-600"></i>
+                </div>
+            </div>
             <div class="relative">
                 <!-- Avatar button -->
                 <button id="userMenuButton"
@@ -39,6 +96,12 @@
                         <span>Profile</span>
                     </a>
 
+            <!-- Logout Button -->
+            <div class="flex items-center">
+                <a asp-area="" asp-controller="Account" asp-action="Logout"
+                    class="flex items-center rounded-md bg-red-600 px-2 py-1 md:px-4 md:py-2 text-white hover:bg-red-700">
+                    <i class="fas fa-sign-out-alt text-sm md:text-base"></i>
+                </a>
                     <a asp-area="Restaurant" asp-controller="User" asp-action="Settings"
                        class="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50">
                         <i class="fas fa-cog w-5 text-gray-400"></i>
@@ -58,4 +121,118 @@
             </div>
         </div>
     </div>
+
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobileMenu" class="lg:hidden hidden mt-4 bg-gray-100 rounded-xl p-4 space-y-2">
+        <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index"
+            class="@(ItemClass("Dashboard"))">
+            <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Dashboard</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Profile" asp-action="Index" class="@ItemClass("Profile")">
+            <i class="fas fa-store @IconClass("Profile")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Restaurant</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
+            <i class="fas fa-utensils @IconClass("Menu")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Menu Book</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Promotions" asp-action="Index"
+            class="@ItemClass("Promotions")">
+            <i class="fas fa-bullhorn @IconClass("Promotions")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Promotions</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Staff" asp-action="Index" class="@ItemClass("Staff")">
+            <i class="fas fa-users @IconClass("Staff")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Staff</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Finance" asp-action="Index" class="@ItemClass("Finance")"> 
+            <i class="fas fa-money-bill-wave @IconClass("Finance")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Finance</span>
+        </a>
+    </div>
 </div>
+
+<style>
+    #topbar {
+        flex: 1;
+        width: 100%;
+    }
+
+    .notification-dot {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        height: 0.5rem;
+        width: 0.5rem;
+        background-color: #ef4444;
+        border-radius: 50%;
+    }
+    
+    .menu-text {
+        white-space: nowrap;
+    }
+
+    /* Responsive nav items */
+    .nav-item {
+        justify-content: center;
+    }
+
+    @@media (min-width: 1280px) {
+        .nav-item {
+            justify-content: flex-start;
+        }
+    }
+
+    @@media (min-width: 768px) {
+        #topbar {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+    }
+
+    /* Mobile menu animation */
+    #mobileMenu {
+        animation: slideDown 0.3s ease-in-out;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (mobileMenuToggle && mobileMenu) {
+            mobileMenuToggle.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Mobile sidebar toggle (existing code)
+        const mobileToggleBtn = document.getElementById('mobileSidebarToggle');
+
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', function () {
+                const sidebar = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebarBackdrop');
+
+                if (sidebar && backdrop) {
+                    sidebar.classList.toggle('sidebar-mobile-open');
+                    backdrop.classList.toggle('hidden');
+                }
+            });
+        }
+    });
+</script>

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ASI.Basecode.Data.Models
 {
@@ -20,5 +18,9 @@ namespace ASI.Basecode.Data.Models
         public DateTime? ResetTokenExpiry { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime UpdatedTime { get; set; }
+
+        // Navigator
+        public UserProfile UserProfile { get; set; }
+        public ICollection<UserAddress> UserAddresses { get; set; }
     }
 }

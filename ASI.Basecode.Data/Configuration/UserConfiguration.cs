@@ -76,6 +76,11 @@ namespace ASI.Basecode.Data.Configuration
                   .HasColumnName("UpdatedTime")
                   .HasColumnType("datetime")
                   .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+            entity.HasOne(e => e.UserProfile)
+                  .WithOne(up => up.User)
+                  .HasForeignKey<UserProfile>(up => up.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

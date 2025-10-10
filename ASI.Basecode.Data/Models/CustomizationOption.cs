@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public class CustomizationOption
+    public partial class CustomizationOption
     {
         public int CustomizationOptionID { get; set; }
         public int CustomizationGroupID { get; set; }

@@ -16,25 +16,21 @@
     @RenderSection("Styles", required: false)
 </head>
 
-<body class="app bg-gray-50 flex flex-col min-h-screen">
-    <!-- Topbar -->
-    <header class="topbar border-b border-gray-200 bg-white">
-        <partial name="/Areas/Restaurant/Views/Shared/_Topbar.cshtml" />
-    </header>
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-row">
-        <!-- Sidebar -->
-        <aside class="sidebar w-64 bg-white border-r border-gray-200">
-            @await Html.PartialAsync("_Sidebar")
-        </aside>
-
-        <!-- Page Content -->
-        <main class="flex-1 p-6 overflow-y-auto">
-            @RenderBody()
-        </main>
+<body class="app p-3 flex flex-col min-h-screen rounded-lg shadow-lg bg-white">
+    <div>
+        @await Html.PartialAsync("_Topbar")
     </div>
+    <main class="flex-1 px-6 overflow-y-auto">
+        @RenderBody()
+    </main>
 
     <!-- Custom Admin JS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script src="~/js/admin.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>

@@ -10,7 +10,7 @@ namespace ASI.Basecode.Data.Interfaces
     public interface ICategoryRepository
     {
         IQueryable<Category> GetAllCategories();
-        IQueryable<Category> GetCategoryByID(int categoryID);
+        Category GetCategoryByID(int categoryID);
         void AddCategory(Category category);
         void UpdateCategory(Category category);
         void DeleteCategory(int categoryID);

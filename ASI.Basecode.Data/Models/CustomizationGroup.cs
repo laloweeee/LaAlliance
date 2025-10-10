@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public class CustomizationGroup
+    public partial class CustomizationGroup
     {
         public int CustomizationGroupID { get; set; }
         public int ProductID { get; set; }
         public string CustomizationName { get; set; }
         public bool IsRequired { get; set; }
-        public bool IsSingleChoice { get; set; }
+        public int NumberOfChoice { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime UpdatedTime { get; set; }
 
@@ -20,6 +20,6 @@ namespace ASI.Basecode.Data.Models
         public Product Product { get; set; }
 
         // Collection
-        public ICollection<CustomizationOption> CustomizationOptions { get; set; } = new List<CustomizationOption>();
+        public ICollection<CustomizationOption> CustomizationOptions { get; set; } = [];
     }
 }
