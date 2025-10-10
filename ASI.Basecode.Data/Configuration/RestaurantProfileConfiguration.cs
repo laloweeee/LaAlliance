@@ -36,14 +36,6 @@ namespace ASI.Basecode.Data.Configuration
                                 .HasMaxLength(255)
                                 .IsRequired();
 
-                        entity.Property(e => e.LogoUrl)
-                                .HasColumnName("LogoUrl")
-                                .HasMaxLength(500);
-
-                        entity.Property(e => e.CoverImageUrl)
-                                .HasColumnName("CoverImageUrl")
-                                .HasMaxLength(500);
-
                         entity.Property(e => e.OpeningTime)
                                 .HasColumnName("OpeningTime")
                                 .HasColumnType("TIME")

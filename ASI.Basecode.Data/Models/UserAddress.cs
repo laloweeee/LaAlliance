@@ -15,6 +15,7 @@ namespace ASI.Basecode.Data.Models
         public string AddressLabel { get; set; }
         public string AddressNote { get; set; }
         public DateTime CreatedAt { get; set; }
+        // Navigator
         public User User { get; set; }
         public Address Address { get; set; }
     }

@@ -1,0 +1,385 @@
+@model ASI.Basecode.WebApp.Areas.Restaurant.Models.RestaurantViewModel
+
+<div class="min-h-screen py-2 sm:py-4 lg:py-8 px-4 sm:px-0">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <!-- HEADER SECTION -->
+        <div class="mb-4 sm:mb-6 lg:mb-8">
+            <a asp-controller="Profile" asp-action="Index" asp-area="Restaurant" asp-route-activeTab="@ViewBag.ReturnTab"
+                class="inline-flex items-center text-emerald-600 hover:text-emerald-700 transition-all duration-200 mb-4 sm:mb-6 group">
+                <i class="fas fa-arrow-left mr-2 transform group-hover:-translate-x-1 transition-transform text-sm sm:text-base"></i>
+                <span class="font-medium text-sm sm:text-base">Return to Profile Details</span>
+            </a>
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-utensils text-emerald-600 text-lg sm:text-xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Restaurant Profile</h1>
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">View and update restaurant information</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM SECTION -->
+        <div class="grid grid-cols-1 gap-4 sm:gap-6">
+            <form asp-action="" method="post" class="space-y-6 sm:space-y-8" id="restaurantInfoForm">
+                <input type="hidden" asp-for="Profile.RestaurantID" />
+                
+                <!-- Restaurant Information Card -->
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-200 flex items-center justify-between">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-info-circle text-emerald-600 mr-2 text-sm sm:text-base"></i>
+                            Restaurant Information
+                        </h2>
+                    </div>
+                    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                        <!-- Restaurant Name -->
+                        <div>
+                            <label asp-for="Profile.Name" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Restaurant Name <span class="text-red-500">*</span>
+                            </label>
+                            <input asp-for="Profile.Name" id="restaurantName"
+                                class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                placeholder="e.g., La Alliance Restaurant" required disabled />
+                            <span asp-validation-for="Profile.Name" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label asp-for="Profile.Description" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Description
+                            </label>
+                            <textarea asp-for="Profile.Description"
+                                class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 resize-none bg-gray-50"
+                                placeholder="Describe your restaurant..." rows="4" disabled></textarea>
+                            <span asp-validation-for="Profile.Description" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div>
+                            <label asp-for="Profile.PhoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Phone Number
+                            </label>
+                            <input asp-for="Profile.PhoneNumber" type="tel" 
+                                class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                placeholder="(555) 123-4567" disabled>
+                            <span asp-validation-for="Profile.PhoneNumber" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label asp-for="Profile.Email" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Email Address
+                            </label>
+                            <input asp-for="Profile.Email" type="email" 
+                                class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                placeholder="info@laalliance.com" disabled>
+                            <span asp-validation-for="Profile.Email" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                        </div>
+
+                        <!-- Operating Hours Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                            <!-- Opening Time -->
+                            <div>
+                                <label asp-for="Profile.OpeningTime" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Opening Time
+                                </label>
+                                <input asp-for="Profile.OpeningTime" type="time" 
+                                    class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                    value="09:00" disabled>
+                                <span asp-validation-for="Profile.OpeningTime" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                            </div>
+
+                            <!-- Closing Time -->
+                            <div>
+                                <label asp-for="Profile.ClosingTime" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Closing Time
+                                </label>
+                                <input asp-for="Profile.ClosingTime" type="time" 
+                                    class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                    value="22:00" disabled>
+                                <span asp-validation-for="Profile.ClosingTime" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Edit Button for Info Section -->
+                <button id="editInfoBtn" type="button" 
+                    class="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-600 text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-200 transition-all duration-200 shadow hover:shadow-md">
+                    <i class="fas fa-edit mr-1"></i>
+                    Edit
+                </button>
+                <!-- Action Buttons (hidden initially, shown in edit mode) -->
+                <div id="infoActionButtons" class="flex flex-col sm:flex-row gap-3 sm:gap-4 pb-4 sm:pb-0 hidden">
+                    <button type="submit" 
+                        class="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg sm:rounded-xl hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-200 transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Changes
+                    </button>
+                    <button type="button" id="cancelInfoBtn"
+                        class="w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg sm:rounded-xl hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 transition-all duration-200 text-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+            <form asp-action="" method="post" class="space-y-6 sm:space-y-8" id="restaurantAddressForm">
+                <input type="hidden" asp-for="Profile.Address.Latitude" id="latitude" />
+                <input type="hidden" asp-for="Profile.Address.Longitude" id="longitude" />
+                <input asp-for="Profile.Address.Country" id="restaurantCountry" type="hidden" value="Philippines" />
+
+                <!-- Restaurant Address Card -->
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-200 flex items-center justify-between">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-map-marker-alt text-emerald-600 mr-2 text-sm sm:text-base"></i>
+                            Restaurant Address
+                        </h2>
+                    </div>
+                    
+                    <div class="p-4 sm:p-6">
+                        <!-- Two Column Layout: Form Inputs & Map -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                            <!-- LEFT COLUMN: Address Form Inputs -->
+                            <div class="space-y-4 sm:space-y-6">
+                                <!-- Street Address -->
+                                <div>
+                                    <label asp-for="Profile.Address.StreetAddress" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Street Address <span class="text-red-500">*</span>
+                                    </label>
+                                    <input asp-for="Profile.Address.StreetAddress" id="restaurantStreetAddress"
+                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                        placeholder="e.g., 123 Main St" required disabled />
+                                    <span asp-validation-for="Profile.Address.StreetAddress" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                </div>
+
+                                <!-- Barangay -->
+                                <div>
+                                    <label asp-for="Profile.Address.Barangay" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Barangay <span class="text-red-500">*</span>
+                                    </label>
+                                    <input asp-for="Profile.Address.Barangay" id="restaurantBarangay"
+                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                        placeholder="e.g., Barangay 123" required disabled />
+                                    <span asp-validation-for="Profile.Address.Barangay" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                </div>
+
+                                <!-- City -->
+                                <div>
+                                    <label asp-for="Profile.Address.City" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        City <span class="text-red-500">*</span>
+                                    </label>
+                                    <input asp-for="Profile.Address.City" id="restaurantCity"
+                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                        placeholder="e.g., Quezon City" required disabled />
+                                    <span asp-validation-for="Profile.Address.City" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                </div>
+
+                                <!-- Province -->
+                                <div>
+                                    <label asp-for="Profile.Address.Province" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Province <span class="text-red-500">*</span>
+                                    </label>
+                                    <input asp-for="Profile.Address.Province" id="restaurantProvince"
+                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                        placeholder="e.g., Metro Manila" required disabled />
+                                    <span asp-validation-for="Profile.Address.Province" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                </div>
+
+                                <!-- ZipCode -->
+                                <div>
+                                    <label asp-for="Profile.Address.ZipCode" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Zip Code <span class="text-red-500">*</span>
+                                    </label>
+                                    <input asp-for="Profile.Address.ZipCode" id="restaurantZipCode"
+                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
+                                        placeholder="e.g., 12345" required disabled />
+                                    <span asp-validation-for="Profile.Address.ZipCode" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT COLUMN: Google Map -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <i class="fas fa-map-pin text-emerald-600 mr-1"></i>
+                                        Pin Location on Map
+                                    </label>
+                                    <p class="text-xs text-gray-600 mb-3">
+                                        Click on the map to set your restaurant's exact location, or use "Search Location" to find it.
+                                    </p>
+                                    <!-- Map Container -->
+                                    <div id="addressMap" class="w-full h-96 rounded-lg border-2 border-gray-300 shadow-sm"></div>
+                                </div>
+                                
+                                <!-- Coordinates Display -->
+                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <p class="text-xs text-gray-600 mb-1">Selected Coordinates:</p>
+                                    <div class="flex gap-4 text-sm">
+                                        <div>
+                                            <span class="font-semibold text-gray-700">Lat:</span>
+                                            <span id="displayLat" class="text-emerald-600 ml-1">Not set</span>
+                                        </div>
+                                        <div>
+                                            <span class="font-semibold text-gray-700">Lng:</span>
+                                            <span id="displayLng" class="text-emerald-600 ml-1">Not set</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Button for Address Section -->
+                <button id="editAddressBtn" type="button" 
+                    class="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg sm:rounded-xl hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-200 transition-all duration-200 shadow-lg hover:shadow-xl">
+                    <i class="fas fa-edit mr-1"></i>
+                    Edit
+                </button>
+                <!-- Action Buttons (hidden initially, shown in edit mode) -->
+                <div id="addressActionButtons" class="flex flex-col sm:flex-row gap-3 sm:gap-4 pb-4 sm:pb-0 hidden">
+                    <button type="submit" 
+                        class="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg sm:rounded-xl hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-200 transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Address
+                    </button>
+                    <button type="button" id="cancelAddressBtn"
+                        class="w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg sm:rounded-xl hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 transition-all duration-200 text-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
+    <script src="~/js/maps.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Info Section Elements
+            const editInfoBtn = document.getElementById('editInfoBtn');
+            const infoForm = document.getElementById('restaurantInfoForm');
+            const infoActionButtons = document.getElementById('infoActionButtons');
+            const cancelInfoBtn = document.getElementById('cancelInfoBtn');
+            const infoInputs = infoForm.querySelectorAll('input:not([type="hidden"]), textarea');
+            
+            // Address Section Elements
+            const editAddressBtn = document.getElementById('editAddressBtn');
+            const addressForm = document.getElementById('restaurantAddressForm');
+            const addressActionButtons = document.getElementById('addressActionButtons');
+            const cancelAddressBtn = document.getElementById('cancelAddressBtn');
+            const addressInputs = addressForm.querySelectorAll('input:not([type="hidden"]), textarea');
+            
+            // Store original values
+            let originalInfoValues = {};
+            let originalAddressValues = {};
+            
+            // Store original values for Info section
+            function storeOriginalInfoValues() {
+                infoInputs.forEach(input => {
+                    originalInfoValues[input.id || input.name] = input.value;
+                });
+            }
+            
+            // Store original values for Address section
+            function storeOriginalAddressValues() {
+                addressInputs.forEach(input => {
+                    originalAddressValues[input.id || input.name] = input.value;
+                });
+            }
+            
+            // Restore original values for Info section
+            function restoreOriginalInfoValues() {
+                infoInputs.forEach(input => {
+                    const key = input.id || input.name;
+                    if (originalInfoValues[key] !== undefined) {
+                        input.value = originalInfoValues[key];
+                    }
+                });
+            }
+            
+            // Restore original values for Address section
+            function restoreOriginalAddressValues() {
+                addressInputs.forEach(input => {
+                    const key = input.id || input.name;
+                    if (originalAddressValues[key] !== undefined) {
+                        input.value = originalAddressValues[key];
+                    }
+                });
+            }
+            
+            // Enable edit mode for Info section
+            editInfoBtn.addEventListener('click', function() {
+                storeOriginalInfoValues();
+                
+                // Enable all inputs
+                infoInputs.forEach(input => {
+                    input.disabled = false;
+                    input.classList.remove('bg-gray-50');
+                    input.classList.add('bg-white');
+                });
+                
+                // Show action buttons, hide edit button
+                infoActionButtons.classList.remove('hidden');
+                editInfoBtn.classList.add('hidden');
+            });
+            
+            // Cancel Info form changes
+            cancelInfoBtn.addEventListener('click', function() {
+                restoreOriginalInfoValues();
+                
+                // Disable all inputs
+                infoInputs.forEach(input => {
+                    input.disabled = true;
+                    input.classList.add('bg-gray-50');
+                    input.classList.remove('bg-white');
+                });
+                
+                // Hide action buttons, show edit button
+                infoActionButtons.classList.add('hidden');
+                editInfoBtn.classList.remove('hidden');
+            });
+            
+            // Enable edit mode for Address section
+            editAddressBtn.addEventListener('click', function() {
+                storeOriginalAddressValues();
+                
+                // Enable all inputs
+                addressInputs.forEach(input => {
+                    input.disabled = false;
+                    input.classList.remove('bg-gray-50');
+                    input.classList.add('bg-white');
+                });
+                
+                // Show action buttons, hide edit button
+                addressActionButtons.classList.remove('hidden');
+                editAddressBtn.classList.add('hidden');
+            });
+            
+            // Cancel Address form changes
+            cancelAddressBtn.addEventListener('click', function() {
+                restoreOriginalAddressValues();
+                
+                // Disable all inputs
+                addressInputs.forEach(input => {
+                    input.disabled = true;
+                    input.classList.add('bg-gray-50');
+                    input.classList.remove('bg-white');
+                });
+                
+                // Hide action buttons, show edit button
+                addressActionButtons.classList.add('hidden');
+                editAddressBtn.classList.remove('hidden');
+            });
+        });
+    </script>
+}

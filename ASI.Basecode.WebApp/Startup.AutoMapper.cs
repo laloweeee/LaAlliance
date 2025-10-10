@@ -51,6 +51,14 @@ namespace ASI.Basecode.WebApp
                     .ForMember(dest => dest.CustomizationGroup, opt => opt.Ignore())
                     .ForMember(dest => dest.CreatedTime, opt => opt.Ignore())
                     .ForMember(dest => dest.UpdatedTime, opt => opt.Ignore());
+
+                CreateMap<RestaurantProfileViewModel, RestaurantProfile>()
+                    .ForMember(dest => dest.UpdatedByUser, opt => opt.Ignore())
+                    .ForMember(dest => dest.CreatedTime, opt => opt.Ignore())
+                    .ForMember(dest => dest.UpdatedTime, opt => opt.Ignore())
+                    .ReverseMap();
+
+                CreateMap<AddressViewModel, Address>().ReverseMap();
             }
         }
     }
