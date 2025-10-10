@@ -4,6 +4,7 @@ using ASI.Basecode.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASI.Basecode.Data.Migrations
 {
     [DbContext(typeof(AsiBasecodeDBContext))]
-    partial class AsiBasecodeDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250930190532_staffDatabase")]
+    partial class staffDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,51 +235,6 @@ namespace ASI.Basecode.Data.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("ASI.Basecode.Data.Models.Staff", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal?>("AnnualSalary")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("HireDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("LastLoginUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Role")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Staff");
-                });
-
             modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>
                 {
                     b.Property<int>("UserID")
@@ -425,17 +383,6 @@ namespace ASI.Basecode.Data.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("ASI.Basecode.Data.Models.Staff", b =>
-                {
-                    b.HasOne("ASI.Basecode.Data.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Category", b =>

@@ -16,7 +16,8 @@ namespace ASI.Basecode.Data
         }
 
         public virtual DbSet<User> Users { get; set; }
-        
+        public virtual DbSet<Staff> Staff { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());

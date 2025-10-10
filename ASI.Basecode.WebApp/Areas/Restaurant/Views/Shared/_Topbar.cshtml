@@ -21,17 +21,40 @@
                 <span class="notification-dot"></span>
             </button>
 
-            <div class="flex items-center space-x-3">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+            <div class="relative">
+                <!-- Avatar button -->
+                <button id="userMenuButton"
+                        type="button"
+                        class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center hover:ring-2 hover:ring-green-500 focus:outline-none"
+                        aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-user text-green-600"></i>
-                </div>
-            </div>
+                </button>
 
-            <div class="flex items-center">
-                <a asp-controller="Account" asp-action="Logout"
-                   class="items-center rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+                <!-- Dropdown -->
+                <div id="userMenu"
+                     class="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg py-2 hidden z-50">
+                    <a asp-area="Restaurant" asp-controller="User" asp-action="Profile"
+                       class="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-id-badge w-5 text-gray-400"></i>
+                        <span>Profile</span>
+                    </a>
+
+                    <a asp-area="Restaurant" asp-controller="User" asp-action="Settings"
+                       class="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-cog w-5 text-gray-400"></i>
+                        <span>Account Settings</span>
+                    </a>
+
+                    <!-- Logout (POST) -->
+                    <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="w-full flex items-center gap-3 px-4 py-2 text-left text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt w-5"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
