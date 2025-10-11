@@ -17,6 +17,9 @@ using Azure.Storage.Sas;
 
 namespace ASI.Basecode.Services.Services
 {
+    /// <summary>
+    /// Service for managing products.
+    /// </summary>
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
@@ -36,32 +39,56 @@ namespace ASI.Basecode.Services.Services
             _blobContainerClient = blobContainerClient;
         }
 
+        /// <summary>
+        /// Retrieve all products.
+        /// </summary>
+        /// <returns></returns>
         public IQueryable<Product> GetAllProducts()
         {
             return _productRepository.GetProducts();
         }
 
+        /// <summary>
+        /// Retrieve a product by its ID.
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <returns></returns>
         public IQueryable<Product> GetProductByID(int productID)
         {
             return _productRepository.GetProductByID(productID);
         }
 
+        /// <summary>
+        /// Retrieve products by category ID.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <returns></returns>
         public IQueryable<Product> GetProductsByCategoryID(int categoryID)
         {
             return _productRepository.GetProductsByCategoryID(categoryID);
         }
 
+        /// <summary>
+        /// Retrieve all active products.
+        /// </summary>
+        /// <returns></returns>
         public IQueryable<Product> GetActiveProducts()
         {
             return _productRepository.GetActiveProducts();
         }
 
-        public async Task AddProduct(ProductViewModel model, int userID)
+        /// <summary>
+        /// Add a new product.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task AddProduct(ProductViewModel model)
         {
             var categoryExists = _categoryService.GetCategoryByID(model.CategoryID) ?? throw new ArgumentException("The selected category does not exist.");
 
             var existingProduct = _productRepository.GetProducts()
-                .FirstOrDefault(p => p.Name.ToLower().Trim() == model.Name.ToLower().Trim()
+                .FirstOrDefault(p => p.ProductName.ToLower().Trim() == model.ProductName.ToLower().Trim()
                     && p.CategoryID == model.CategoryID);
 
             if (existingProduct != null)
@@ -69,33 +96,29 @@ namespace ASI.Basecode.Services.Services
                 throw new ArgumentException("A product with this name already exists in the selected category.");
             }
 
-            var user = _userRepository.GetUserById(userID).FirstOrDefault() ?? throw new ArgumentException("Invalid user ID.");
-
             var product = new Product
             {
-                Name = model.Name.Trim(),
-                Description = model.Description?.Trim(),
-                Price = model.Price,
+                ProductName = model.ProductName.Trim(),
+                ProductDescription = model.ProductDescription?.Trim(),
+                ProductPrice = model.ProductPrice,
                 CategoryID = model.CategoryID,
                 IsActive = model.IsActive,
-                CreatedByUser = user,
-                UpdatedByUser = user,
             };
 
             if (model.ImageFile != null)
             {
                 var imageUrl = await _fileHandlingService.HandleFile(model.ImageFile, "products");
-                product.ImageUrl = imageUrl;
+                product.ProductImage = imageUrl;
             }
 
             if (model.CustomizationGroups != null && model.CustomizationGroups.Count != 0)
             {
-                product.CustomizationGroups = [.. model.CustomizationGroups.Select(cg => new CustomizationGroup
+                product.ProductOptionGroup = [.. model.CustomizationGroups.Select(cg => new ProductOptionGroup
                 {
-                    CustomizationName = cg.CustomizationName,
+                    OptionGroupName = cg.OptionGroupName,
                     IsRequired = cg.IsRequired,
                     NumberOfChoice = cg.NumberOfChoice,
-                    CustomizationOptions = cg.CustomizationOptions?.Select(co => new CustomizationOption
+                    ProductOptionItems = cg.ProductOptionItems?.Select(co => new ProductOptionItems
                     {
                         OptionName = co.OptionName,
                         AdditionalPrice = co.AdditionalPrice
@@ -106,7 +129,13 @@ namespace ASI.Basecode.Services.Services
             _productRepository.AddProduct(product);
         }
 
-        public async Task EditProduct(ProductViewModel model, int userID)
+        /// <summary>
+        /// Edit an existing product.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task EditProduct(ProductViewModel model)
         {
             var product = _productRepository.GetProductByID(model.ProductID).FirstOrDefault()
                 ?? throw new ArgumentException("The product does not exist.");
@@ -116,7 +145,7 @@ namespace ASI.Basecode.Services.Services
 
             var existingProduct = _productRepository.GetProducts()
                 .FirstOrDefault(p => p.ProductID != model.ProductID
-                    && p.Name.ToLower().Trim() == model.Name.ToLower().Trim()
+                    && p.ProductName.ToLower().Trim() == model.ProductName.ToLower().Trim()
                     && p.CategoryID == model.CategoryID);
 
             if (existingProduct != null)
@@ -127,24 +156,24 @@ namespace ASI.Basecode.Services.Services
             bool hasChanges = false;
 
             // Update only if Name has changed
-            if (product.Name != model.Name.Trim())
+            if (product.ProductName != model.ProductName.Trim())
             {
-                product.Name = model.Name.Trim();
+                product.ProductName = model.ProductName.Trim();
                 hasChanges = true;
             }
 
             // Update only if Description has changed
-            var newDescription = model.Description?.Trim();
-            if (product.Description != newDescription)
+            var newDescription = model.ProductDescription?.Trim();
+            if (product.ProductDescription != newDescription)
             {
-                product.Description = newDescription;
+                product.ProductDescription = newDescription;
                 hasChanges = true;
             }
 
             // Update only if Price has changed
-            if (product.Price != model.Price)
+            if (product.ProductPrice != model.ProductPrice)
             {
-                product.Price = model.Price;
+                product.ProductPrice = model.ProductPrice;
                 hasChanges = true;
             }
 
@@ -167,9 +196,9 @@ namespace ASI.Basecode.Services.Services
             {
                 var imageUrl = await _fileHandlingService.HandleFile(model.ImageFile, "products");
 
-                if (product.ImageUrl != imageUrl)
+                if (product.ProductImage != imageUrl)
                 {
-                    product.ImageUrl = imageUrl;
+                    product.ProductImage = imageUrl;
                     hasChanges = true;
                 }
             }
@@ -177,53 +206,47 @@ namespace ASI.Basecode.Services.Services
             // Update Customization Groups only if they have changed
             if (model.CustomizationGroups != null)
             {
-                bool customizationsChanged = HasCustomizationGroupsChanged(product.CustomizationGroups.ToList(), model.CustomizationGroups);
+                bool customizationsChanged = HasCustomizationGroupsChanged(product.ProductOptionGroup.ToList(), model.CustomizationGroups);
 
                 if (customizationsChanged)
                 {
                     // Remove existing groups and options
-                    product.CustomizationGroups.Clear();
+                    product.ProductOptionGroup.Clear();
 
                     // Add updated groups and options
                     foreach (var cg in model.CustomizationGroups)
                     {
-                        var newGroup = new CustomizationGroup
+                        var newGroup = new ProductOptionGroup
                         {
-                            CustomizationName = cg.CustomizationName,
+                            OptionGroupName = cg.OptionGroupName,
                             IsRequired = cg.IsRequired,
                             NumberOfChoice = cg.NumberOfChoice,
-                            CustomizationOptions = cg.CustomizationOptions?.Select(co => new CustomizationOption
+                            ProductOptionItems = cg.ProductOptionItems?.Select(co => new ProductOptionItems
                             {
                                 OptionName = co.OptionName,
                                 AdditionalPrice = co.AdditionalPrice
-                            }).ToList() ?? []
+                            }).ToList() ?? new List<ProductOptionItems>()
                         };
-                        product.CustomizationGroups.Add(newGroup);
+                        product.ProductOptionGroup.Add(newGroup);
                     }
                     hasChanges = true;
                 }
             }
-            else if (product.CustomizationGroups.Any())
+            else if (product.ProductOptionGroup.Any())
             {
                 // If no customization groups provided but product had some, clear them
-                product.CustomizationGroups.Clear();
+                product.ProductOptionGroup.Clear();
                 hasChanges = true;
             }
 
             // Only update if there are changes
             if (hasChanges)
             {
-                var user = _userRepository.GetUserById(userID).FirstOrDefault()
-                    ?? throw new ArgumentException("Invalid user ID.");
-
-                product.UpdatedByUser = user;
-                product.UpdatedTime = DateTime.Now; // If you have this field
-
                 _productRepository.UpdateProduct(product);
             }
         }
 
-        private static bool HasCustomizationGroupsChanged(List<CustomizationGroup> existingGroups, List<CustomizationGroupViewModel> newGroups)
+        private static bool HasCustomizationGroupsChanged(List<ProductOptionGroup> existingGroups, List<ProductOptionGroupViewModel> newGroups)
         {
             if (existingGroups.Count != newGroups.Count)
                 return true;
@@ -231,20 +254,20 @@ namespace ASI.Basecode.Services.Services
             for (int i = 0; i < existingGroups.Count; i++)
             {
                 var existing = existingGroups[i];
-                var newGroup = newGroups.FirstOrDefault(g => g.CustomizationName == existing.CustomizationName);
+                var newGroup = newGroups.FirstOrDefault(g => g.OptionGroupName == existing.OptionGroupName);
 
                 if (newGroup == null)
                     return true;
 
                 // Check group properties
-                if (existing.CustomizationName != newGroup.CustomizationName ||
+                if (existing.OptionGroupName != newGroup.OptionGroupName ||
                     existing.IsRequired != newGroup.IsRequired ||
                     existing.NumberOfChoice != newGroup.NumberOfChoice)
                     return true;
 
                 // Check options count
-                var existingOptions = existing.CustomizationOptions?.ToList() ?? new List<CustomizationOption>();
-                var newOptions = newGroup.CustomizationOptions ?? new List<CustomizationOptionViewModel>();
+                var existingOptions = existing.ProductOptionItems?.ToList() ?? new List<ProductOptionItems>();
+                var newOptions = newGroup.ProductOptionItems ?? new List<ProductOptionItemViewModel>();
 
                 if (existingOptions.Count != newOptions.Count)
                     return true;

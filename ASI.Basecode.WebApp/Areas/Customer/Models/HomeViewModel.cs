@@ -6,7 +6,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
 {
     public class HomeViewModel
     {
-        public IEnumerable<Category> Categories { get; set; } = new List<Category>();
+        public IEnumerable<ProductCategory> Categories { get; set; } = new List<ProductCategory>();
         public IEnumerable<Product> Products { get; set; } = new List<Product>();
     }
 }

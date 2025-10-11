@@ -4,7 +4,7 @@ namespace ASI.Basecode.Data.Interfaces
 {
     public interface IRestaurantProfileRepository
     {
-        RestaurantProfile GetRestaurantProfile();
-        void EditRestaurantProfile(RestaurantProfile profile);
+        Restaurant GetRestaurantProfile();
+        void EditRestaurantProfile(Restaurant profile);
     }
 }

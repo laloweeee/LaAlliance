@@ -97,7 +97,7 @@
                                         px-5 py-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-emerald-100 hover:text-emerald-800
                                         border border-gray-100 flex items-center min-w-max"
                                     data-category-id="@category.CategoryID">
-                                    <span class="font-medium">@category.Name</span>
+                                    <span class="font-medium">@category.CategoryName</span>
                                 </div>
                                 
                                 isFirst = false;
@@ -123,38 +123,38 @@
                             if (productsInCategory.Any())
                             {
                                 <div id="category-@category.CategoryID" class="category-section mb-8 scroll-mt-4">
-                                    <h3 class="text-xl font-medium text-emerald-700 mb-4 border-b pb-2">@category.Name</h3>
+                                    <h3 class="text-xl font-medium text-emerald-700 mb-4 border-b pb-2">@category.CategoryName</h3>
                                     
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                         @foreach (var product in productsInCategory)
                                         {
-                                            <div class="product-card flex flex-row sm:flex-col border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                                                @if (!string.IsNullOrEmpty(product.ImageUrl))
-                                                {
-                                                    <div class="w-1/4 sm:w-full">
-                                                        <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-24 sm:h-48 object-cover">
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <div class="w-1/4 sm:w-full bg-gray-200 flex items-center justify-center h-24 sm:h-48">
-                                                        <i class="fa fa-image text-gray-400 text-4xl"></i>
-                                                    </div>
-                                                }
-                                                
-                                                <div class="p-3 sm:p-4 flex flex-col justify-between w-2/4 sm:w-full">
-                                                    <div>
-                                                        <h4 class="text-base sm:text-lg font-medium">@product.Name</h4>
-                                                        <p class="text-gray-600 text-xs sm:text-sm mt-1 sm:mt-2">@(product.Description?.Length > 100 ? product.Description.Substring(0, 97) + "..." : product.Description)</p>
-                                                    </div>
+                                            <div class="bg-white rounded-xl overflow-hidden shadow-md card-hover border border-gray-100">
+                                                <div class="relative h-48 bg-gray-300 overflow-hidden">
+                                                    @if (!string.IsNullOrEmpty(product.ProductImage))
+                                                    {
+                                                        <img src="@product.ProductImage" 
+                                                             alt="@product.ProductName" 
+                                                             class="object-cover w-full h-full transform hover:scale-110 transition-transform duration-500" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="flex items-center justify-center h-full bg-gray-200">
+                                                            <i class="fa fa-image text-gray-400 text-4xl"></i>
+                                                        </div>
+                                                    }
                                                 </div>
-                                                
-                                                <div class="p-2 sm:p-4 flex flex-col justify-between items-end w-1/4 sm:w-full border-l sm:border-l-0 sm:border-t">
-                                                    <div class="text-emerald-600 font-semibold text-lg sm:text-xl mb-1 sm:mb-2">₱@product.Price.ToString("0.00")</div>
-                                                    <button class="bg-emerald-500 hover:bg-emerald-600 text-white w-full py-1 sm:py-2 rounded-md transition-colors flex items-center justify-center" 
-                                                            data-product-id="@product.ProductID">
-                                                        <i class="fa fa-cart-plus mr-2"></i> Add
-                                                    </button>
+                                                <div class="p-4">
+                                                    <h3 class="font-bold text-lg mb-2 text-gray-900">@product.ProductName</h3>
+                                                    <p class="text-gray-600 text-xs leading-relaxed mb-3">
+                                                        @(product.ProductDescription?.Length > 100 ? product.ProductDescription.Substring(0, 97) + "..." : product.ProductDescription)
+                                                    </p>
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="text-green-600 font-bold text-base">₱@product.ProductPrice.ToString("0.00")</span>
+                                                        <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-300 text-xs font-semibold" 
+                                                                data-product-id="@product.ProductID">
+                                                            Order Now
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         }

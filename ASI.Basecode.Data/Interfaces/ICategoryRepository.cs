@@ -1,4 +1,4 @@
-﻿using ASI.Basecode.Data.Models;
+using ASI.Basecode.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +9,10 @@ namespace ASI.Basecode.Data.Interfaces
 {
     public interface ICategoryRepository
     {
-        IQueryable<Category> GetAllCategories();
-        Category GetCategoryByID(int categoryID);
-        void AddCategory(Category category);
-        void UpdateCategory(Category category);
+        IQueryable<ProductCategory> GetAllCategories();
+        ProductCategory GetCategoryByID(int categoryID);
+        void AddCategory(ProductCategory category);
+        void UpdateCategory(ProductCategory category);
         void DeleteCategory(int categoryID);
     }
 }

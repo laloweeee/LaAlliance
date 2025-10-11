@@ -6,44 +6,29 @@ namespace ASI.Basecode.Data.Configuration
 {
     public class UserAddressConfiguration : IEntityTypeConfiguration<UserAddress>
     {
-        public void Configure(EntityTypeBuilder<UserAddress> entity)
+        public void Configure(EntityTypeBuilder<UserAddress> builder)
         {
-            entity.ToTable("UserAddresses");
+            // Primary Key
+            builder.HasKey(ua => ua.UserAddressID);
 
-            entity.HasKey(e => e.UserAddressId);
+            // Properties
+            builder.Property(ua => ua.IsDefault)
+                .HasDefaultValue(true);
 
-            entity.Property(e => e.UserAddressId)
-                .HasColumnName("UserAddressId")
-                .ValueGeneratedOnAdd();
+            builder.Property(ua => ua.AddressType)
+                .HasMaxLength(50);
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("UserId")
-                .IsRequired();
+            builder.Property(ua => ua.AddressNote)
+                .HasMaxLength(500);
 
-            entity.Property(e => e.AddressId)
-                .HasColumnName("AddressId")
-                .IsRequired();
+            // Relationships
+            builder.HasOne(ua => ua.Address)
+                .WithOne(a => a.UserAddress)
+                .HasForeignKey<UserAddress>(ua => ua.AddressID)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            entity.Property(e => e.IsDefault)
-                .HasColumnName("IsDefault")
-                .IsRequired();
-
-            entity.Property(e => e.AddressLabel)
-                .HasColumnName("AddressLabel")
-                .IsRequired()
-                .HasMaxLength(100);
-
-            entity.Property(e => e.AddressNote)
-                .HasColumnName("AddressNote")
-                .HasMaxLength(250);
-
-            entity.HasOne(e => e.User)
-                .WithMany(u => u.UserAddresses)
-                .HasForeignKey(e => e.UserId);
-
-            entity.HasOne(e => e.Address)
-                .WithOne()
-                .HasForeignKey<UserAddress>(e => e.AddressId);
+            // Table Name
+            builder.ToTable("UserAddresses");
         }
     }
 }

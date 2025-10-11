@@ -22,5 +22,7 @@
 		<PackageReference Include="System.Drawing.Common" Version="9.0.6" />
 		<PackageReference Include="ZXing.Net" Version="0.16.10" />
 	</ItemGroup>
-
+	<ItemGroup>
+        <ProjectReference Include="..\ASI.Basecode.Resources\ASI.Basecode.Resources.csproj" />
+    </ItemGroup>
 </Project>

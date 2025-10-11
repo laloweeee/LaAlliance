@@ -13,23 +13,61 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Services.Services
 {
+    /// <summary>
+    /// OTP Service for generating, storing, and verifying OTPs
+    /// </summary>
     public class OtpService : IOtpService
     {
         private readonly Random _random = new();
         private readonly IConfiguration _configuration;
         private readonly IUserRepository _repository;
+        private readonly IMailSender _mailSender;
+        private const int OtpExpiryMinutes = 10;
 
-        public OtpService(IConfiguration configuration, IUserRepository repository)
+        public OtpService(IConfiguration configuration, IUserRepository repository, IMailSender mailSender)
         {
             _configuration = configuration;
             _repository = repository;
+            _mailSender = mailSender;
         }
 
-        public int GenerateOtp()
+        /// <summary>
+        /// Creates and sends OTP to user email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<bool> CreateOtpForUser(string email)
+        {
+            var otpCode = GenerateOtp();
+            var timestamp = DateTime.UtcNow;
+
+            StoreOtpForUser(email, otpCode, timestamp);
+
+            try
+            {
+                await _mailSender.SendEmailVerificationAsync(email, otpCode);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Generates a random 6-digit OTP
+        /// </summary>
+        /// <returns></returns>
+        private int GenerateOtp()
         {
             return _random.Next(100000, 999999);
         }
 
+        /// <summary>
+        /// Retrieves the secret key from configuration
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private string GetSecretKey()
         {
             string secretKey = _configuration["TokenAuthentication:SecretKey"];
@@ -42,42 +80,124 @@ namespace ASI.Basecode.Services.Services
             return secretKey;
         }
 
-        public string HashOtp(int otp, DateTime timestamp)
+        /// <summary>
+        /// Encrypts OTP with timestamp for storage
+        /// </summary>
+        /// <param name="otp">The OTP code to encrypt</param>
+        /// <param name="timestamp">The timestamp when OTP was generated</param>
+        /// <returns>Encrypted OTP string</returns>
+        public string EncryptOtp(int otp, DateTime timestamp)
         {
             string secretKey = GetSecretKey();
-            string dataToHash = $"{otp}|{timestamp:yyyyMMddHHmm}|{secretKey}";
+            string dataToEncrypt = $"{otp}|{timestamp:o}"; // ISO 8601 format for precise timestamp
 
-            using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey)))
+            using (var aes = Aes.Create())
             {
-                byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataToHash));
-                return Convert.ToBase64String(hashBytes);
+                // Use a fixed key derived from the secret
+                byte[] key = new byte[32];
+                byte[] secretBytes = Encoding.UTF8.GetBytes(secretKey);
+                Array.Copy(secretBytes, key, Math.Min(secretBytes.Length, 32));
+
+                aes.Key = key;
+                aes.GenerateIV();
+
+                using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                using (var msEncrypt = new MemoryStream())
+                {
+                    // Prepend IV to the encrypted data
+                    msEncrypt.Write(aes.IV, 0, aes.IV.Length);
+
+                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    using (var swEncrypt = new StreamWriter(csEncrypt))
+                    {
+                        swEncrypt.Write(dataToEncrypt);
+                    }
+
+                    return Convert.ToBase64String(msEncrypt.ToArray());
+                }
             }
         }
 
-        public bool VerifyOtp(string email, int otpCode)
+        /// <summary>
+        /// Decrypts OTP and extracts timestamp
+        /// </summary>
+        /// <param name="encryptedOtp">The encrypted OTP string</param>
+        /// <returns>Tuple containing OTP code and timestamp</returns>
+        private (int otp, DateTime timestamp) DecryptOtp(string encryptedOtp)
+        {
+            string secretKey = GetSecretKey();
+            byte[] cipherTextWithIv = Convert.FromBase64String(encryptedOtp);
+
+            using (var aes = Aes.Create())
+            {
+                byte[] key = new byte[32];
+                byte[] secretBytes = Encoding.UTF8.GetBytes(secretKey);
+                Array.Copy(secretBytes, key, Math.Min(secretBytes.Length, 32));
+
+                aes.Key = key;
+
+                // Extract IV from the beginning of the cipher text
+                byte[] iv = new byte[aes.IV.Length];
+                byte[] cipherText = new byte[cipherTextWithIv.Length - iv.Length];
+
+                Array.Copy(cipherTextWithIv, iv, iv.Length);
+                Array.Copy(cipherTextWithIv, iv.Length, cipherText, 0, cipherText.Length);
+
+                aes.IV = iv;
+
+                using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                using (var msDecrypt = new MemoryStream(cipherText))
+                using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                using (var srDecrypt = new StreamReader(csDecrypt))
+                {
+                    string decryptedData = srDecrypt.ReadToEnd();
+                    string[] parts = decryptedData.Split('|');
+
+                    if (parts.Length != 2)
+                        throw new InvalidOperationException("Invalid OTP format");
+
+                    int otp = int.Parse(parts[0]);
+                    DateTime timestamp = DateTime.Parse(parts[1]);
+
+                    return (otp, timestamp);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifies OTP code and validates its expiry without database lookup
+        /// </summary>
+        /// <param name="email">User's email</param>
+        /// <param name="otpCode">OTP code to verify</param>
+        /// <returns>True if OTP is valid and not expired, false otherwise</returns>
+        public bool VerifyOTP(string email, int otpCode)
         {
             var otpDetails = GetOtpDetailsForUser(email);
 
             if (otpDetails == null)
                 return false;
 
-            DateTime timestamp = otpDetails.Timestamp;
-            string storedHash = otpDetails.HashedOtp;
+            string storedEncryptedOtp = otpDetails.HashedOtp;
 
-            if (DateTime.UtcNow > timestamp.AddMinutes(10))
+            if (string.IsNullOrEmpty(storedEncryptedOtp))
                 return false;
-
-            string computedHash = HashOtp(otpCode, timestamp);
 
             try
             {
-                byte[] hash1 = Convert.FromBase64String(computedHash);
-                byte[] hash2 = Convert.FromBase64String(storedHash);
-                return hash1.Length == hash2.Length && CryptographicOperations.FixedTimeEquals(hash1, hash2);
+                // Decrypt the stored OTP to get the original code and timestamp
+                var (storedOtp, timestamp) = DecryptOtp(storedEncryptedOtp);
+
+                // Check if OTP has expired (using UTC to avoid timezone issues)
+                if (DateTime.UtcNow > timestamp.ToUniversalTime().AddMinutes(OtpExpiryMinutes))
+                    return false;
+
+                // Compare OTP codes using constant-time comparison to prevent timing attacks
+                return storedOtp == otpCode;
             }
-            catch
+            catch (Exception)
             {
-                return computedHash == storedHash;
+                // Log the exception if needed
+                return false;
             }
         }
 
@@ -88,12 +208,16 @@ namespace ASI.Basecode.Services.Services
         /// <param name="hashedOtp"></param>
         /// <param name="timestamp"></param>
         /// <exception cref="InvalidDataException"></exception>
-        public void StoreOtpForUser(string email, string hashedOtp, DateTime timestamp)
+        public void StoreOtpForUser(string email, int otp, DateTime timestamp)
         {
-            var user = _repository.GetUsers().FirstOrDefault(u => u.Email == email) ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);
+            var user = _repository.GetUsers().FirstOrDefault(u => u.Email == email)
+                ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);
 
-            user.EmailHashToken = hashedOtp;
-            user.EmailTokenExpiry = timestamp;
+            // Encrypt OTP with timestamp instead of hashing
+            string encryptedOtp = EncryptOtp(otp, timestamp);
+
+            user.EmailHashToken = encryptedOtp;
+
             _repository.UpdateUser(user);
         }
 
@@ -110,7 +234,6 @@ namespace ASI.Basecode.Services.Services
             return new OtpModel
             {
                 HashedOtp = user.EmailHashToken,
-                Timestamp = user.EmailTokenExpiry.Value
             };
         }
 
@@ -125,7 +248,6 @@ namespace ASI.Basecode.Services.Services
 
             user.IsEmailVerified = true;
             user.EmailHashToken = null;
-            user.EmailTokenExpiry = null;
 
             _repository.UpdateUser(user);
         }

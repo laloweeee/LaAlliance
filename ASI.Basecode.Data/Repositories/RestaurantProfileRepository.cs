@@ -1,26 +1,31 @@
 using System.Linq;
 using ASI.Basecode.Data.Interfaces;
 using ASI.Basecode.Data.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace ASI.Basecode.Data.Repositories
 {
-    public class RestaurantProfileRepository : BaseRepository, IRestaurantProfileRepository
+    public class RestaurantProfileRepository : BaseRepository, IRestaurantProfile
     {
         public RestaurantProfileRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 
-        public RestaurantProfile GetRestaurantProfile()
+        /// <summary>
+        /// Get the restaurant profile (there should only be one)
+        /// </summary>
+        /// <returns></returns>
+        public Restaurant GetRestaurantProfile()
         {
-            return GetDbSet<RestaurantProfile>()
-                .Include(p => p.Address)
-                .FirstOrDefault();
+            return GetDbSet<Restaurant>().FirstOrDefault();
         }
 
-        public void EditRestaurantProfile(RestaurantProfile profile)
+        /// <summary>
+        /// Edit the restaurant profile
+        /// </summary>
+        /// <param name="profile"></param>
+        public void EditRestaurantProfile(Restaurant profile)
         {
-            GetDbSet<RestaurantProfile>().Update(profile);
+            GetDbSet<Restaurant>().Update(profile);
             UnitOfWork.SaveChanges();
         }
     }
