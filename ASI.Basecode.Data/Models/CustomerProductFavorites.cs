@@ -14,7 +14,7 @@ namespace ASI.Basecode.Data.Models
         public DateTime DateAdded { get; set; }
 
         //Navigator
-        public Product Product { get; set; }
-        public User User { get; set; }
+        public Product Product { get; set; } // One customer favorite is for one product
+        public User User { get; set; } // One customer favorite is for one user
     }
 }

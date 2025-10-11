@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Models
 {
     public partial class Address
     {
-        public int AddressId { get; set; }
+        public int AddressID { get; set; }
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public string Street { get; set; }
@@ -19,8 +20,8 @@ namespace ASI.Basecode.Data.Models
         public string Country { get; } = "Philippines";
 
         //Navigator
-        public UserAddress UserAddress { get; set; }
-        public RestaurantAddress RestaurantAddress { get; set; }
-        public Order Order { get; set; }
+        public UserAddress UserAddress { get; set; } // One address can belong to one user
+        public RestaurantAddress RestaurantAddress { get; set; } // One address can belong to one restaurant
+        public Order Order { get; set; } // One address can belong to one order
     }
 }

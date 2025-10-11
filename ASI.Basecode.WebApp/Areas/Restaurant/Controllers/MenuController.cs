@@ -65,6 +65,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 
         #region Category Actions
 
+        /// <summary>
+        /// Renders the form for adding or editing a category.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult CategoryForm(int? categoryID, string returnTab = "categories")
         {
@@ -90,6 +96,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Handles the submission of the category form for adding a new category.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddCategory(CategoryViewModel model, string returnTab = "categories")
@@ -98,8 +110,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             {
                 try
                 {
-                    var userID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _categoryService.AddCategory(model, userID);
+                    _categoryService.AddCategory(model);
                     TempData["ToastrSuccess"] = "Category added successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
@@ -113,6 +124,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             return View("CategoryForm", model);
         }
 
+        /// <summary>
+        /// Handles the submission of the category form for updating an existing category.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateCategory(CategoryViewModel model, string returnTab = "categories")
@@ -121,8 +138,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             {
                 try
                 {
-                    var userID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _categoryService.UpdateCategory(model, userID);
+                    _categoryService.UpdateCategory(model);
                     TempData["ToastrSuccess"] = "Category updated successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
@@ -136,6 +152,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             return View("CategoryForm", model);
         }
 
+        /// <summary>
+        /// Handles the deletion of a category.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteCategory(int categoryID, string returnTab = "categories")
@@ -157,13 +179,35 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 
         #region Product Actions
 
+        /// <summary>
+        /// Populates the ViewBag with categories for dropdown lists.
+        /// </summary>
+        private void PopulateViewBagCategories()
+        {
+            try
+            {
+                var categories = _categoryService.GetAllCategories().ToList();
+                ViewBag.Categories = categories;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error populating categories in ViewBag");
+                ViewBag.Categories = new List<ProductCategory>();
+            }
+        }
+
+        /// <summary>
+        /// Handles the submission of the product form for adding a new product.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult ProductForm(int? productID, string returnTab = "products")
         {
             ViewBag.ReturnTab = returnTab;
-            ViewBag.Categories = _categoryService.GetAllCategories().ToList();
+            PopulateViewBagCategories();
 
-            // Handle new product creation
             if (!productID.HasValue || productID.Value == 0)
             {
                 return View(new ProductViewModel());
@@ -171,7 +215,6 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 
             try
             {
-                // Get the product from the service
                 var product = _productService.GetProductByID(productID.Value).FirstOrDefault();
                 
                 if (product == null)
@@ -180,12 +223,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
 
-                // Map the product to view model
-                var model = _mapper.Map<ProductViewModel>(product);
-                
-                _logger.LogInformation($"Loading Product ID: {model.ProductID}, Name: {model.Name}, Category: {model.CategoryID}");
-                _logger.LogInformation($"Customization Groups: {model.CustomizationGroups?.Count ?? 0}");
-                
+                var model = _mapper.Map<ProductViewModel>(product);                
                 return View(model);
             }
             catch (Exception ex)
@@ -196,26 +234,32 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             }
         }
 
+        /// <summary>
+        /// Handles the submission of the product form for adding a new product.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddProduct(ProductViewModel model, string returnTab = "products")
         {
             try
             {
-                _logger.LogInformation($"Received Product: {model.Name}, CategoryID: {model.CategoryID}");
+                _logger.LogInformation($"Received Product: {model.ProductName}, CategoryID: {model.CategoryID}");
                 _logger.LogInformation($"Customization Groups Count: {model.CustomizationGroups?.Count ?? 0}");
 
                 if (model.CustomizationGroups != null)
                 {
                     foreach (var group in model.CustomizationGroups)
                     {
-                        _logger.LogInformation($"Group: {group.CustomizationName}, Options: {group.CustomizationOptions?.Count ?? 0}");
+                        _logger.LogInformation($"Group: {group.OptionGroupName}, Options: {group.ProductOptionItems?.Count ?? 0}");
                     }
                 }
 
                 if (ModelState.IsValid)
                 {
-                    await _productService.AddProduct(model, UserId);
+                    await _productService.AddProduct(model);
 
                     TempData["ToastrSuccess"] = "Product added successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });
@@ -235,26 +279,32 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             }
         }
 
+        /// <summary>
+        /// Handles the submission of the product form for adding a new product.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProduct(ProductViewModel model, string returnTab = "products")
         {
             try
             {
-                _logger.LogInformation($"Updating Product ID: {model.ProductID}, Name: {model.Name}, CategoryID: {model.CategoryID}");
+                _logger.LogInformation($"Updating Product ID: {model.ProductID}, Name: {model.ProductName}, CategoryID: {model.CategoryID}");
                 _logger.LogInformation($"Customization Groups Count: {model.CustomizationGroups?.Count ?? 0}");
 
                 if (model.CustomizationGroups != null)
                 {
                     foreach (var group in model.CustomizationGroups)
                     {
-                        _logger.LogInformation($"Group: {group.CustomizationName}, Options: {group.CustomizationOptions?.Count ?? 0}");
+                        _logger.LogInformation($"Group: {group.OptionGroupName}, Options: {group.ProductOptionItems?.Count ?? 0}");
                     }
                 }
 
                 if (ModelState.IsValid)
                 {
-                    await _productService.EditProduct(model, UserId);
+                    await _productService.EditProduct(model);
 
                     TempData["ToastrSuccess"] = "Product updated successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });

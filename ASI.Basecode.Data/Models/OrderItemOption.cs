@@ -14,8 +14,8 @@ namespace ASI.Basecode.Data.Models
         public int ProductOptionItemID { get; set; }
 
         //Navigator
-        public OrderItems OrderItems { get; set; }
-        public ProductOptionGroup ProductOptionGroup { get; set; }
-        public ProductOptionItems ProductOptionItems { get; set; }
+        public OrderItems OrderItems { get; set; } // One order item option belongs to one order item
+        public ProductOptionGroup ProductOptionGroup { get; set; } // One order item option belongs to one product option group
+        public ProductOptionItems ProductOptionItems { get; set; } // One order item option belongs to one product option item
     }
 }

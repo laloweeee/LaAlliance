@@ -27,30 +27,40 @@ namespace ASI.Basecode.WebApp
             {
                 CreateMap<UserViewModel, User>();
                 CreateMap<ProductCategory, CategoryViewModel>().ReverseMap();
+                
                 // Product mappings
                 CreateMap<Product, ProductViewModel>()
                     .ForMember(dest => dest.ImageFile, opt => opt.Ignore())
-                    .ForMember(dest => dest.CustomizationGroups, opt => opt.MapFrom(src => src.CustomizationGroups))
+                    .ForMember(dest => dest.CustomizationGroups, opt => opt.MapFrom(src => src.ProductOptionGroup))
                     .ReverseMap()
-                    .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
-                    .ForMember(dest => dest.Category, opt => opt.Ignore())
-                    .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore())
-                    .ForMember(dest => dest.UpdatedByUser, opt => opt.Ignore());
+                    .ForMember(dest => dest.ProductCategory, opt => opt.Ignore())
+                    .ForMember(dest => dest.OrderItems, opt => opt.Ignore())
+                    .ForMember(dest => dest.PromotionProducts, opt => opt.Ignore())
+                    .ForMember(dest => dest.CustomerProductFavorites, opt => opt.Ignore())
+                    .ForMember(dest => dest.ProductOptionGroup, opt => opt.MapFrom(src => src.CustomizationGroups));
 
-                // CustomizationGroup mappings
-                CreateMap<ProductOptionGroup, CustomizationGroupViewModel>()
-                    .ForMember(dest => dest.CustomizationOptions, opt => opt.MapFrom(src => src.CustomizationOptions))
+                // ProductOptionGroup mappings
+                CreateMap<ProductOptionGroup, ProductOptionGroupViewModel>()
+                    .ForMember(dest => dest.ProductOptionItems, opt => opt.MapFrom(src => src.ProductOptionItems))
                     .ReverseMap()
                     .ForMember(dest => dest.Product, opt => opt.Ignore())
-                    .ForMember(dest => dest.CreatedTime, opt => opt.Ignore())
-                    .ForMember(dest => dest.UpdatedTime, opt => opt.Ignore());
+                    .ForMember(dest => dest.CartItemOption, opt => opt.Ignore())
+                    .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore())
+                    .ForMember(dest => dest.ProductOptionItems, opt => opt.MapFrom(src => src.ProductOptionItems));
 
-                // CustomizationOption mappings
-                CreateMap<ProductOptionItems, CustomizationOptionViewModel>()
+                // ProductOptionItems mappings
+                CreateMap<ProductOptionItems, ProductOptionItemViewModel>()
                     .ReverseMap()
-                    .ForMember(dest => dest.CustomizationGroup, opt => opt.Ignore())
-                    .ForMember(dest => dest.CreatedTime, opt => opt.Ignore())
-                    .ForMember(dest => dest.UpdatedTime, opt => opt.Ignore());
+                    .ForMember(dest => dest.ProductOptionGroup, opt => opt.Ignore())
+                    .ForMember(dest => dest.CartItemOption, opt => opt.Ignore())
+                    .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore());
+
+                // Add mapping for ProductOptionItemViewModel if needed
+                CreateMap<ProductOptionItems, ProductOptionItemViewModel>()
+                    .ReverseMap()
+                    .ForMember(dest => dest.ProductOptionGroup, opt => opt.Ignore())
+                    .ForMember(dest => dest.CartItemOption, opt => opt.Ignore())
+                    .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore());
             }
         }
     }

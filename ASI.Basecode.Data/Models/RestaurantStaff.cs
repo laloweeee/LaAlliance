@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Models
 {
@@ -10,11 +11,11 @@ namespace ASI.Basecode.Data.Models
     {
         public int StaffID { get; set; }
         public int UserID  { get; set; }
-        public string Role { get; set; }
-        public string Status { get; set; }
+        public StaffRole Role { get; set; }
+        public AccountStatus Status { get; set; }
 
         //Navigator
-        public User User { get; set; }
-        public ICollection<OrderProcessed> OrderProcessed { get; set; } = [];
+        public User User { get; set; } // One restaurant staff is one user
+        public ICollection<OrderProcessed> OrderProcessed { get; set; } = new List<OrderProcessed>(); // One restaurant staff can have multiple order processed
     }
 }

@@ -9,13 +9,12 @@ namespace ASI.Basecode.Data.Models
     public partial class Cart
     {
         public int CartID { get; set; }
-        public int CustomerID { get; set; }
+        public int UserID { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public bool isCheckedOut { get; set; }
 
         //Navigator
-        public User User { get; set; }
-        public ICollection<CartItem> CartItem { get; set; } = [];
+        public User User { get; set; } // One cart belongs to one user
+        public ICollection<CartItem> CartItem { get; set; } = new List<CartItem>(); // One cart can have multiple cart items
     }
 }

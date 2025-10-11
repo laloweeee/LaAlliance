@@ -4,7 +4,7 @@ namespace ASI.Basecode.Data.Models
 {
     public partial class DeliveryPolicy
     {
-        public int DeliverySettingID { get; set; }
+        public int PolicyID { get; set; }
         public int MaxDeliveryDistance { get; set; }
         public decimal BaseDeliveryFee { get; set; }
         public decimal PerKmFee { get; set; }

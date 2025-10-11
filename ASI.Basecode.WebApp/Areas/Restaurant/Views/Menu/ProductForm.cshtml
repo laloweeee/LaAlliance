@@ -1,7 +1,5 @@
 @{
     ViewData["Title"] = "Product Form";
-
-    var returnTab = ViewBag.ReturnTab;
 }
 
 @model ASI.Basecode.Services.ServiceModels.ProductViewModel
@@ -34,7 +32,7 @@
         <form asp-action="@(Model.ProductID == 0 ? "AddProduct" : "UpdateProduct")" method="post" id="productForm" enctype="multipart/form-data" class="space-y-8">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="ProductID" />
-            <input type="hidden" name="returnTab" value="@returnTab" />
+            <input type="hidden" name="returnTab" value="@ViewBag.ReturnTab" />
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left Column - Product Information -->
@@ -49,22 +47,22 @@
                         </div>
                         <div class="p-6 space-y-6">
                             <div>
-                                <label asp-for="Name" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <label asp-for="ProductName" class="block text-sm font-semibold text-gray-700 mb-2">
                                     Product Name <span class="text-red-500">*</span>
                                 </label>
-                                <input asp-for="Name" id="productName"
+                                <input asp-for="ProductName" id="productName"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400"
                                     placeholder="e.g., Grilled Chicken Sandwich" required />
-                                <span asp-validation-for="Name" class="text-red-500 text-sm mt-1 block"></span>
+                                <span asp-validation-for="ProductName" class="text-red-500 text-sm mt-1 block"></span>
                             </div>
                             <div>
-                                <label asp-for="Description" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <label asp-for="ProductDescription" class="block text-sm font-semibold text-gray-700 mb-2">
                                     Description
                                 </label>
-                                <textarea asp-for="Description"
+                                <textarea asp-for="ProductDescription"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 resize-none"
                                     placeholder="Describe your product..." rows="5"></textarea>
-                                <span asp-validation-for="Description" class="text-red-500 text-sm mt-1 block"></span>
+                                <span asp-validation-for="ProductDescription" class="text-red-500 text-sm mt-1 block"></span>
                             </div>
                         </div>
                     </div>
@@ -81,13 +79,39 @@
                             <label for="categorySelect" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Select Category <span class="text-red-500">*</span>
                             </label>
+                            
+                            @{
+                                var categories = ViewBag.Categories as List<ASI.Basecode.Data.Models.ProductCategory> 
+                                                ?? new List<ASI.Basecode.Data.Models.ProductCategory>();
+                            }
+                            
                             <select asp-for="CategoryID" id="categorySelect"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 appearance-none bg-white cursor-pointer"
-                                asp-items="@(new SelectList(ViewBag.Categories, "CategoryID", "Name"))"
                                 required>
                                 <option value="" disabled selected>Choose a category...</option>
+                                @if (categories.Any())
+                                {
+                                    @foreach (var category in categories)
+                                    {
+                                        <option value="@category.CategoryID" selected="@(category.CategoryID == Model.CategoryID)">
+                                            @category.CategoryName
+                                        </option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="" disabled>No categories available</option>
+                                }
                             </select>
                             <span asp-validation-for="CategoryID" class="text-red-500 text-sm mt-1 block"></span>
+                            
+                            @if (!categories.Any())
+                            {
+                                <p class="text-amber-600 text-sm mt-2 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Please create at least one category before adding products.
+                                </p>
+                            }
                         </div>
                     </div>
 
@@ -100,16 +124,16 @@
                             </h2>
                         </div>
                         <div class="p-6">
-                            <label asp-for="Price" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label asp-for="ProductPrice" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Price (₱) <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₱</span>
-                                <input asp-for="Price" id="productPrice" type="number" step="0.01" min="0"
+                                <input asp-for="ProductPrice" id="productPrice" type="number" step="0.01" min="0"
                                     class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400"
                                     placeholder="0.00" required />
                             </div>
-                            <span asp-validation-for="Price" class="text-red-500 text-sm mt-1 block"></span>
+                            <span asp-validation-for="ProductPrice" class="text-red-500 text-sm mt-1 block"></span>
                         </div>
                     </div>
                 </div>
@@ -261,11 +285,11 @@
         });
 
         // Load existing image if editing
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        @if (!string.IsNullOrEmpty(Model.ProductImage))
         {
             <text>
             document.addEventListener('DOMContentLoaded', function() {
-                document.getElementById('previewImg').src = '@Model.ImageUrl';
+                document.getElementById('previewImg').src = '@Model.ProductImage';
                 document.getElementById('imagePreview').classList.remove('hidden');
                 document.getElementById('uploadPlaceholder').classList.add('hidden');
             });
@@ -281,19 +305,19 @@
                     </div>
                     <div class="flex-1 w-full sm:w-auto">
                         <input type="text" 
-                            name="CustomizationGroups[${groupIndex}].CustomizationOptions[${optionIndex}].OptionName"
+                            name="CustomizationGroups[${groupIndex}].ProductOptionItems[${optionIndex}].OptionName"
                             value="${optionName}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                             placeholder="Option name" required />
                         <input type="hidden" 
-                            name="CustomizationGroups[${groupIndex}].CustomizationOptions[${optionIndex}].CustomizationOptionID" 
+                            name="CustomizationGroups[${groupIndex}].ProductOptionItems[${optionIndex}].CustomizationOptionID" 
                             value="${optionID}" />
                     </div>
                     <div class="w-full sm:w-36 flex items-center gap-3">
                         <div class="relative flex-1 sm:flex-none sm:w-3/4">
                             <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₱</span>
                             <input type="number" step="0.01" min="0"
-                                name="CustomizationGroups[${groupIndex}].CustomizationOptions[${optionIndex}].AdditionalPrice"
+                                name="CustomizationGroups[${groupIndex}].ProductOptionItems[${optionIndex}].AdditionalPrice"
                                 value="${additionalPrice}"
                                 class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                                 placeholder="0.00" />
@@ -306,7 +330,7 @@
             `;
         }
 
-        // Function to create group HTML
+        // Function to create group HTML - FIXED: Changed CustomizationName to OptionGroupName
         function createGroupHTML(groupIndex, groupName = '', isRequired = false, numberOfChoice = 1, groupID = 0) {
             return `
                 <div class="customization-group border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-group-index="${groupIndex}">
@@ -339,11 +363,11 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-2">
                                         Group Name <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="text" name="CustomizationGroups[${groupIndex}].CustomizationName" 
+                                    <input type="text" name="CustomizationGroups[${groupIndex}].OptionGroupName" 
                                         value="${groupName}"
                                         class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="e.g., Size, Toppings" required />
-                                    <input type="hidden" name="CustomizationGroups[${groupIndex}].CustomizationGroupID" value="${groupID}" />
+                                    <input type="hidden" name="CustomizationGroups[${groupIndex}].ProductOptionGroupID" value="${groupID}" />
                                 </div>
                                 <div>
                                     <div class="flex flex-col space-y-4">
@@ -394,7 +418,7 @@
             `;
         }
 
-        // Load existing customization groups if editing
+        // Load existing customization groups if editing - FIXED: Use OptionGroupName
         @if (Model.CustomizationGroups != null && Model.CustomizationGroups.Count > 0)
         {
             <text>
@@ -408,15 +432,15 @@
                         <text>
                             (function() {
                                 // Initialize option index for this group based on existing options count
-                                optionIndexes[customizationGroupIndex] = @(group.CustomizationOptions?.Count ?? 0);
+                                optionIndexes[customizationGroupIndex] = @(group.ProductOptionItems?.Count ?? 0);
 
-                                // Create group
+                                // Create group - FIXED: Use OptionGroupName
                                 const groupHTML = createGroupHTML(
-                                customizationGroupIndex,
-                                '@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(group.CustomizationName))',
-                                                    @group.IsRequired.ToString().ToLower(),
-                                                    @group.NumberOfChoice,
-                                @group.CustomizationGroupID
+                                    customizationGroupIndex,
+                                    '@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(group.OptionGroupName))',
+                                    @group.IsRequired.ToString().ToLower(),
+                                    @group.NumberOfChoice,
+                                    @group.ProductOptionGroupID
                                 );
 
                                 container.insertAdjacentHTML('beforeend', groupHTML);
@@ -424,10 +448,10 @@
                                 // Add options for this group
                                 const optionsContainer = container.querySelector(`[data-group-index="${customizationGroupIndex}"] .options-container`);
 
-                                @if (group.CustomizationOptions != null && group.CustomizationOptions.Any())
+                                @if (group.ProductOptionItems != null && group.ProductOptionItems.Any())
                                 {
                                     var optionIndex = 0;
-                                    foreach (var option in group.CustomizationOptions)
+                                    foreach (var option in group.ProductOptionItems)
                                     {
                                         <text>
                                             (function() {
@@ -436,7 +460,7 @@
                                                     @optionIndex,
                                                     '@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(option.OptionName))',
                                                     @option.AdditionalPrice,
-                                                    @option.CustomizationOptionID
+                                                    @option.ProductOptionItemsID
                                                 );
                                                 optionsContainer.insertAdjacentHTML('beforeend', optionHTML);
                                             })();
@@ -551,7 +575,7 @@
                 const inputs = option.querySelectorAll('input');
                 inputs.forEach(input => {
                     if (input.name) {
-                        input.name = input.name.replace(/CustomizationOptions\[\d+\]/, `CustomizationOptions[${newIndex}]`);
+                        input.name = input.name.replace(/ProductOptionItems\[\d+\]/, `ProductOptionItems[${newIndex}]`);
                     }
                 });
             });

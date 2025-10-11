@@ -16,6 +16,6 @@ namespace ASI.Basecode.Data.Models
         public DateTime ExpirationDate { get; set; }
 
         //Navigator
-        public RestaurantPromotions RestaurantPromotions { get; set; }
+        public RestaurantPromotions RestaurantPromotions { get; set; } // One promotion has one promotion code
     }
 }

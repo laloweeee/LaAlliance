@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,9 +17,9 @@ namespace ASI.Basecode.Data.Models
         public int NumberOfChoice { get; set; }
 
         // Navigator
-        public Product Product { get; set; }
-        public CartItemOption CartItemOption { get; set; }
-        public ICollection<ProductOptionItems> ProductOptionItems { get; set; } = [];
-        public ICollection<OrderItemOption> OrderItemOption { get; set; } = [];
+        public Product Product { get; set; } // One product option group belongs to one product
+        public CartItemOption CartItemOption { get; set; } // One product option group can be associated with one cart item option
+        public ICollection<ProductOptionItems> ProductOptionItems { get; set; } = new List<ProductOptionItems>(); // One product option group can have multiple product option items
+        public ICollection<OrderItemOption> OrderItemOption { get; set; } = new List<OrderItemOption>(); // One product option group can have multiple order item options
     }
 }

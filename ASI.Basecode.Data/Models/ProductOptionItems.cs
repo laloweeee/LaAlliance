@@ -14,8 +14,8 @@ namespace ASI.Basecode.Data.Models
         public decimal AdditionalPrice { get; set; }
 
         // Navigator
-        public ProductOptionGroup ProductOptionGroup { get; set; }
-        public CartItemOption CartItemOption { get; set; }
-        public ICollection<OrderItemOption> OrderItemOption { get; set; } = [];
+        public ProductOptionGroup ProductOptionGroup { get; set; } // One product option item belongs to one product option group
+        public CartItemOption CartItemOption { get; set; } // One product option item can be associated with one cart item option
+        public ICollection<OrderItemOption> OrderItemOption { get; set; } = new List<OrderItemOption>(); // One product option item can be associated with multiple order item options
     }
 }

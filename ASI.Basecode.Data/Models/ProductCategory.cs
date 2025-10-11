@@ -10,6 +10,6 @@ namespace ASI.Basecode.Data.Models
         public bool IsActive { get; set; }
 
         // Navigator
-        public ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Product> Products { get; set; } = new List<Product>(); // One product category can have multiple products
     }
 }

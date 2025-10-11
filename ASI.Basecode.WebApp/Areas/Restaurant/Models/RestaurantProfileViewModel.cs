@@ -26,10 +26,10 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Models
         public decimal? MinimumOrderAmount { get; set; }
 
         [Display(Name = "Opening Time")]
-        public string? OpenTime { get; set; }
+        public string OpenTime { get; set; }
 
         [Display(Name = "Closing Time")]
-        public string? CloseTime { get; set; }
+        public string CloseTime { get; set; }
 
         [Display(Name = "Open 24/7?")]
         public bool OpenAllDay { get; set; }

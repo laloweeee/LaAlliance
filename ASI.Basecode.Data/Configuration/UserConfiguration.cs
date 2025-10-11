@@ -1,86 +1,82 @@
-﻿using ASI.Basecode.Data.Models;
+using ASI.Basecode.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Configuration
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {
-        public void Configure(EntityTypeBuilder<User> entity)
+        public void Configure(EntityTypeBuilder<User> builder)
         {
-            entity.ToTable("Users");
+            // Primary Key
+            builder.HasKey(u => u.UserID);
 
-            entity.HasKey(e => e.UserID);
+            // Properties
+            builder.Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(255);
 
-            entity.Property(e => e.UserID)
-                  .HasColumnName("UserID")
-                  .ValueGeneratedOnAdd();
+            builder.Property(u => u.Password)
+                .IsRequired()
+                .HasMaxLength(255);
 
-            entity.Property(e => e.Email)
-                  .HasColumnName("Email")
-                  .IsRequired()
-                  .HasMaxLength(255);
+            builder.Property(u => u.UserType)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasDefaultValue(UserType.Customer);
 
-            entity.Property(e => e.Password)
-                  .HasColumnName("Password")
-                  .IsRequired()
-                  .HasMaxLength(255);
+            builder.Property(u => u.IsEmailVerified)
+                .HasDefaultValue(false);
 
-            entity.Property(e => e.FirstName)
-                  .HasColumnName("FirstName")
-                  .IsRequired()
-                  .HasMaxLength(100);
+            builder.Property(u => u.EmailHashToken)
+                .HasMaxLength(500)
+                .IsRequired(false)
+                .HasDefaultValue(null);
 
-            entity.Property(e => e.LastName)
-                  .HasColumnName("LastName")
-                  .IsRequired()
-                  .HasMaxLength(100);
+            builder.Property(u => u.ResetPasswordHashToken)
+                .HasMaxLength(500)
+                .IsRequired(false)
+                .HasDefaultValue(null);
 
-            entity.Property(e => e.Role)
-                  .HasColumnName("Role")
-                  .IsRequired()
-                  .HasMaxLength(50)
-                  .HasDefaultValue("Customer");
+            builder.Property(u => u.AccountStatus)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasDefaultValue(AccountStatus.Active);
 
-            entity.Property(e => e.IsEmailVerified)
-                  .HasColumnName("IsEmailVerified")
-                  .HasDefaultValue(false);
+            // Relationships
+            builder.HasOne(u => u.UserProfile)
+                .WithOne(up => up.User)
+                .HasForeignKey<UserProfile>(up => up.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Property(e => e.EmailHashToken)
-                  .HasColumnName("EmailHashToken")
-                  .HasMaxLength(512);
+            builder.HasMany(u => u.UserAddress)
+                .WithOne(ua => ua.User)
+                .HasForeignKey(ua => ua.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Property(e => e.EmailTokenExpiry)
-                  .HasColumnName("EmailTokenExpiry")
-                  .HasColumnType("datetime");
+            builder.HasOne(u => u.RestaurantStaff)
+                .WithOne(rs => rs.User)
+                .HasForeignKey<RestaurantStaff>(rs => rs.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Property(e => e.ResetPasswordHashToken)
-                  .HasColumnName("ResetPasswordHashToken")
-                  .HasMaxLength(512);
+            builder.HasOne(u => u.Cart)
+                .WithOne(c => c.User)
+                .HasForeignKey<Cart>(c => c.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Property(e => e.ResetTokenExpiry)
-                  .HasColumnName("ResetTokenExpiry")
-                  .HasColumnType("datetime");
+            builder.HasMany(u => u.CustomerProductFavorites)
+                .WithOne(cpf => cpf.User)
+                .HasForeignKey(cpf => cpf.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Property(e => e.CreatedTime)
-                  .HasColumnName("CreatedTime")
-                  .HasColumnType("datetime")
-                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            builder.HasMany(u => u.Order)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Property(e => e.UpdatedTime)
-                  .HasColumnName("UpdatedTime")
-                  .HasColumnType("datetime")
-                  .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
-
-            entity.HasOne(e => e.UserProfile)
-                  .WithOne(up => up.User)
-                  .HasForeignKey<UserProfile>(up => up.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
+            // Table Name
+            builder.ToTable("Users");
         }
     }
 }

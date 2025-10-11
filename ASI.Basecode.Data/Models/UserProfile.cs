@@ -15,6 +15,6 @@ namespace ASI.Basecode.Data.Models
         public int ContactNumber { get; set; }
 
         // Navigator
-        public User User { get; set; }
+        public User User { get; set; } // One user has one profile
     }
 }

@@ -10,12 +10,12 @@ namespace ASI.Basecode.Data.Models
     {
         public int OrderProcessID { get; set; }
         public int OrderID { get; set; }
-        public int HandledBy { get; set; }
+        public int UserID { get; set; }
         public TimeOnly ElapsedTime { get; set; }
         public DateTime ProcessedAt { get; set; }
 
         //Navigator
-        public Order Order { get; set; }
-        public RestaurantStaff RestaurantStaff { get; set; }
+        public Order Order { get; set; } // One order process belongs to one order
+        public RestaurantStaff HandledBy { get; set; } // One order process is handled by one restaurant staff
     }
 }

@@ -11,12 +11,12 @@ namespace ASI.Basecode.Data.Models
         public int UserAddressID { get; set; }
         public int UserID { get; set; }
         public int AddressID { get; set; }
-        public bool IsDefault { get; set; }
+        public bool IsDefault { get; set; } = true;
         public string AddressType { get; set; }
         public string AddressNote { get; set; }
 
         //Navigator
-        public Address Address { get; set; }
-        public User User { get; set; }
+        public Address Address { get; set; } // One user address belongs to one address
+        public User User { get; set; } // One user address belongs to one user
     }
 }

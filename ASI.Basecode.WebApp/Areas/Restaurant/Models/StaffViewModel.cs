@@ -1,4 +1,5 @@
 ﻿using System;
+using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.WebApp.Areas.Restaurant.Models
 {
@@ -20,13 +21,11 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Models
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
         public string Email { get; set; } = "";
-        public string? Phone { get; set; }
-        public string? Address { get; set; }
-        public string Role { get; set; } = "Cashier";
-        public string Status { get; set; } = "Active";
-        public DateTime? HireDate { get; set; }
-        public decimal? AnnualSalary { get; set; }
-        public string? Password { get; set; } //pwede ra dili mo update/edit sa pass
+        public string Phone { get; set; }
+        public string Address { get; set; }
+        public StaffRole Role { get; set; } = StaffRole.Staff;
+        public AccountStatus Status { get; set; } = AccountStatus.Active;
+        public string Password { get; set; } //pwede ra dili mo update/edit sa pass
     }
 
     public class StaffDetailsDto : StaffUpsertDto

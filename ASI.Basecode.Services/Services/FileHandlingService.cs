@@ -18,6 +18,13 @@ namespace ASI.Basecode.Services.Services
             _fileStorageService = fileStorageService;
         }
 
+        /// <summary>
+        /// Handles the file upload process including validation and storage.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="folderPath"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<string> HandleFile(IFormFile file, string folderPath)
         {
             if (file == null || file.Length == 0)

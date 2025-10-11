@@ -13,7 +13,7 @@ namespace ASI.Basecode.Data.Models
         public int AddressID { get; set; }
 
         //Navigator
-        public Restaurant Restaurant { get; set; }
-        public Address Address { get; set; }
+        public Restaurant Restaurant { get; set; } // One restaurant address belongs to one restaurant
+        public Address Address { get; set; } // One restaurant address belongs to one address
     }
 }

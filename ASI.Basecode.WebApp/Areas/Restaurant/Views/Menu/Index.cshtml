@@ -2,7 +2,7 @@
     ViewData["Title"] = "LaAlliancé";
 }
 
-@model ASI.Basecode.WebApp.Areas.Restaurant.ProductModels.MenuViewModel
+@model ASI.Basecode.WebApp.Areas.Restaurant.Models.MenuViewModel
 
 <div class="mt-4">
     <!-- Tab Navigation -->
@@ -106,7 +106,7 @@
                         <option value="">All Categories</option>
                         @foreach (var category in Model.Categories.Where(c => c.IsActive))
                         {
-                            <option value="@category.CategoryID">@category.Name</option>
+                            <option value="@category.CategoryID">@category.CategoryName</option>
                         }
                     </select>
                 </div>
@@ -196,14 +196,14 @@
                     @foreach (var product in ViewBag.Products)
                     {
                         <div class="product-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group"
-                             data-name="@product.Name.ToLower()" 
-                             data-price="@product.Price" 
+                             data-name="@product.ProductName.ToLower()" 
+                             data-price="@product.ProductPrice" 
                              data-category="@product.CategoryID" 
                              data-status="@(product.IsActive ? "active" : "inactive")">
                             <!-- Image Container with Overlay -->
                             <div class="relative aspect-w-16 aspect-h-9 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                                <img src="@(product.ImageUrl ?? "https://via.placeholder.com/300x200")"
-                                     alt="@product.Name"
+                                <img src="@(product.ProductImage ?? "https://via.placeholder.com/300x200")"
+                                     alt="@product.ProductName"
                                      class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110">
 
                                 <!-- Status Badge Overlay -->
@@ -218,7 +218,7 @@
                                 <div class="absolute top-3 left-3">
                                     <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white/90 text-gray-700 backdrop-blur-sm shadow-md">
                                         <i class="fas fa-tag mr-1.5 text-emerald-600"></i>
-                                        @product.Category?.Name
+                                        @product.ProductCategory.CategoryName
                                     </span>
                                 </div>
                             </div>
@@ -227,18 +227,18 @@
                             <div class="p-5">
                                 <!-- Product Name -->
                                 <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem] group-hover:text-emerald-600 transition-colors duration-200">
-                                    @product.Name
+                                    @product.ProductName
                                 </h3>
 
                                 <!-- Description -->
                                 <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
-                                    @product.Description
+                                    @product.ProductDescription
                                 </p>
 
                                 <!-- Price Section -->
                                 <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
                                     <div class="flex items-baseline">
-                                        <span class="text-2xl font-bold text-emerald-600">₱@product.Price.ToString("N2")</span>
+                                        <span class="text-2xl font-bold text-emerald-600">₱@product.ProductPrice.ToString("N2")</span>
                                     </div>
                                     <div class="flex items-center text-gray-500 text-xs">
                                         <i class="fas fa-chart-line mr-1"></i>
@@ -317,7 +317,7 @@
                     @foreach (var category in Model.Categories)
                     {
                         <div class="category-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group"
-                            data-name="@category.Name.ToLower()" 
+                            data-name="@category.CategoryName.ToLower()" 
                             data-status="@(category.IsActive ? "active" : "inactive")"
                             data-category-id="@category.CategoryID">
                             
@@ -338,7 +338,7 @@
                                 
                                 <!-- Category Name -->
                                 <h3 class="text-xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-200 mb-1">
-                                    @category.Name
+                                    @category.CategoryName
                                 </h3>
                                 
                                 <!-- Category ID Badge -->

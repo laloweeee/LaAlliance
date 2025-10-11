@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Services.Services
 {
+    /// <summary>
+    /// Service for sending emails such as welcome emails, password resets, and email verifications.
+    /// </summary>
     public class MailSenderService : IMailSender
     {
         private readonly IConfiguration _configuration;
@@ -19,13 +22,19 @@ namespace ASI.Basecode.Services.Services
             _logger = logger;
         }
 
+        /// <summary>
+        /// Sends a welcome email to a new user.
+        /// </summary>
+        /// <param name="toEmail"></param>
+        /// <param name="userName"></param>
+        /// <returns></returns>
         public async Task SendWelcomeEmailAsync(string toEmail, string userName)
         {
             try
             {
                 _logger.LogInformation($"Sending welcome email to {toEmail}");
-                var subject = "Welcome to LaAlliancé!";
-                var htmlContent = $"Welcome to LaAlliancé {userName}";
+                var subject = "Welcome to LaAlliancï¿½!";
+                var htmlContent = $"Welcome to LaAlliancï¿½ {userName}";
 
                 await sendCustomEmailAsync(toEmail, subject, htmlContent);
                 _logger.LogInformation($"Welcome email sent to {toEmail}");
@@ -37,11 +46,17 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
+        /// <summary>
+        /// Sends a password reset email with an OTP code.
+        /// </summary>
+        /// <param name="toEmail"></param>
+        /// <param name="otpCode"></param>
+        /// <returns></returns>
         public async Task SendPasswordResetEmailAsync(string toEmail, string otpCode)
         {
             try
             {
-                var subject = "Reset Your Password - LaAlliancé";
+                var subject = "Reset Your Password - LaAlliancï¿½";
                 var htmlContent = $"Your OTP Code: {otpCode}";
 
                 await sendCustomEmailAsync(toEmail, subject, htmlContent);
@@ -53,21 +68,27 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
+        /// <summary>
+        /// Sends an email verification email with an OTP code.
+        /// </summary>
+        /// <param name="toEmail"></param>
+        /// <param name="otpCode"></param>
+        /// <returns></returns>
         public async Task SendEmailVerificationAsync(string toEmail, int otpCode)
         {
             try
             {
-                var subject = "Verify Your Email - LaAlliancé";
+                var subject = "Verify Your Email - LaAlliancï¿½";
                 var htmlContent = $@"
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
                 <h2 style='color: #4CAF50;'>Verify Your Email Address</h2>
-                <p>Thank you for registering with LaAlliancé! To complete your registration, please use the verification code below:</p>
+                <p>Thank you for registering with LaAlliancï¿½! To complete your registration, please use the verification code below:</p>
                 <div style='background-color: #f2f2f2; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;'>
                     {otpCode}
                 </div>
                 <p>This code will expire in 10 minutes.</p>
-                <p>If you didn't create an account with LaAlliancé, you can safely ignore this email.</p>
-                <p>Thank you,<br>The LaAlliancé Team</p>
+                <p>If you didn't create an account with LaAlliancï¿½, you can safely ignore this email.</p>
+                <p>Thank you,<br>The LaAlliancï¿½ Team</p>
             </div>";
 
                 await sendCustomEmailAsync(toEmail, subject, htmlContent);
@@ -80,6 +101,13 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
+        /// <summary>
+        /// Sends a custom email with specified subject and HTML content.
+        /// </summary>
+        /// <param name="toEmail"></param>
+        /// <param name="subject"></param>
+        /// <param name="htmlContent"></param>
+        /// <returns></returns>
         public async Task sendCustomEmailAsync(string toEmail, string subject, string htmlContent)
         {
             var smtpServer = _configuration["Email:Host"];

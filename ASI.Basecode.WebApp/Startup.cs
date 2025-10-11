@@ -139,21 +139,21 @@ namespace ASI.Basecode.WebApp
             // RBAC
             services.AddAuthorization(options =>
             {
-                // Role base policies for Customer and Restaurant   
+                // Customer policy
                 options.AddPolicy("Customer", policy =>
                     policy.RequireRole("Customer"));
 
+                // Restaurant policy - both Admin and Staff can access
                 options.AddPolicy("Restaurant", policy =>
-                    policy.RequireRole("Restaurant"));
+                    policy.RequireRole("Restaurant", "Admin", "Staff"));
 
-                // Permission base policies for Restaurant
-                options.AddPolicy("Admin", policy =>
-                    policy.RequireRole("Restaurant")
-                        .RequireClaim("RestaurantPermission", "Admin"));
+                // Admin-only policy
+                options.AddPolicy("RestaurantAdmin", policy =>
+                    policy.RequireRole("Admin"));
 
-                options.AddPolicy("Staff", policy =>
-                    policy.RequireRole("Restaurant")
-                        .RequireClaim("RestaurantPermission", "Staff", "Admin"));
+                // Staff policy - both Admin and Staff can access
+                options.AddPolicy("RestaurantStaff", policy =>
+                    policy.RequireRole("Admin", "Staff"));
             });
 
             services.Configure<FormOptions>(options =>

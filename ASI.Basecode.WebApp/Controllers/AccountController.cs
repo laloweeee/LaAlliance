@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using static ASI.Basecode.Resources.Constants.Enums;
 
@@ -90,24 +91,29 @@ namespace ASI.Basecode.WebApp.Controllers
             this._session.SetString("HasSession", "Exist");
 
             User user = null;
+
             var loginResult = _userService.AuthenticateUser(model.Email, model.Password, ref user);
 
             if (loginResult == LoginResult.Success && user != null)
             {
+                if (user.UserType == UserType.Restaurant && user.RestaurantStaff == null)
+                {
+                    user = _userService.GetUserByID(user.UserID).FirstOrDefault();
+                }
+
                 await this._signInManager.SignInAsync(user);
                 this._session.SetString("UserEmail", model.Email);
 
-                return user.Role switch
+                return user.UserType switch
                 {
-                    "Customer" => RedirectToAction("Index", "Home", new { area = "Customer" }),
-                    "Restaurant" => RedirectToAction("Index", "Dashboard", new { area = "Restaurant" }),
+                    UserType.Customer => RedirectToAction("Index", "Home", new { area = "Customer" }),
+                    UserType.Restaurant => RedirectToAction("Index", "Dashboard", new { area = "Restaurant" }),
                     _ => RedirectToAction("Login", "Account"),
                 };
             }
             else
             {
-                // 認証NG
-                TempData["ErrorMessage"] = "Incorrect UserId or Password";
+                TempData["ErrorMessage"] = "Incorrect Email or Password";
                 return View();
             }
         }
@@ -126,15 +132,22 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             try
             {
+
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                
                 _userService.AddUser(model);
 
-                int otpCode = _otpService.GenerateOtp();
-                DateTime timestamp = DateTime.UtcNow;
-                string hashOtp = _otpService.HashOtp(otpCode, timestamp);
+                var otpCreated = await _otpService.CreateOtpForUser(model.Email);
 
-                _otpService.StoreOtpForUser(model.Email, hashOtp, timestamp);
-
-                await _mailSender.SendEmailVerificationAsync(model.Email, otpCode);
+                if (!otpCreated)
+                {
+                    TempData["ErrorMessage"] = "Failed to create OTP.";
+                    return View(model);
+                }
 
                 TempData["SuccessMessage"] = "Registration successful! Please check your email for verification code.";
 
@@ -176,7 +189,7 @@ namespace ASI.Basecode.WebApp.Controllers
                     return View("Verification", model);
                 }
 
-                if (_otpService.VerifyOtp(model.Email, int.Parse(model.OtpCode)))
+                if (_otpService.VerifyOTP(model.Email, int.Parse(model.OtpCode)))
                 {
                     _otpService.MarkVerified(model.Email);
                     TempData["SuccessMessage"] = "Email verified successfully.";
@@ -204,13 +217,13 @@ namespace ASI.Basecode.WebApp.Controllers
 
             try
             {
-                int otpCode = _otpService.GenerateOtp();
-                DateTime timestamp = DateTime.UtcNow;
-                string hashedOtp = _otpService.HashOtp(otpCode, timestamp);
+                var otpCreated = await _otpService.CreateOtpForUser(email);
 
-                _otpService.StoreOtpForUser(email, hashedOtp, timestamp);
-
-                await _mailSender.SendEmailVerificationAsync(email, otpCode);
+                if (!otpCreated)
+                {
+                    TempData["ErrorMessage"] = "Failed to create OTP.";
+                    return View();
+                }
 
                 TempData["SuccessMessage"] = "Verification code resent. Please check your email.";
             }
