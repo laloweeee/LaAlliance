@@ -28,4 +28,32 @@ namespace ASI.Basecode.Services.ServiceModels
         public string ProductImage { get; set; }
         public List<ProductOptionGroupViewModel> CustomizationGroups { get; set; } = new List<ProductOptionGroupViewModel>();
     }
+
+    public class ProductOptionGroupViewModel
+    {
+        public int ProductOptionGroupID { get; set; }
+        public int ProductID { get; set; }
+        [Required(ErrorMessage = "Option group name is required")]
+        [StringLength(100, ErrorMessage = "Option group name cannot exceed 100 characters")]
+        public string OptionGroupName { get; set; }
+
+        public bool IsRequired { get; set; }
+
+        public int NumberOfChoice { get; set; } = 1;
+
+        public List<ProductOptionItemViewModel> ProductOptionItems { get; set; } = new List<ProductOptionItemViewModel>();
+    }
+
+    public class ProductOptionItemViewModel
+    {
+        public int ProductOptionItemsID { get; set; }
+        public int ProductOptionGroupID { get; set; }
+
+        [Required(ErrorMessage = "Option name is required")]
+        [StringLength(100, ErrorMessage = "Option name cannot exceed 100 characters")]
+        public string OptionName { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage = "Additional price cannot be negative")]
+        public decimal AdditionalPrice { get; set; } = 0;
+    }
 }

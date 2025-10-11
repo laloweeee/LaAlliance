@@ -61,6 +61,19 @@ namespace ASI.Basecode.WebApp
                     .ForMember(dest => dest.ProductOptionGroup, opt => opt.Ignore())
                     .ForMember(dest => dest.CartItemOption, opt => opt.Ignore())
                     .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore());
+
+                // Restaurant profile mappings
+                CreateMap<Restaurant, RestaurantViewModel>()
+                    .ForMember(dest => dest.Address, opt => opt.MapFrom(src => 
+                        src.RestaurantAddress != null && src.RestaurantAddress.Address != null 
+                            ? src.RestaurantAddress.Address 
+                            : null))
+                    .ReverseMap()
+                    .ForMember(dest => dest.RestaurantAddress, opt => opt.Ignore());
+
+                // Address mappings
+                CreateMap<Address, AddressViewModel>()
+                    .ReverseMap();
             }
         }
     }

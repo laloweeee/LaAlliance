@@ -21,30 +21,28 @@ namespace ASI.Basecode.Services.Services
             _repository = repository;
         }
 
-        public RestaurantProfile GetRestaurantProfile()
+        public Restaurant GetRestaurantProfile()
         {
             return _repository.GetRestaurantProfile();
         }
 
-        public void EditRestaurantInformation(RestaurantProfile model, int userID)
+        public void EditRestaurantInformation(Restaurant model)
         {
             // Validate the model
             ValidateRestaurantProfile(model);
             ValidateBusinessHours(model.OpeningTime, model.ClosingTime);
-            ValidateContactInformation(model.Email, model.PhoneNumber);
-
-            model.UpdatedBy = userID;
+            ValidateContactInformation(model.Email, model.ContactNumber);
 
             // Update the profile
             _repository.EditRestaurantProfile(model);
         }
 
-        public void EditRestaurantAddress(Address address, int userID)
+        public void EditRestaurantAddress(Address address)
         {
             
         }
 
-        private void ValidateRestaurantProfile(RestaurantProfile model)
+        private void ValidateRestaurantProfile(Restaurant model)
         {
             if (string.IsNullOrWhiteSpace(model.Name))
             {
@@ -61,9 +59,9 @@ namespace ASI.Basecode.Services.Services
                 throw new ArgumentException("Email is required.", nameof(model.Email));
             }
 
-            if (string.IsNullOrWhiteSpace(model.PhoneNumber))
+            if (string.IsNullOrWhiteSpace(model.ContactNumber))
             {
-                throw new ArgumentException("Phone number is required.", nameof(model.PhoneNumber));
+                throw new ArgumentException("Phone number is required.", nameof(model.ContactNumber));
             }
         }
 
@@ -106,9 +104,9 @@ namespace ASI.Basecode.Services.Services
 
         private void ValidateAddress(Address address)
         {
-            if (string.IsNullOrWhiteSpace(address.StreetAddress))
+            if (string.IsNullOrWhiteSpace(address.Street))
             {
-                throw new ArgumentException("Street address is required.", nameof(address.StreetAddress));
+                throw new ArgumentException("Street address is required.", nameof(address.Street));
             }
 
             if (string.IsNullOrWhiteSpace(address.City))

@@ -1,4 +1,4 @@
-﻿@model ASI.Basecode.Services.ServiceModels.RestaurantProfileViewModel
+﻿@model ASI.Basecode.Services.ServiceModels.RestaurantViewModel
 @{
     ViewData["Title"] = "Restaurant Profile";
 }
@@ -34,7 +34,7 @@
             <div class="space-y-4">
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Phone Number</p>
-                    <p class="text-gray-900 font-medium">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)</p>
+                    <p class="text-gray-900 font-medium">@(string.IsNullOrEmpty(Model.ContactNumber) ? "Not provided" : Model.ContactNumber)</p>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email Address</p>
@@ -57,12 +57,12 @@
                 <div class="flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
                     <div>
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Opens</p>
-                        <p class="text-2xl font-bold text-emerald-600">@(Model.OpeningTime.ToString("hh\\:mm tt") ?? "Not set")</p>
+                        <p class="text-2xl font-bold text-emerald-600">@Model.OpeningTime.ToString("hh\\:mm tt")</p>
                     </div>
                     <div class="h-12 w-px bg-gray-300"></div>
                     <div>
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Closes</p>
-                        <p class="text-2xl font-bold text-red-600">@(Model.ClosingTime.ToString("hh\\:mm tt") ?? "Not set")</p>
+                        <p class="text-2xl font-bold text-red-600">@Model.ClosingTime.ToString("hh\\:mm tt")</p>
                     </div>
                 </div>
             </div>
@@ -109,7 +109,7 @@
             <div class="space-y-4">
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Street Address</p>
-                    <p class="text-gray-900 font-medium text-lg">@(string.IsNullOrEmpty(Model.Address?.StreetAddress) ? "Not provided" : Model.Address.StreetAddress)</p>
+                    <p class="text-gray-900 font-medium text-lg">@(string.IsNullOrEmpty(Model.Address?.Street) ? "Not provided" : Model.Address.Street)</p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="p-4 bg-gray-50 rounded-lg">
@@ -145,7 +145,7 @@
                          data-lat="@Model.Address.Latitude" 
                          data-lng="@Model.Address.Longitude" 
                          data-title="@Model.Name"
-                         data-address="@Model.Address.StreetAddress"
+                         data-address="@Model.Address.Street"
                          class="w-full h-80 rounded-xl border-2 border-gray-200 shadow-inner"></div>
                     <div class="flex items-center gap-2 text-sm text-gray-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

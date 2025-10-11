@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
-using ASI.Basecode.WebApp.Areas.Restaurant.Models;
 using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.Services.ServiceModels;
 using System;
@@ -21,12 +20,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         private readonly IRestaurantProfileService _restaurantProfileService;
 
         public ProfileController(
-                                IHttpContextAccessor httpContextAccessor,
-                                ILoggerFactory loggerFactory,
-                                IConfiguration configuration,
-                                IMapper mapper,
-                                IRestaurantProfileService restaurantProfileService
-                            ) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+            IHttpContextAccessor httpContextAccessor,
+            ILoggerFactory loggerFactory,
+            IConfiguration configuration,
+            IMapper mapper,
+            IRestaurantProfileService restaurantProfileService
+        ) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _restaurantProfileService = restaurantProfileService;
         }
@@ -35,7 +34,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         public IActionResult Index()
         {
             var profile = _restaurantProfileService.GetRestaurantProfile();
-            var model = _mapper.Map<RestaurantProfileViewModel>(profile);
+            var model = _mapper.Map<RestaurantViewModel>(profile);
             var googleApiKey = _configuration["GoogleMaps:ApiKey"];
 
             ViewBag.GoogleMapsApiKey = googleApiKey;
@@ -46,16 +45,14 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         public IActionResult RestaurantProfileForm()
         {
             var googleApiKey = _configuration["GoogleMaps:ApiKey"];
-
             ViewBag.GoogleMapsApiKey = googleApiKey;
-            var model = new RestaurantViewModel
-            {
-                Profile = _mapper.Map<RestaurantProfileViewModel>(_restaurantProfileService.GetRestaurantProfile())
-            };
 
-            return View(model);
+            var restaurantData = _restaurantProfileService.GetRestaurantProfile();
+            var profileViewModel = _mapper.Map<RestaurantViewModel>(restaurantData);
+            return View(profileViewModel);
         }
 
+        [HttpPost]
         public IActionResult UpdateRestaurantProfile(RestaurantViewModel model)
         {
             var googleApiKey = _configuration["GoogleMaps:ApiKey"];
@@ -65,25 +62,23 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             {
                 try
                 {
-                    var profile = _mapper.Map<RestaurantProfile>(model.Profile);
-                    profile.UpdatedBy = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                    profile.UpdatedTime = System.DateTime.Now;
+                    var restaurant = _mapper.Map<Data.Models.Restaurant>(model);
 
-                    _restaurantProfileService.EditRestaurantProfile(profile);
-                    TempData["SuccessMessage"] = "Address updated successfully.";
+                    _restaurantProfileService.EditRestaurantInformation(restaurant);
+                    TempData["SuccessMessage"] = "Restaurant information updated successfully.";
                     return RedirectToAction("RestaurantProfileForm");
                 }
                 catch (ArgumentException ex)
                 {
-                    _logger.LogWarning(ex, "Validation error updating restaurant address");
+                    _logger.LogWarning(ex, "Validation error updating restaurant profile");
                     ModelState.AddModelError("", ex.Message);
                     TempData["ErrorMessage"] = ex.Message;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error updating restaurant address");
-                    ModelState.AddModelError("", "An unexpected error occurred while updating the address.");
-                    TempData["ErrorMessage"] = "An unexpected error occurred while updating the address.";
+                    _logger.LogError(ex, "Error updating restaurant profile");
+                    ModelState.AddModelError("", "An unexpected error occurred while updating the profile.");
+                    TempData["ErrorMessage"] = "An unexpected error occurred while updating the profile.";
                 }
             }
 

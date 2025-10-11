@@ -1,4 +1,4 @@
-@model ASI.Basecode.WebApp.Areas.Restaurant.Models.RestaurantViewModel
+@model ASI.Basecode.Services.ServiceModels.RestaurantViewModel
 
 <div class="min-h-screen py-2 sm:py-4 lg:py-8 px-4 sm:px-0">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -25,7 +25,7 @@
         <!-- FORM SECTION -->
         <div class="grid grid-cols-1 gap-4 sm:gap-6">
             <form asp-action="" method="post" class="space-y-6 sm:space-y-8" id="restaurantInfoForm">
-                <input type="hidden" asp-for="Profile.RestaurantID" />
+                <input type="hidden" asp-for="RestaurantID" />
                 
                 <!-- Restaurant Information Card -->
                 <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -38,70 +38,70 @@
                     <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                         <!-- Restaurant Name -->
                         <div>
-                            <label asp-for="Profile.Name" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label asp-for="Name" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Restaurant Name <span class="text-red-500">*</span>
                             </label>
-                            <input asp-for="Profile.Name" id="restaurantName"
+                            <input asp-for="Name" id="restaurantName"
                                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                 placeholder="e.g., La Alliance Restaurant" required disabled />
-                            <span asp-validation-for="Profile.Name" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                            <span asp-validation-for="Name" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                         </div>
 
                         <!-- Description -->
                         <div>
-                            <label asp-for="Profile.Description" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label asp-for="Description" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Description
                             </label>
-                            <textarea asp-for="Profile.Description"
+                            <textarea asp-for="Description"
                                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 resize-none bg-gray-50"
                                 placeholder="Describe your restaurant..." rows="4" disabled></textarea>
-                            <span asp-validation-for="Profile.Description" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                            <span asp-validation-for="Description" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                         </div>
 
                         <!-- Phone Number -->
                         <div>
-                            <label asp-for="Profile.PhoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Phone Number
+                            <label asp-for="ContactNumber" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Contact Number
                             </label>
-                            <input asp-for="Profile.PhoneNumber" type="tel" 
+                            <input asp-for="ContactNumber" type="tel" 
                                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                 placeholder="(555) 123-4567" disabled>
-                            <span asp-validation-for="Profile.PhoneNumber" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                            <span asp-validation-for="ContactNumber" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                         </div>
 
                         <!-- Email -->
                         <div>
-                            <label asp-for="Profile.Email" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label asp-for="Email" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Email Address
                             </label>
-                            <input asp-for="Profile.Email" type="email" 
+                            <input asp-for="Email" type="email" 
                                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                 placeholder="info@laalliance.com" disabled>
-                            <span asp-validation-for="Profile.Email" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                            <span asp-validation-for="Email" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                         </div>
 
                         <!-- Operating Hours Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             <!-- Opening Time -->
                             <div>
-                                <label asp-for="Profile.OpeningTime" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <label asp-for="OpeningTime" class="block text-sm font-semibold text-gray-700 mb-2">
                                     Opening Time
                                 </label>
-                                <input asp-for="Profile.OpeningTime" type="time" 
+                                <input asp-for="OpeningTime" type="time" 
                                     class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                     value="09:00" disabled>
-                                <span asp-validation-for="Profile.OpeningTime" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                <span asp-validation-for="OpeningTime" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                             </div>
 
                             <!-- Closing Time -->
                             <div>
-                                <label asp-for="Profile.ClosingTime" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <label asp-for="ClosingTime" class="block text-sm font-semibold text-gray-700 mb-2">
                                     Closing Time
                                 </label>
-                                <input asp-for="Profile.ClosingTime" type="time" 
+                                <input asp-for="ClosingTime" type="time" 
                                     class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                     value="22:00" disabled>
-                                <span asp-validation-for="Profile.ClosingTime" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                <span asp-validation-for="ClosingTime" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                             </div>
                         </div>
                     </div>
@@ -128,9 +128,9 @@
                 </div>
             </form>
             <form asp-action="" method="post" class="space-y-6 sm:space-y-8" id="restaurantAddressForm">
-                <input type="hidden" asp-for="Profile.Address.Latitude" id="latitude" />
-                <input type="hidden" asp-for="Profile.Address.Longitude" id="longitude" />
-                <input asp-for="Profile.Address.Country" id="restaurantCountry" type="hidden" value="Philippines" />
+                <input type="hidden" asp-for="Address.Latitude" id="latitude" />
+                <input type="hidden" asp-for="Address.Longitude" id="longitude" />
+                <input asp-for="Address.Country" id="restaurantCountry" type="hidden" value="Philippines" />
 
                 <!-- Restaurant Address Card -->
                 <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -149,57 +149,57 @@
                             <div class="space-y-4 sm:space-y-6">
                                 <!-- Street Address -->
                                 <div>
-                                    <label asp-for="Profile.Address.StreetAddress" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label asp-for="Address.Street" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Street Address <span class="text-red-500">*</span>
                                     </label>
-                                    <input asp-for="Profile.Address.StreetAddress" id="restaurantStreetAddress"
+                                    <input asp-for="Address.Street" id="restaurantStreetAddress"
                                         class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                         placeholder="e.g., 123 Main St" required disabled />
-                                    <span asp-validation-for="Profile.Address.StreetAddress" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                    <span asp-validation-for="Address.Street" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                                 </div>
 
                                 <!-- Barangay -->
                                 <div>
-                                    <label asp-for="Profile.Address.Barangay" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label asp-for="Address.Barangay" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Barangay <span class="text-red-500">*</span>
                                     </label>
-                                    <input asp-for="Profile.Address.Barangay" id="restaurantBarangay"
+                                    <input asp-for="Address.Barangay" id="restaurantBarangay"
                                         class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                         placeholder="e.g., Barangay 123" required disabled />
-                                    <span asp-validation-for="Profile.Address.Barangay" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                    <span asp-validation-for="Address.Barangay" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                                 </div>
 
                                 <!-- City -->
                                 <div>
-                                    <label asp-for="Profile.Address.City" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label asp-for="Address.City" class="block text-sm font-semibold text-gray-700 mb-2">
                                         City <span class="text-red-500">*</span>
                                     </label>
-                                    <input asp-for="Profile.Address.City" id="restaurantCity"
+                                    <input asp-for="Address.City" id="restaurantCity"
                                         class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                         placeholder="e.g., Quezon City" required disabled />
-                                    <span asp-validation-for="Profile.Address.City" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                    <span asp-validation-for="Address.City" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                                 </div>
 
                                 <!-- Province -->
                                 <div>
-                                    <label asp-for="Profile.Address.Province" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label asp-for="Address.Province" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Province <span class="text-red-500">*</span>
                                     </label>
-                                    <input asp-for="Profile.Address.Province" id="restaurantProvince"
+                                    <input asp-for="Address.Province" id="restaurantProvince"
                                         class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                         placeholder="e.g., Metro Manila" required disabled />
-                                    <span asp-validation-for="Profile.Address.Province" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                    <span asp-validation-for="Address.Province" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                                 </div>
 
                                 <!-- ZipCode -->
                                 <div>
-                                    <label asp-for="Profile.Address.ZipCode" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label asp-for="Address.ZipCode" class="block text-sm font-semibold text-gray-700 mb-2">
                                         Zip Code <span class="text-red-500">*</span>
                                     </label>
-                                    <input asp-for="Profile.Address.ZipCode" id="restaurantZipCode"
+                                    <input asp-for="Address.ZipCode" id="restaurantZipCode"
                                         class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-gray-400 bg-gray-50"
                                         placeholder="e.g., 12345" required disabled />
-                                    <span asp-validation-for="Profile.Address.ZipCode" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
+                                    <span asp-validation-for="Address.ZipCode" class="text-red-500 text-xs sm:text-sm mt-1 block"></span>
                                 </div>
                             </div>
 
