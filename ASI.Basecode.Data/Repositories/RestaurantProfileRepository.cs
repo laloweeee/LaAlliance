@@ -4,7 +4,7 @@ using ASI.Basecode.Data.Models;
 
 namespace ASI.Basecode.Data.Repositories
 {
-    public class RestaurantProfileRepository : BaseRepository, IRestaurantProfile
+    public class RestaurantProfileRepository : BaseRepository, IRestaurantProfileRepository
     {
         public RestaurantProfileRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
