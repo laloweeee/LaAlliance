@@ -98,9 +98,8 @@ namespace ASI.Basecode.WebApp.Controllers
             {
                 if (user.UserType == UserType.Restaurant && user.RestaurantStaff == null)
                 {
-                    user = _userService.GetUserByID(user.UserID).FirstOrDefault();
+                    user = _userService.GetUserByID(user.UserID);
                 }
-
                 await this._signInManager.SignInAsync(user);
                 this._session.SetString("UserEmail", model.Email);
 

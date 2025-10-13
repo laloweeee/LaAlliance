@@ -12,7 +12,7 @@ namespace ASI.Basecode.Data.Models
         public int UserID { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public int ContactNumber { get; set; }
+        public string ContactNumber { get; set; }
 
         // Navigator
         public User User { get; set; } // One user has one profile

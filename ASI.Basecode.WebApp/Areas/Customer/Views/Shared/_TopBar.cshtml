@@ -73,7 +73,8 @@
 
                     <!-- Menu Items -->
                     <div class="py-2">
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-emerald-50 transition-colors group">
+                        <a asp-area="Customer" asp-controller="Account" asp-action="Index" 
+                            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-emerald-50 transition-colors group">
                             <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
                                 <i class="fa fa-user text-emerald-600 text-sm"></i>
                             </div>
@@ -81,7 +82,7 @@
                         </a>
 
                         <a asp-area="Customer" asp-controller="Order" asp-action="Index" 
-                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-emerald-50 transition-colors group">
+                            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-emerald-50 transition-colors group">
                             <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                                 <i class="fa fa-shopping-bag text-blue-600 text-sm"></i>
                             </div>
@@ -93,13 +94,6 @@
                                 <i class="fa fa-heart text-purple-600 text-sm"></i>
                             </div>
                             <span class="text-sm font-medium">Favorites</span>
-                        </a>
-
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-emerald-50 transition-colors group">
-                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                                <i class="fa fa-cog text-orange-600 text-sm"></i>
-                            </div>
-                            <span class="text-sm font-medium">Settings</span>
                         </a>
 
                         <div class="border-t border-gray-100 my-2"></div>

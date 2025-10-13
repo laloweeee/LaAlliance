@@ -99,9 +99,9 @@ namespace ASI.Basecode.Services.Services
         /// </summary>
         /// <param name="userID"></param>
         /// <returns></returns>
-        public IQueryable<User> GetUserByID(int userID)
+        public User GetUserByID(int userID)
         {
-            return _repository.GetUserByID(userID).AsQueryable();
+            return _repository.GetUserByID(userID).FirstOrDefault();
         }
     }
 }

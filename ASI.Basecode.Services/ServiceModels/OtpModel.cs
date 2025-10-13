@@ -9,6 +9,5 @@ namespace ASI.Basecode.Services.ServiceModels
     public class OtpModel
     {
         public string HashedOtp { get; set; }
-        public DateTime Timestamp { get; set; }
     }
 }
