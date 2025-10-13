@@ -1,4 +1,4 @@
-﻿using ASI.Basecode.Data.Interfaces;
+using ASI.Basecode.Data.Interfaces;
 using ASI.Basecode.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,39 +17,54 @@ namespace ASI.Basecode.Data.Repositories
             _dbContext = dbContext;
         }
 
-        public IQueryable<Category> GetAllCategories()
+        /// <summary>
+        /// Get all product categories.
+        /// </summary>
+        /// <returns></returns>
+        public IQueryable<ProductCategory> GetAllCategories()
         {
-            // return GetDbSet<Category>();
-            return _dbContext.Categories;
+            return _dbContext.ProductCategories.AsQueryable();
         }
 
-        public Category GetCategoryByID(int categoryID)
+        /// <summary>
+        /// Get a category by its ID.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <returns></returns>
+        public ProductCategory GetCategoryByID(int categoryID)
         {
-            return _dbContext.Categories.FirstOrDefault(c => c.CategoryID == categoryID);
+            return _dbContext.ProductCategories.FirstOrDefault(c => c.CategoryID == categoryID);
         }
 
-        public void AddCategory(Category category)
+        /// <summary>
+        /// Add a new product category.
+        /// </summary>
+        /// <param name="category"></param>
+        public void AddCategory(ProductCategory category)
         {
-            category.CreatedTime = DateTime.UtcNow;
-            category.UpdatedTime = DateTime.UtcNow;
-            _dbContext.Categories.Add(category);
+            _dbContext.ProductCategories.Add(category);
             UnitOfWork.SaveChanges();
         }
 
-        public void UpdateCategory(Category category)
+        /// <summary>
+        /// Update an existing product category.
+        /// </summary>
+        /// <param name="category"></param>
+        public void UpdateCategory(ProductCategory category)
         {
-            _dbContext.Categories.Update(category);
+            _dbContext.ProductCategories.Update(category);
             UnitOfWork.SaveChanges();
         }
 
+        /// <summary>
+        /// Delete a product category by its ID.
+        /// </summary>
+        /// <param name="categoryID"></param>
         public void DeleteCategory(int categoryID)
         {
             var category = GetCategoryByID(categoryID);
-            if (category != null)
-            {
-                GetDbSet<Category>().Remove(category);
-                UnitOfWork.SaveChanges();
-            }
+            _dbContext.ProductCategories.Remove(category);
+            UnitOfWork.SaveChanges();
         }
     }
 }

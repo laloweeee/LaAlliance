@@ -3,21 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Models
 {
     public partial class Address
     {
-        public int AddressId { get; set; }
-        public string StreetAddress { get; set; }
+        public int AddressID { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
+        public string Street { get; set; }
         public string Barangay { get; set; }
         public string City { get; set; }
         public string Province { get; set; }
         public int ZipCode { get; set; }
         public string Country { get; } = "Philippines";
 
-        // Navigator
-        public ICollection<UserAddress> UserAddresses { get; set; }
-        public RestaurantProfile RestaurantProfile { get; set; }
+        //Navigator
+        public UserAddress UserAddress { get; set; } // One address can belong to one user
+        public RestaurantAddress RestaurantAddress { get; set; } // One address can belong to one restaurant
+        public Order Order { get; set; } // One address can belong to one order
     }
 }

@@ -25,21 +25,78 @@
         }
 
         /// <summary>
-        /// User Role
+        /// User Type
         /// </summary>
-        public enum UserRole
+        public enum UserType
         {
-            Customer = 0,
-            Restaurant = 1
+            Customer,
+            Restaurant
         }
 
         /// <summary>
-        /// Restaurant Permission
+        /// Order Status
         /// </summary>
-        public enum RestaurantPermission
+        public enum OrderStatus
         {
-            Admin = 0,
-            Staff = 1,
+            Pending,
+            Processing,
+            Completed,
+            Cancelled,
+            Refunded,
+            Ready
+        }
+        /// <summary>
+        /// Order Type
+        /// </summary>
+        public enum OrderType
+        {
+            Delivery,
+            Pickup
+        }
+        /// <summary>
+        /// Payment Method
+        /// </summary>
+        public enum PaymentMethod
+        {
+            CreditCard,
+            CashOnDelivery
+        }
+        /// <summary>
+        /// Payment Status
+        /// </summary>
+        public enum PaymentStatus
+        {
+            Pending,
+            Completed,
+            Failed,
+            Refunded
+        }
+        /// <summary>
+        /// Discount Type
+        /// </summary>
+        public enum DiscountType
+        {
+            Percentage,
+            FixedAmount
+        }
+        /// <summary>
+        /// Staff Role
+        /// </summary>
+        public enum StaffRole
+        {
+            Admin,
+            Staff
+        }
+
+        /// <summary>
+        /// Account Status
+        /// </summary>
+        public enum AccountStatus
+        {
+            Active,
+            Inactive,
+            Suspended,
+            Terminated
         }
     }
 }

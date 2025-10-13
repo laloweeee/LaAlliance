@@ -1,88 +1,62 @@
-﻿using ASI.Basecode.Data.Models;
+using ASI.Basecode.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Configuration
 {
     public class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
-                public void Configure(EntityTypeBuilder<Product> entity)
-                {
-                        entity.ToTable("Products");
+        public void Configure(EntityTypeBuilder<Product> builder)
+        {
+            // Primary Key
+            builder.HasKey(p => p.ProductID);
 
-                        entity.HasKey(e => e.ProductID);
+            // Properties
+            builder.Property(p => p.ProductName)
+                .IsRequired()
+                .HasMaxLength(200);
 
-                        entity.Property(e => e.ProductID)
-                                .HasColumnName("ProductID")
-                                .ValueGeneratedOnAdd();
+            builder.Property(p => p.ProductImage)
+                .HasMaxLength(500);
 
-                        entity.Property(e => e.CategoryID)
-                                .HasColumnName("CategoryID")
-                                .IsRequired();
+            builder.Property(p => p.ProductDescription)
+                .HasMaxLength(1000);
 
-                        entity.Property(e => e.Name)
-                                .HasColumnName("Name")
-                                .IsRequired()
-                                .HasMaxLength(100);
+            builder.Property(p => p.ProductPrice)
+                .IsRequired()
+                .HasPrecision(18, 2);
 
-                        entity.Property(e => e.Description)
-                                .HasColumnName("Description")
-                                .HasMaxLength(500);
+            builder.Property(p => p.IsActive)
+                .IsRequired();
 
-                        entity.Property(e => e.Price)
-                                .HasColumnName("Price")
-                                .IsRequired()
-                                .HasColumnType("decimal(10, 2)");
+            // Relationships
+            builder.HasOne(p => p.ProductCategory)
+                .WithMany(pc => pc.Products)
+                .HasForeignKey(p => p.CategoryID)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                        entity.Property(e => e.ImageUrl)
-                                .HasColumnName("ImageUrl")
-                                .HasMaxLength(255);
+            builder.HasMany(p => p.OrderItems)
+                .WithOne(oi => oi.Product)
+                .HasForeignKey(oi => oi.ProductID)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                        entity.Property(e => e.IsActive)
-                                .HasColumnName("IsActive")
-                                .IsRequired()
-                                .HasDefaultValue(true);
+            builder.HasMany(p => p.PromotionProducts)
+                .WithOne(pp => pp.Product)
+                .HasForeignKey(pp => pp.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                        entity.Property(e => e.CreatedBy)
-                                .HasColumnName("CreatedBy")
-                                .IsRequired();
+            builder.HasMany(p => p.ProductOptionGroup)
+                .WithOne(pog => pog.Product)
+                .HasForeignKey(pog => pog.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                        entity.Property(e => e.CreatedTime)
-                                .HasColumnName("CreatedTime")
-                                .HasColumnType("datetime")
-                                .IsRequired()
-                                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            builder.HasMany(p => p.CustomerProductFavorites)
+                .WithOne(cpf => cpf.Product)
+                .HasForeignKey(cpf => cpf.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                        entity.Property(e => e.UpdatedBy)
-                                .HasColumnName("UpdatedBy")
-                                .IsRequired();
-
-                        entity.Property(e => e.UpdatedTime)
-                                .HasColumnName("UpdatedTime")
-                                .HasColumnType("datetime")
-                                .IsRequired()
-                                .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
-
-                        entity.HasOne(e => e.CreatedByUser)
-                                .WithMany()
-                                .HasForeignKey(e => e.CreatedBy);
-
-                        entity.HasOne(e => e.UpdatedByUser)
-                                .WithMany()
-                                .HasForeignKey(e => e.UpdatedBy);
-
-                        entity.HasOne(e => e.Category)
-                                .WithMany(c => c.Products)
-                                .HasForeignKey(e => e.CategoryID);
-
-                        entity.HasMany(e => e.CustomizationGroups)
-                                .WithOne(cg => cg.Product)
-                                .HasForeignKey(cg => cg.ProductID);
+            // Table Name
+            builder.ToTable("Products");
         }
     }
 }

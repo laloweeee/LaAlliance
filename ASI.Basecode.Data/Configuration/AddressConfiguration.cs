@@ -6,45 +6,45 @@ namespace ASI.Basecode.Data.Configuration
 {
     public class AddressConfiguration : IEntityTypeConfiguration<Address>
     {
-        public void Configure(EntityTypeBuilder<Address> entity)
+        public void Configure(EntityTypeBuilder<Address> builder)
         {
-            entity.ToTable("Addresses");
+            // Primary Key
+            builder.HasKey(a => a.AddressID);
 
-            entity.HasKey(e => e.AddressId);
+            // Properties
+            builder.Property(a => a.Longitude)
+                .IsRequired();
 
-            entity.Property(e => e.AddressId)
-                  .HasColumnName("AddressID")
-                  .ValueGeneratedOnAdd();
+            builder.Property(a => a.Latitude)
+                .IsRequired();
 
-            entity.Property(e => e.StreetAddress)
-                  .HasColumnName("StreetAddress")
-                  .IsRequired()
-                  .HasMaxLength(200);
+            builder.Property(a => a.Street)
+                .IsRequired()
+                .HasMaxLength(255);
 
-            entity.Property(e => e.Barangay)
-                  .HasColumnName("Barangay")
-                  .IsRequired()
-                  .HasMaxLength(100);
+            builder.Property(a => a.Barangay)
+                .IsRequired()
+                .HasMaxLength(100);
 
-            entity.Property(e => e.City)
-                  .HasColumnName("City")
-                  .IsRequired()
-                  .HasMaxLength(100);
+            builder.Property(a => a.City)
+                .IsRequired()
+                .HasMaxLength(100);
 
-            entity.Property(e => e.Province)
-                  .HasColumnName("Province")
-                  .IsRequired()
-                  .HasMaxLength(100);
+            builder.Property(a => a.Province)
+                .IsRequired()
+                .HasMaxLength(100);
 
-            entity.Property(e => e.ZipCode)
-                  .HasColumnName("ZipCode")
-                  .IsRequired();
+            builder.Property(a => a.ZipCode)
+                .IsRequired();
 
-            entity.Property(e => e.Country)
-                  .HasColumnName("Country")
-                  .IsRequired()
-                  .HasMaxLength(100)
-                  .HasDefaultValue("Philippines");
+            builder.Property(a => a.Country)
+                .HasMaxLength(100)
+                .HasDefaultValue("Philippines");
+
+            // Relationships are configured in UserAddressConfiguration, RestaurantAddressConfiguration, and OrderConfiguration
+
+            // Table Name
+            builder.ToTable("Addresses");
         }
     }
 }

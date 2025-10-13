@@ -11,18 +11,6 @@
         <div class="flex items-center gap-7">
             <!-- Navigation Links (hidden on mobile) -->
             <div class="hidden md:flex items-center gap-7">
-                <a href="#"
-                   class="relative text-white text-lg font-medium cursor-pointer transition duration-300 ease-in-out hover:text-green-300">
-                    Home
-                </a>
-                <a href="#"
-                   class="relative text-white text-lg font-medium cursor-pointer transition duration-300 ease-in-out hover:text-green-300">
-                    Menu
-                </a>
-                <a href="#"
-                   class="relative text-white text-lg font-medium cursor-pointer transition duration-300 ease-in-out hover:text-green-300">
-                    About
-                </a>
             </div>
 
             <!-- Login Button (always visible) -->
@@ -37,6 +25,7 @@
 <!-- JS to toggle background color on scroll -->
 <script>
     const navbar = document.getElementById('navbar');
+    const loginButton = document.getElementById('loginButton');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 200) {
             navbar.classList.add('bg-green-600');
@@ -55,3 +44,4 @@
         }
     });
 </script>
+

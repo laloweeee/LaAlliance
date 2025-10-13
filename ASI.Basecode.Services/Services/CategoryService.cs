@@ -18,69 +18,82 @@ namespace ASI.Basecode.Services.Services
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IUserRepository _userRepository;
 
 
-        public CategoryService(ICategoryRepository categoryRepository, IUserRepository userRepository)
+        public CategoryService(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
-            _userRepository = userRepository;
         }
 
-        public IQueryable<Category> GetAllCategories()
+        /// <summary>
+        /// Get all categories
+        /// </summary>
+        /// <returns></returns>
+        public List<ProductCategory> GetAllCategories()
         {
-            return _categoryRepository.GetAllCategories();
+            return _categoryRepository.GetAllCategories().OrderBy(c => c.CategoryName).ToList();
         }
 
-        public Category GetCategoryByID(int categoryID)
+        /// <summary>
+        /// Get category by ID
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <returns></returns>
+        public ProductCategory GetCategoryByID(int categoryID)
         {
             return _categoryRepository.GetCategoryByID(categoryID);
         }
 
-        public void AddCategory(CategoryViewModel model, int userID)
+        /// <summary>
+        /// Add a new category
+        /// </summary>
+        /// <param name="model"></param>
+        /// <exception cref="ArgumentException"></exception>
+        public void AddCategory(CategoryViewModel model)
         {
             var existingCategory = _categoryRepository.GetAllCategories()
-                .FirstOrDefault(c => c.Name.ToLower().Trim() == model.Name.ToLower().Trim());
+                .FirstOrDefault(c => c.CategoryName.ToLower().Trim() == model.CategoryName.ToLower().Trim());
 
             if (existingCategory != null)
             {
                 throw new ArgumentException("A category with this name already exists.");
             }
 
-            var user = _userRepository.GetUserById(userID).FirstOrDefault() ?? throw new ArgumentException("Invalid CreatedBy user ID.");
-
-            var category = new Category
+            var category = new ProductCategory
             {
-                Name = model.Name.Trim(),
+                CategoryName = model.CategoryName.Trim(),
                 IsActive = model.IsActive,
-                CreatedByUser = user,
-                UpdatedByUser = user,
             };
 
             _categoryRepository.AddCategory(category);
         }
 
-        public void UpdateCategory(CategoryViewModel model, int userID)
+        /// <summary>
+        /// Update an existing category
+        /// </summary>
+        /// <param name="model"></param>
+        /// <exception cref="ArgumentException"></exception>
+        public void UpdateCategory(CategoryViewModel model)
         {
             var category = _categoryRepository.GetCategoryByID(model.CategoryID) ?? throw new ArgumentException("Category not found.");
 
             var existingCategory = _categoryRepository.GetAllCategories()
-                .FirstOrDefault(c => c.Name.ToLower().Trim() == model.Name.ToLower().Trim() && c.CategoryID != model.CategoryID);
+                .FirstOrDefault(c => c.CategoryName.ToLower().Trim() == model.CategoryName.ToLower().Trim() && c.CategoryID != model.CategoryID);
 
             if (existingCategory != null)
             {
                 throw new ArgumentException("A category with this name already exists.");
             }
 
-            var user = _userRepository.GetUserById(userID).FirstOrDefault() ?? throw new ArgumentException("Invalid UpdatedBy user ID.");
-
-            category.Name = model.Name.Trim();
             category.IsActive = model.IsActive;
-            category.UpdatedByUser = user;
 
             _categoryRepository.UpdateCategory(category);
         }
 
+        /// <summary>
+        /// Delete a category
+        /// </summary>
+        /// <param name="categoryID"></param>
         public void DeleteCategory(int categoryID)
         {
             _categoryRepository.DeleteCategory(categoryID);

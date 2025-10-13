@@ -20,6 +20,14 @@ namespace ASI.Basecode.Services.Services
             _blobServiceClient = new BlobServiceClient(connectionString);
         }
 
+
+        /// <summary>
+        /// Uploads an image to the specified container with the given file name.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="containerName"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public async Task<string> UploadImageAsync(IFormFile file, string containerName, string fileName)
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
@@ -38,6 +46,11 @@ namespace ASI.Basecode.Services.Services
             return blobClient.Uri.ToString();
         }
 
+        /// <summary>
+        /// Deletes an image from the specified container based on the image URL.
+        /// </summary>
+        /// <param name="imageUrl"></param>
+        /// <returns></returns>
         public async Task<bool> DeleteImageAsync(string imageUrl)
         {
             try

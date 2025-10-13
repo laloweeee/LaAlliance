@@ -59,5 +59,13 @@
         if (errorMessage) {
             toastr.error(errorMessage);
         }
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        var staff = await _db.Staff.FirstOrDefaultAsync(x => x.UserId == user.Id);
+        if (staff != null)
+        {
+            staff.LastLoginUtc = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+        }
     </script>
 }

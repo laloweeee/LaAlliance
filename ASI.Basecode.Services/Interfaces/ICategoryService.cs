@@ -10,10 +10,10 @@ namespace ASI.Basecode.Services.Interfaces
 {
     public interface ICategoryService
     {
-        IQueryable<Category> GetAllCategories();
-        Category GetCategoryByID(int categoryID);
-        void AddCategory(CategoryViewModel category, int userID);
-        void UpdateCategory(CategoryViewModel category, int userID);
+        List<ProductCategory> GetAllCategories();
+        ProductCategory GetCategoryByID(int categoryID);
+        void AddCategory(CategoryViewModel category);
+        void UpdateCategory(CategoryViewModel category);
         void DeleteCategory(int categoryID);
     }
 }

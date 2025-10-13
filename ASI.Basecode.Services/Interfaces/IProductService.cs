@@ -13,7 +13,8 @@ namespace ASI.Basecode.Services.Interfaces
         IQueryable<Product> GetAllProducts();
         IQueryable<Product> GetProductByID(int productID);
         IQueryable<Product> GetProductsByCategoryID(int categoryID);
-        Task AddProduct(ProductViewModel model, int userID);
-        Task EditProduct(ProductViewModel model, int userID);
+        IQueryable<Product> GetActiveProducts();
+        Task AddProduct(ProductViewModel model);
+        Task EditProduct(ProductViewModel model);
     }
 }

@@ -38,6 +38,10 @@ namespace ASI.Basecode.WebApp.Controllers
         [ServiceFilter(typeof(AuthenticationUserFilters))]
         public IActionResult Index()
         {
+            // Get Google API key from configuration
+            var googleApiKey = _configuration["GoogleMaps:ApiKey"] ?? _configuration["GoogleApiKey"];
+            ViewBag.GoogleApiKey = googleApiKey;
+            
             return View();
         }
     }

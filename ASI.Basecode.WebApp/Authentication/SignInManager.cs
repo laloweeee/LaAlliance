@@ -81,16 +81,50 @@ namespace ASI.Basecode.WebApp.Authentication
         {
             var token = _configuration.GetTokenAuthentication();
 
-            //TODO
+            // Get user's full name, handling null UserProfile
+            var fullName = user.UserProfile != null 
+                ? $"{user.UserProfile.FirstName} {user.UserProfile.LastName}" 
+                : user.Email;
+
             var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString(), ClaimValueTypes.String, Const.Issuer),
-                new Claim(ClaimTypes.Name, user.Email, ClaimValueTypes.String, Const.Issuer),
                 new Claim(ClaimTypes.Email, user.Email, ClaimValueTypes.String, Const.Issuer),
-                new Claim(ClaimTypes.Role, user.Role, ClaimValueTypes.String, Const.Issuer),
-                new Claim("UserId", user.UserID.ToString(), ClaimValueTypes.String, Const.Issuer),
-                new Claim("FirstName", user.FirstName, ClaimValueTypes.String, Const.Issuer),
+                new Claim(ClaimTypes.Name, fullName, ClaimValueTypes.String, Const.Issuer),
+                new Claim("UserID", user.UserID.ToString(), ClaimValueTypes.String, Const.Issuer),
             };
+
+            // Add Role claim based on UserType
+            if (user.UserType == UserType.Customer)
+            {
+                // Customer only has one role
+                claims.Add(new Claim(ClaimTypes.Role, "Customer", ClaimValueTypes.String, Const.Issuer));
+            }
+
+            else if (user.UserType == UserType.Restaurant)
+            {
+                // Restaurant users have the base "Restaurant" role
+                claims.Add(new Claim(ClaimTypes.Role, "Restaurant", ClaimValueTypes.String, Const.Issuer));
+
+                // Add specific restaurant role if available (Admin or Staff)
+                if (user.RestaurantStaff != null)
+                {
+                    // Add the specific role (Admin or Staff)
+                    var restaurantRole = user.RestaurantStaff.Role.ToString();
+                    if (!string.IsNullOrEmpty(restaurantRole))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, restaurantRole, ClaimValueTypes.String, Const.Issuer));
+                        claims.Add(new Claim("RestaurantRole", restaurantRole, ClaimValueTypes.String, Const.Issuer));
+                    }
+
+                    // Add StaffID if available
+                    if (user.RestaurantStaff.StaffID > 0)
+                    {
+                        claims.Add(new Claim("StaffID", user.RestaurantStaff.StaffID.ToString(), ClaimValueTypes.String, Const.Issuer));
+                    }
+                }
+            }
+
             return new ClaimsIdentity(claims, Const.AuthenticationScheme);
         }
 
