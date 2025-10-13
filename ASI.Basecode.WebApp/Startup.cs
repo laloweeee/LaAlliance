@@ -6,7 +6,9 @@ using ASI.Basecode.WebApp.Authentication;
 using ASI.Basecode.WebApp.Extensions.Configuration;
 using ASI.Basecode.WebApp.Models;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Text;
+using Azure.Storage.Blobs;
 
 namespace ASI.Basecode.WebApp
 {
@@ -83,13 +86,25 @@ namespace ASI.Basecode.WebApp
 
             services.AddMemoryCache();
 
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "DataProtection-Keys")))
+                .SetApplicationName("ASI.Basecode.WebApp");
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            });
+
             // Register SQL database configuration context as services.
             services.AddDbContext<AsiBasecodeDBContext>(options =>
             {
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 32)),
                     mysqloptions => mysqloptions.CommandTimeout(120));
-                    
+
             });
 
             services.AddControllersWithViews();
@@ -97,6 +112,14 @@ namespace ASI.Basecode.WebApp
 
             //Configuration
             services.Configure<TokenAuthentication>(Configuration.GetSection("TokenAuthentication"));
+
+            services.AddScoped<BlobContainerClient>(provider =>
+            {
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var connectionString = configuration.GetConnectionString("AzureBlobStorage");
+                var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+                return blobServiceClient.GetBlobContainerClient("products");
+            });
 
             // Session
             services.AddSession(options =>
@@ -116,21 +139,21 @@ namespace ASI.Basecode.WebApp
             // RBAC
             services.AddAuthorization(options =>
             {
-                // Role base policies for Customer and Restaurant   
+                // Customer policy
                 options.AddPolicy("Customer", policy =>
                     policy.RequireRole("Customer"));
 
+                // Restaurant policy - both Admin and Staff can access
                 options.AddPolicy("Restaurant", policy =>
-                    policy.RequireRole("Restaurant"));
+                    policy.RequireRole("Restaurant", "Admin", "Staff"));
 
-                // Permission base policies for Restaurant
-                options.AddPolicy("Admin", policy => 
-                    policy.RequireRole("Restaurant")
-                        .RequireClaim("RestaurantPermission", "Admin"));
+                // Admin-only policy
+                options.AddPolicy("RestaurantAdmin", policy =>
+                    policy.RequireRole("Admin"));
 
-                options.AddPolicy("Staff", policy =>
-                    policy.RequireRole("Restaurant")
-                        .RequireClaim("RestaurantPermission", "Staff", "Admin"));
+                // Staff policy - both Admin and Staff can access
+                options.AddPolicy("RestaurantStaff", policy =>
+                    policy.RequireRole("Admin", "Staff"));
             });
 
             services.Configure<FormOptions>(options =>
@@ -177,10 +200,9 @@ namespace ASI.Basecode.WebApp
 
             app.UseEndpoints(endpoints =>
             {
-                // Enables support for Areas (Admin/Restaurant in your case)
                 endpoints.MapControllerRoute(
                     name: "areas",
-                    pattern: "{area:exists}/{controller=Restaurant}/{action=Dashboard}/{id?}");
+                    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
                 // Default fallback (non-area controllers/views)
                 endpoints.MapDefaultControllerRoute();

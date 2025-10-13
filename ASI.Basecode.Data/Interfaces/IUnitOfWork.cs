@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Interfaces
 {

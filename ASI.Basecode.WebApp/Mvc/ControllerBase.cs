@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using ASI.Basecode.Services.Interfaces;
 
 namespace ASI.Basecode.WebApp.Mvc
 {
@@ -29,6 +30,9 @@ namespace ASI.Basecode.WebApp.Mvc
         /// <summary>Session</summary>
         protected ISession _session => _httpContextAccessor.HttpContext.Session;
 
+        /// <summary>Cart Service</summary>
+        protected readonly ICartService _cartService;
+
         /// <summary>
         /// Initializes a new instance of the ControllerBase{TController} class.
         /// </summary>
@@ -41,13 +45,15 @@ namespace ASI.Basecode.WebApp.Mvc
                                 IHttpContextAccessor httpContextAccessor,
                                 ILoggerFactory loggerFactory,
                                 IConfiguration configuration,
-                                IMapper mapper = null)
+                                IMapper mapper = null,
+                                ICartService cartService = null)
         {
             this._httpContextAccessor = httpContextAccessor;
             this._configuration = configuration;
             this._logger = loggerFactory.CreateLogger<TController>();
             this._configuration = configuration;
             this._mapper = mapper;
+            this._cartService = cartService;
         }
 
         /// <summary>Mapper</summary>
@@ -56,9 +62,9 @@ namespace ASI.Basecode.WebApp.Mvc
         /// <summary>
         /// Get UserId.
         /// </summary>
-        public string UserId
+        public int UserId
         {
-            get { return User.FindFirst(ClaimTypes.NameIdentifier).Value; }
+            get { return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value); }
         }
 
         /// <summary>
@@ -115,6 +121,25 @@ namespace ASI.Basecode.WebApp.Mvc
         /// <param name="context">context</param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+            base.OnActionExecuting(context);
+
+            if (_cartService != null && UserId > 0)
+            {
+                try
+                {
+                    var cart = _cartService.GetOrCreateCart(UserId);
+                    ViewBag.CartCount = cart.CartItems?.Sum(item => item.Quantity) ?? 0;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error loading cart count");
+                    ViewBag.CartCount = 0;
+                }
+            }
+            else
+            {
+                ViewBag.CartCount = 0;
+            }
         }
 
         /// <summary>

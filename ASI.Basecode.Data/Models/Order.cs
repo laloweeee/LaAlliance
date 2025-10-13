@@ -3,27 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Models
 {
-    public class Order
+    public partial class Order
     {
-        public int OrderId { get; set; }
-        public int UserId { get; set; }
-        public int RestaurantId { get; set; }
-        public Decimal SubTotal { get; set; }
-        public Decimal Total { get; set; }
-        public Decimal DeliveryFee { get; set; }
-        public Decimal DiscountAmount { get; set; }
-        
-        // TODO: public int PromotionId { get; set; }
+        public int OrderID { get; set; }
+        public int UserID { get; set; }
+        public int? PromotionID { get; set; }
+        public int OrderAddressID { get; set; }
 
-        public string OrderType { get; set; }
-        public string OderStatus { get; set; }
-        public string paymentStatus { get; set; }
-        public DateTime CreatedTime { get; set; } // Timestamp of creation
-        public DateTime UpdatedTime { get; set; } // Timestamp of last update
-        public TimeOnly ElapsedTime { get; set; }
-        public int ManagedBy { get; set; } // UserID of the handling staff
+        public DateTime OrderDate { get; set; }
+        public decimal SubTotal { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal TotalAmount { get; set; }
+
+        public OrderType OrderType { get; set; } = OrderType.Delivery;
+        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.CreditCard;
+
+        //Navigator
+        public RestaurantPromotions RestaurantPromotion { get; set; } // One order can have one promotion
+        public User User { get; set; } // One order is placed by one user
+        public Address Address { get; set; } // One order has one address
+        public OrderProcessed OrderProcessed { get; set; } // One order has one order processed
+        public ICollection<OrderItems> OrderItems { get; set; } = new List<OrderItems>(); // One order can have multiple order items
+        public ICollection<PaymentLog> PaymentLogs { get; set; } = new List<PaymentLog>(); // One Order → Many Payments
     }
 }

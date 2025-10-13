@@ -1,0 +1,681 @@
+﻿@{
+    ViewData["Title"] = "LaAlliancé";
+}
+
+@model ASI.Basecode.WebApp.Areas.Restaurant.Models.MenuViewModel
+
+<div class="mt-4">
+    <!-- Tab Navigation -->
+    <div class="bg-gray-100 rounded-xl p-3">
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 w-full md:w-auto">
+                <!-- Tab Navigation -->
+                <div class="flex space-x-4">
+                    <button id="products-tab"
+                        class="tab-button @(ViewBag.ActiveTab == "products" ? "active bg-emerald-600 text-white" : "bg-white text-gray-700") whitespace-nowrap py-2 px-4 rounded-md font-medium text-sm focus:outline-none transition-colors duration-200">
+                        <i class="fas fa-pizza-slice mr-2"></i>
+                        Products
+                    </button>
+                    <button id="categories-tab"
+                        class="tab-button @(ViewBag.ActiveTab == "categories" ? "active bg-emerald-600 text-white" : "bg-white text-gray-700") whitespace-nowrap py-2 px-4 rounded-md font-medium text-sm focus:outline-none transition-colors duration-200">
+                        <i class="fas fa-tags mr-2"></i>
+                        Categories
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Button -->
+            <div id="products-add-button" class="@(ViewBag.ActiveTab == "products" ? "" : "hidden") w-full md:w-auto">
+                @{
+                    var hasActiveCategories = Model.Categories.Any(c => c.IsActive);
+                }
+                @if (hasActiveCategories)
+                {
+                    <a asp-controller="Menu" asp-action="ProductForm" asp-area="Restaurant" asp-route-returnTab="products"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center md:justify-start transition-all duration-200 shadow-md hover:shadow-lg w-full md:w-auto">
+                        <i class="fas fa-plus mr-2"></i>
+                        <span class="font-medium">Add Product</span>
+                    </a>
+                }
+                else
+                {
+                    <button disabled
+                        title="Please create at least one active category first"
+                        class="bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center justify-center md:justify-start cursor-not-allowed w-full md:w-auto opacity-60">
+                        <i class="fas fa-plus mr-2"></i>
+                        <span class="font-medium">Add Product</span>
+                    </button>
+                }
+            </div>
+
+            <div id="categories-add-button" class="@(ViewBag.ActiveTab == "categories" ? "" : "hidden") w-full md:w-auto">
+                <a asp-controller="Menu" asp-action="CategoryForm" asp-area="Restaurant" asp-route-returnTab="categories"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center md:justify-start transition-all duration-200 shadow-md hover:shadow-lg w-full md:w-auto">
+                    <i class="fas fa-plus mr-2"></i>
+                    <span class="font-medium">Add Category</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section for Products -->
+    <div id="products-filters" class="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 @(ViewBag.ActiveTab == "products" ? "" : "hidden")">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-filter text-emerald-600 mr-2"></i>
+                Filter Products
+            </h3>
+            <button id="toggle-product-filters" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center">
+                <i class="fas fa-chevron-down mr-1 transition-transform" id="product-filter-icon"></i>
+                <span>Show Filters</span>
+            </button>
+        </div>
+        
+        <div id="product-filter-container" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <!-- Name Filter -->
+                <div>
+                    <label for="product-name-filter" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                    <input type="text" id="product-name-filter" placeholder="Search by name" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+                
+                <!-- Price Range Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+                    <div class="flex space-x-2 items-center">
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">₱</span>
+                            <input type="number" id="product-min-price" placeholder="Min" min="0" 
+                                   class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                        </div>
+                        <span class="text-gray-500">-</span>
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">₱</span>
+                            <input type="number" id="product-max-price" placeholder="Max" min="0" 
+                                   class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category Filter -->
+                <div>
+                    <label for="product-category-filter" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="product-category-filter" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                        <option value="">All Categories</option>
+                        @foreach (var category in Model.Categories.Where(c => c.IsActive))
+                        {
+                            <option value="@category.CategoryID">@category.CategoryName</option>
+                        }
+                    </select>
+                </div>
+                
+                <!-- Availability Filter -->
+                <div>
+                    <label for="product-status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="product-status-filter" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button id="reset-product-filters" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    Reset Filters
+                </button>
+                <button id="apply-product-filters" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters Section for Categories -->
+    <div id="categories-filters" class="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 @(ViewBag.ActiveTab == "categories" ? "" : "hidden")">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-filter text-emerald-600 mr-2"></i>
+                Filter Categories
+            </h3>
+            <button id="toggle-category-filters" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center">
+                <i class="fas fa-chevron-down mr-1 transition-transform" id="category-filter-icon"></i>
+                <span>Show Filters</span>
+            </button>
+        </div>
+        
+        <div id="category-filter-container" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Name Filter -->
+                <div>
+                    <label for="category-name-filter" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
+                    <input type="text" id="category-name-filter" placeholder="Search by name" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+                
+                <!-- Availability Filter -->
+                <div>
+                    <label for="category-status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="category-status-filter" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button id="reset-category-filters" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    Reset Filters
+                </button>
+                <button id="apply-category-filters" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6">
+        <!-- Products Tab Content -->
+        <div id="products-content" class="tab-content @(ViewBag.ActiveTab == "products" ? "" : "hidden")">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Products</h2>
+                    <p class="text-gray-600"><span id="filtered-product-count">@ViewBag.Products.Count</span> products available</p>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            @if (ViewBag.Products != null && ViewBag.Products.Count > 0)
+            {
+                <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @foreach (var product in ViewBag.Products)
+                    {
+                        <div class="product-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group"
+                             data-name="@product.ProductName.ToLower()" 
+                             data-price="@product.ProductPrice" 
+                             data-category="@product.CategoryID" 
+                             data-status="@(product.IsActive ? "active" : "inactive")">
+                            <!-- Image Container with Overlay -->
+                            <div class="relative aspect-w-16 aspect-h-9 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                                <img src="@(product.ProductImage ?? "https://via.placeholder.com/300x200")"
+                                     alt="@product.ProductName"
+                                     class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110">
+
+                                <!-- Status Badge Overlay -->
+                                <div class="absolute top-3 right-3">
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm @(product.IsActive ? "bg-green-500/90 text-white" : "bg-red-500/90 text-white") shadow-lg">
+                                        <i class="fas fa-circle text-[8px] mr-1.5 @(product.IsActive ? "animate-pulse" : "")"></i>
+                                        @(product.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </div>
+
+                                <!-- Category Badge Overlay -->
+                                <div class="absolute top-3 left-3">
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white/90 text-gray-700 backdrop-blur-sm shadow-md">
+                                        <i class="fas fa-tag mr-1.5 text-emerald-600"></i>
+                                        @product.ProductCategory.CategoryName
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-5">
+                                <!-- Product Name -->
+                                <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem] group-hover:text-emerald-600 transition-colors duration-200">
+                                    @product.ProductName
+                                </h3>
+
+                                <!-- Description -->
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+                                    @product.ProductDescription
+                                </p>
+
+                                <!-- Price Section -->
+                                <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+                                    <div class="flex items-baseline">
+                                        <span class="text-2xl font-bold text-emerald-600">₱@product.ProductPrice.ToString("N2")</span>
+                                    </div>
+                                    <div class="flex items-center text-gray-500 text-xs">
+                                        <i class="fas fa-chart-line mr-1"></i>
+                                        <span>ID: @product.ProductID</span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex gap-2">
+                                    <a asp-controller="Menu" 
+                                    asp-action="ProductForm" 
+                                    asp-area="Restaurant" 
+                                    asp-route-productID="@product.ProductID" 
+                                    asp-route-returnTab="products"
+                                    class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Hover Effect Indicator -->
+                            <div class="h-1 bg-gradient-to-r from-emerald-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                        </div>
+                    }
+                </div>
+                <!-- No Results Message -->
+                <div id="no-products-results" class="hidden text-center py-8">
+                    <i class="fas fa-filter text-4xl text-gray-300 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-600 mb-1">No products match your filters</h3>
+                    <p class="text-gray-500 mb-4">Try adjusting your search criteria</p>
+                    <button id="clear-product-filters" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        Clear All Filters
+                    </button>
+                </div>
+            }
+            else
+            {
+                @if (ViewBag.Categories.Count == 0)
+                {
+                    <div class="text-center py-12">
+                        <i class="fas fa-exclamation-triangle text-6xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">No categories available</h3>
+                        <p class="text-gray-500 mb-4">Please create at least one active category before adding products</p>
+                        <a asp-controller="Menu" asp-action="CategoryForm" asp-area="Restaurant" asp-route-returnTab="categories"
+                            class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Category
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12">
+                        <i class="fas fa-exclamation-triangle text-6xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">No products available</h3>
+                        <p class="text-gray-500 mb-4">Get started by adding your first product</p>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Categories Tab Content -->
+        <div id="categories-content" class="tab-content @(ViewBag.ActiveTab == "categories" ? "" : "hidden")">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Categories</h2>
+                    <p class="text-gray-600"><span id="filtered-category-count">@Model.Categories.Count()</span> categories available</p>
+                </div>
+            </div>
+
+            <!-- Categories Grid -->
+            @if (Model.Categories != null && Model.Categories.Count() > 0)
+            {
+                <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <div class="category-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group"
+                            data-name="@category.CategoryName.ToLower()" 
+                            data-status="@(category.IsActive ? "active" : "inactive")"
+                            data-category-id="@category.CategoryID">
+                            
+                            <!-- Header Section with Icon and Status -->
+                            <div class="relative bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 border-b border-emerald-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <!-- Icon Container -->
+                                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                                        <i class="fas fa-tag text-white text-2xl"></i>
+                                    </div>
+                                    
+                                    <!-- Status Badge -->
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold @(category.IsActive ? "bg-green-500 text-white shadow-lg" : "bg-red-500 text-white shadow-lg")">
+                                        <i class="fas fa-circle text-[8px] mr-1.5 @(category.IsActive ? "animate-pulse" : "")"></i>
+                                        @(category.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </div>
+                                
+                                <!-- Category Name -->
+                                <h3 class="text-xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-200 mb-1">
+                                    @category.CategoryName
+                                </h3>
+                                
+                                <!-- Category ID Badge -->
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-white/60 text-gray-600 text-xs font-mono">
+                                        <i class="fas fa-hashtag text-[10px] mr-1"></i>
+                                        @category.CategoryID
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Content Section -->
+                            <div class="p-6">
+                                <!-- Stats Section -->
+                                <div class="mb-6 pb-4 border-b border-gray-100">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-pizza-slice text-blue-600 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500 mb-0.5">Total Products</p>
+                                            <p class="text-2xl font-bold text-gray-900">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex gap-2">
+                                    <a asp-controller="Menu" 
+                                    asp-action="CategoryForm" 
+                                    asp-area="Restaurant" 
+                                    asp-route-categoryID="@category.CategoryID" 
+                                    asp-route-returnTab="categories"
+                                    class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit</span>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Hover Effect Indicator -->
+                            <div class="h-1 bg-gradient-to-r from-emerald-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                        </div>
+                    }
+                </div>
+                <!-- No Results Message -->
+                <div id="no-categories-results" class="hidden text-center py-8">
+                    <i class="fas fa-filter text-4xl text-gray-300 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-600 mb-1">No categories match your filters</h3>
+                    <p class="text-gray-500 mb-4">Try adjusting your search criteria</p>
+                    <button id="clear-category-filters" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        Clear All Filters
+                    </button>
+                </div>
+            }
+            else
+            {
+                <!-- Empty State for Categories -->
+                <div class="text-center py-12">
+                    <i class="fas fa-tags text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No categories found</h3>
+                    <p class="text-gray-500 mb-4">Get started by creating your first category</p>
+                    <a asp-controller="Menu" asp-action="CategoryForm" asp-area="Restaurant" asp-route-returnTab="categories"
+                        class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Category
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toastr notifications - properly escaped
+        @if (TempData["ToastrSuccess"] != null)
+        {
+            <text>toastr.success(@Json.Serialize(TempData["ToastrSuccess"].ToString()));</text>
+        }
+
+        @if (TempData["ToastrError"] != null)
+        {
+            <text>toastr.error(@Json.Serialize(TempData["ToastrError"].ToString()));</text>
+        }
+
+        @if (TempData["ToastrWarning"] != null)
+        {
+            <text>toastr.warning(@Json.Serialize(TempData["ToastrWarning"].ToString()));</text>
+        }
+
+        @if (TempData["ToastrInfo"] != null)
+        {
+            <text>toastr.info(@Json.Serialize(TempData["ToastrInfo"].ToString()));</text>
+        }
+
+        // Configure toastr for mobile
+        toastr.options = {
+            "positionClass": window.innerWidth < 768 ? "toast-bottom-center" : "toast-top-right",
+            "timeOut": "3000"
+        };
+
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const productsAddButton = document.getElementById('products-add-button');
+        const categoriesAddButton = document.getElementById('categories-add-button');
+        const productsFilters = document.getElementById('products-filters');
+        const categoriesFilters = document.getElementById('categories-filters');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const targetTab = this.id.replace('-tab', '-content');
+                const activeTab = this.id.replace('-tab', ''); // products or categories
+
+                // Remove active class from all tabs
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-emerald-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-700');
+                });
+
+                tabContents.forEach(content => content.classList.add('hidden'));
+
+                // Add active class to clicked tab
+                this.classList.add('active', 'bg-emerald-600', 'text-white');
+                this.classList.remove('bg-white', 'text-gray-700');
+                document.getElementById(targetTab).classList.remove('hidden');
+
+                // Toggle Add buttons and filter sections
+                if (this.id === 'products-tab') {
+                    productsAddButton.classList.remove('hidden');
+                    categoriesAddButton.classList.add('hidden');
+                    productsFilters.classList.remove('hidden');
+                    categoriesFilters.classList.add('hidden');
+                    filterProducts(); // Apply current filters
+                } else if (this.id === 'categories-tab') {
+                    productsAddButton.classList.add('hidden');
+                    categoriesAddButton.classList.remove('hidden');
+                    productsFilters.classList.add('hidden');
+                    categoriesFilters.classList.remove('hidden');
+                    filterCategories(); // Apply current filters
+                }
+
+                // Update URL with active tab without reloading the page
+                const url = new URL(window.location);
+                url.searchParams.set('activeTab', activeTab);
+                window.history.pushState({}, '', url);
+
+                // Update all links with current tab
+                updateLinks(activeTab);
+            });
+        });
+
+        // Toggle Product Filters
+        document.getElementById('toggle-product-filters').addEventListener('click', function() {
+            const filterContainer = document.getElementById('product-filter-container');
+            const filterIcon = document.getElementById('product-filter-icon');
+            const isHidden = filterContainer.classList.contains('hidden');
+            
+            if (isHidden) {
+                filterContainer.classList.remove('hidden');
+                filterIcon.classList.add('rotate-180');
+                this.querySelector('span').textContent = 'Hide Filters';
+            } else {
+                filterContainer.classList.add('hidden');
+                filterIcon.classList.remove('rotate-180');
+                this.querySelector('span').textContent = 'Show Filters';
+            }
+        });
+        
+        // Toggle Category Filters
+        document.getElementById('toggle-category-filters').addEventListener('click', function() {
+            const filterContainer = document.getElementById('category-filter-container');
+            const filterIcon = document.getElementById('category-filter-icon');
+            const isHidden = filterContainer.classList.contains('hidden');
+            
+            if (isHidden) {
+                filterContainer.classList.remove('hidden');
+                filterIcon.classList.add('rotate-180');
+                this.querySelector('span').textContent = 'Hide Filters';
+            } else {
+                filterContainer.classList.add('hidden');
+                filterIcon.classList.remove('rotate-180');
+                this.querySelector('span').textContent = 'Show Filters';
+            }
+        });
+
+        // Product Filter Function
+        function filterProducts() {
+            const nameFilter = document.getElementById('product-name-filter')?.value.toLowerCase().trim() || '';
+            const minPrice = parseFloat(document.getElementById('product-min-price')?.value || 0);
+            const maxPrice = parseFloat(document.getElementById('product-max-price')?.value || Number.MAX_SAFE_INTEGER);
+            const categoryFilter = document.getElementById('product-category-filter')?.value || '';
+            const statusFilter = document.getElementById('product-status-filter')?.value || '';
+            
+            const productCards = document.querySelectorAll('.product-card');
+            let visibleCount = 0;
+            
+            productCards.forEach(card => {
+                const name = card.dataset.name;
+                const price = parseFloat(card.dataset.price);
+                const category = card.dataset.category;
+                const status = card.dataset.status;
+                
+                // Check if the product matches all filters
+                const matchesName = name.includes(nameFilter);
+                const matchesPrice = price >= minPrice && (maxPrice === Number.MAX_SAFE_INTEGER || price <= maxPrice);
+                const matchesCategory = categoryFilter === '' || category === categoryFilter;
+                const matchesStatus = statusFilter === '' || status === statusFilter;
+                
+                if (matchesName && matchesPrice && matchesCategory && matchesStatus) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            // Update count and show/hide no results message
+            document.getElementById('filtered-product-count').textContent = visibleCount;
+            const noResultsEl = document.getElementById('no-products-results');
+            const productsGrid = document.getElementById('products-grid');
+            
+            if (visibleCount === 0) {
+                noResultsEl.classList.remove('hidden');
+                productsGrid.classList.add('hidden');
+            } else {
+                noResultsEl.classList.add('hidden');
+                productsGrid.classList.remove('hidden');
+            }
+        }
+        
+        // Category Filter Function
+        function filterCategories() {
+            const nameFilter = document.getElementById('category-name-filter')?.value.toLowerCase().trim() || '';
+            const statusFilter = document.getElementById('category-status-filter')?.value || '';
+            
+            const categoryCards = document.querySelectorAll('.category-card');
+            let visibleCount = 0;
+            
+            categoryCards.forEach(card => {
+                const name = card.dataset.name;
+                const status = card.dataset.status;
+                
+                // Check if the category matches all filters
+                const matchesName = name.includes(nameFilter);
+                const matchesStatus = statusFilter === '' || status === statusFilter;
+                
+                if (matchesName && matchesStatus) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            // Update count and show/hide no results message
+            document.getElementById('filtered-category-count').textContent = visibleCount;
+            const noResultsEl = document.getElementById('no-categories-results');
+            const categoriesGrid = document.getElementById('categories-grid');
+            
+            if (visibleCount === 0) {
+                noResultsEl.classList.remove('hidden');
+                categoriesGrid.classList.add('hidden');
+            } else {
+                noResultsEl.classList.add('hidden');
+                categoriesGrid.classList.remove('hidden');
+            }
+        }
+        
+        // Apply Product Filters
+        document.getElementById('apply-product-filters')?.addEventListener('click', filterProducts);
+        
+        // Apply Category Filters
+        document.getElementById('apply-category-filters')?.addEventListener('click', filterCategories);
+        
+        // Reset Product Filters
+        document.getElementById('reset-product-filters')?.addEventListener('click', function() {
+            document.getElementById('product-name-filter').value = '';
+            document.getElementById('product-min-price').value = '';
+            document.getElementById('product-max-price').value = '';
+            document.getElementById('product-category-filter').value = '';
+            document.getElementById('product-status-filter').value = '';
+            filterProducts();
+        });
+        
+        // Reset Category Filters
+        document.getElementById('reset-category-filters')?.addEventListener('click', function() {
+            document.getElementById('category-name-filter').value = '';
+            document.getElementById('category-status-filter').value = '';
+            filterCategories();
+        });
+        
+        // Clear Product Filters button on no results
+        document.getElementById('clear-product-filters')?.addEventListener('click', function() {
+            document.getElementById('product-name-filter').value = '';
+            document.getElementById('product-min-price').value = '';
+            document.getElementById('product-max-price').value = '';
+            document.getElementById('product-category-filter').value = '';
+            document.getElementById('product-status-filter').value = '';
+            filterProducts();
+        });
+        
+        // Clear Category Filters button on no results
+        document.getElementById('clear-category-filters')?.addEventListener('click', function() {
+            document.getElementById('category-name-filter').value = '';
+            document.getElementById('category-status-filter').value = '';
+            filterCategories();
+        });
+        
+        // Input event listeners for products filters (real-time filtering)
+        ['product-name-filter', 'product-min-price', 'product-max-price', 'product-category-filter', 'product-status-filter'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', filterProducts);
+            }
+        });
+        
+        // Input event listeners for category filters (real-time filtering)
+        ['category-name-filter', 'category-status-filter'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', filterCategories);
+            }
+        });
+
+        // Function to update links with current active tab
+        function updateLinks(activeTab) {
+            const links = document.querySelectorAll('a[href*="CategoryForm"], a[href*="ProductForm"]');
+            links.forEach(link => {
+                const url = new URL(link.href, window.location.origin);
+                url.searchParams.set('returnTab', activeTab);
+                link.href = url.toString();
+            });
+        }
+
+        // Initialize links on page load
+        const initialTab = '@ViewBag.ActiveTab';
+        updateLinks(initialTab);
+    });
+</script>

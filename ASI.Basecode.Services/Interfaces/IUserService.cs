@@ -1,5 +1,6 @@
 ﻿using ASI.Basecode.Data.Models;
 using ASI.Basecode.Services.ServiceModels;
+using System.Linq;
 using System.Threading.Tasks;
 using static ASI.Basecode.Resources.Constants.Enums;
 
@@ -13,5 +14,6 @@ namespace ASI.Basecode.Services.Interfaces
         // bool IsRestaurantAdmin(User user);
         // bool IsRestaurantStaff(User user);
         void AddUser(UserViewModel model);
+        IQueryable<User> GetUserByID(int userID);
     }
 }

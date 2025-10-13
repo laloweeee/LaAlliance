@@ -23,6 +23,13 @@ namespace ASI.Basecode.Services.Services
             _repository = repository;
         }
 
+        /// <summary>
+        /// Authenticate user function
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public LoginResult AuthenticateUser(string email, string password, ref User user)
         {
             user = new User();
@@ -41,17 +48,17 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public bool IsCustomer(User user)
         {
-            return user?.Role == UserRole.Customer.ToString();
+            return user?.UserType == UserType.Customer;
         }
 
         /// <summary>
         /// Determines whether the specified user has the role of a restaurant.
         /// </summary>
-        /// <param name="user">The user to evaluate. Must not be <see langword="null"/>.</param>
-        /// <returns><see langword="true"/> if the user's role is "Restaurant"; otherwise, <see langword="false"/>.</returns>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public bool IsRestaurant(User user)
         {
-            return user?.Role == UserRole.Restaurant.ToString();
+            return user?.UserType == UserType.Restaurant;
         }
 
         /// <summary>
@@ -61,22 +68,40 @@ namespace ASI.Basecode.Services.Services
         /// <exception cref="InvalidDataException"></exception>
         public void AddUser(UserViewModel model)
         {
-            var user = new User();
-            if (!_repository.UserExists(model.Email))
+            if (model == null)
             {
-                _mapper.Map(model, user);
-                user.Email = model.Email;
-                user.Password = PasswordManager.EncryptPassword(model.Password);
-                user.Role = UserRole.Customer.ToString();
-                user.CreatedTime = DateTime.Now;
-                user.UpdatedTime = DateTime.Now;
-
-                _repository.AddUser(user);
+                throw new ArgumentNullException(nameof(model));
             }
-            else
+
+            if (_repository.UserExists(model.Email))
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserExists);
             }
+
+            var user = new User
+            {
+                Email = model.Email,
+                UserProfile = new UserProfile
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName
+                },
+                Password = PasswordManager.EncryptPassword(model.Password),
+                UserType = UserType.Customer,
+                IsEmailVerified = false
+            };
+
+            _repository.AddUser(user);
+        }
+
+        /// <summary>
+        /// Get user by ID
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        public IQueryable<User> GetUserByID(int userID)
+        {
+            return _repository.GetUserByID(userID).AsQueryable();
         }
     }
 }

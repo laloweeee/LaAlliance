@@ -1,0 +1,364 @@
+﻿@{
+    ViewData["Title"] = "Staff Management";
+}
+
+<div id="staff" class="section active">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Staff Management</h2>
+        <button onclick="window.showAddStaff()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>Add Staff Member
+        </button>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff Member</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="staffTbody" class="bg-white divide-y divide-gray-200">
+                <tr data-staff-id="1">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="text-blue-600 font-medium">JD</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">John Doe</div>
+                                <div class="text-sm text-gray-500">john@restaurant.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Manager</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 hours ago</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button onclick="window.editStaff(1)" class="text-blue-600 hover:text-blue-900">Edit</button>
+                        <button onclick="window.deleteStaff(1)" class="text-red-600 hover:text-red-900">Delete</button>
+                    </td>
+                </tr>
+                <tr data-staff-id="2">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="text-blue-600 font-medium">JS</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">Jane Smith</div>
+                                <div class="text-sm text-gray-500">jane@restaurant.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Cashier</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 hour ago</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button onclick="window.editStaff(2)" class="text-blue-600 hover:text-blue-900">Edit</button>
+                        <button onclick="window.deleteStaff(2)" class="text-red-600 hover:text-red-900">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add/Edit Staff Modal (one modal for both) -->
+<div id="addStaffModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
+    <!-- key changes: max-h, flex column, scrollable body, sticky header -->
+    <div class="bg-white w-full max-w-2xl rounded-lg shadow-lg overflow-hidden max-h-[85vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10">
+            <h2 id="staffModalTitle" class="text-2xl font-bold text-gray-800">Add Staff Member</h2>
+            <button type="button" class="text-gray-500 hover:text-gray-700" onclick="window.hideAddStaff()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto flex-1">
+            <form id="addStaffForm" class="space-y-6">
+                <input type="hidden" id="editingStaffId" value="">
+
+                <!-- First / Last / Email -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                        <input type="text" id="staffFirstName" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="John" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                        <input type="text" id="staffLastName" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Doe" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="staffEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="john@restaurant.com" required>
+                    </div>
+                </div>
+
+                <!-- Phone / Role -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                        <input type="tel" id="staffPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="(555) 123-4567" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                        <select id="staffRole" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                            <option value="">Select Role</option>
+                            <option>Manager</option>
+                            <option>Chef</option>
+                            <option>Cashier</option>
+                            <option>Delivery</option>
+                            <option>Kitchen Staff</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <textarea id="staffAddress" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="2" placeholder="123 Main Street, City, State, ZIP"></textarea>
+                </div>
+
+                <!-- Status / Hire Date / Salary -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select id="staffStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                            <option>On Leave</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Hire Date</label>
+                        <input type="date" id="staffHireDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Annual Salary ($)</label>
+                        <input type="number" id="staffSalary" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="45000" min="0" step="1000">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="staffPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="••••••••">
+                        <p class="text-xs text-gray-500 mt-1">Leave blank when editing to keep the current password.</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-6 border-t">
+                    <button type="button" onclick="window.hideAddStaff()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button id="staffSubmitBtn" type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                        Add Staff Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Staff Confirmation -->
+<div id="deleteStaffModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
+    <div class="bg-white w-full max-w-md rounded-lg shadow-lg overflow-hidden max-h-[75vh] flex flex-col">
+        <div class="p-6 overflow-y-auto">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Delete Staff Member</h3>
+                    <p class="text-sm text-gray-600">This action cannot be undone</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete "<span id="deleteStaffName" class="font-semibold"></span>"?</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="window.hideDeleteStaffConfirm()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                <button id="confirmDeleteStaffBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const baseUrl = '/Restaurant/Staff';
+
+        function rolePill(role){
+          const map={Manager:'green',Chef:'purple',Cashier:'blue',Delivery:'indigo','Kitchen Staff':'gray'};
+          const c=map[role]||'gray';
+          return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${c}-100 text-${c}-800">${role}</span>`;
+        }
+        function statusPill(status){
+          const c = status==='Active'?'green':(status==='On Leave'?'yellow':'red');
+          return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${c}-100 text-${c}-800">${status}</span>`;
+        }
+        function initials(first,last){ return `${first?.[0]||''}${last?.[0]||''}`.toUpperCase(); }
+
+        function rowTemplate(s){
+          return `
+          <tr data-id="${s.id}">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span class="text-blue-600 font-medium">${initials(s.firstName,s.lastName)}</span>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">${s.firstName} ${s.lastName}</div>
+                  <div class="text-sm text-gray-500">${s.email}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">${rolePill(s.role)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${statusPill(s.status)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${s.lastLogin || '—'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+              <button class="text-blue-600 hover:text-blue-900" onclick="editStaff(${s.id})">Edit</button>
+              <button class="text-red-600 hover:text-red-900" onclick="deleteStaff(${s.id})">Delete</button>
+            </td>
+          </tr>`;
+        }
+
+        async function loadTable(){
+          const res = await fetch(`${baseUrl}/List`);
+          const json = await res.json();
+          const tbody = document.getElementById('staffTbody');
+          tbody.innerHTML = '';
+          json.data.forEach(x => tbody.insertAdjacentHTML('beforeend', rowTemplate(x)));
+        }
+
+        // modal helpers 
+        function openModal(){ const m=document.getElementById('addStaffModal'); m.classList.remove('hidden'); m.classList.add('flex');}
+        function closeModal(){ const m=document.getElementById('addStaffModal'); m.classList.add('hidden'); m.classList.remove('flex');}
+        function setReadOnly(disabled){
+          document.querySelectorAll('#addStaffForm input, #addStaffForm select, #addStaffForm textarea')
+            .forEach(el => el.disabled = disabled);
+          document.getElementById('staffPassword').closest('div').style.display = disabled ? 'none' : '';
+          document.getElementById('staffSubmitBtn').style.display = disabled ? 'none' : '';
+        }
+
+        // open 'Add
+        window.showAddStaff = function(){
+          document.getElementById('staffModalTitle').textContent = 'Add Staff Member';
+          document.getElementById('staffSubmitBtn').textContent = 'Add Staff Member';
+          document.getElementById('addStaffForm').reset();
+          document.getElementById('editingStaffId').value = '';
+          setReadOnly(false);
+          openModal();
+        };
+        window.hideAddStaff = closeModal;
+
+        // open 'Edit 
+        window.editStaff = async function(id){
+          const res = await fetch(`${baseUrl}/Get/${id}`);
+          const { data } = await res.json();
+          fillForm(data);
+          document.getElementById('editingStaffId').value = id;
+          document.getElementById('staffModalTitle').textContent = 'Edit Staff Member';
+          document.getElementById('staffSubmitBtn').textContent = 'Update Staff Member';
+          setReadOnly(false);
+          openModal();
+        };
+
+        // double-click to view details (read-only)
+        document.getElementById('staffTbody').addEventListener('dblclick', async (e)=>{
+          const tr = e.target.closest('tr[data-id]');
+          if(!tr) return;
+          const id = tr.getAttribute('data-id');
+          const res = await fetch(`${baseUrl}/Get/${id}`);
+          const { data } = await res.json();
+          fillForm(data);
+          document.getElementById('editingStaffId').value = id;
+          document.getElementById('staffModalTitle').textContent = 'Staff Details';
+          setReadOnly(true); // everything disabled, password hidden, submit hidden
+          openModal();
+        });
+
+        function fillForm(d){
+          document.getElementById('staffFirstName').value = d.firstName || '';
+          document.getElementById('staffLastName').value  = d.lastName || '';
+          document.getElementById('staffEmail').value     = d.email || '';
+          document.getElementById('staffPhone').value     = d.phone || '';
+          document.getElementById('staffAddress').value   = d.address || '';
+          document.getElementById('staffRole').value      = d.role || '';
+          document.getElementById('staffStatus').value    = d.status || 'Active';
+          document.getElementById('staffHireDate').value  = d.hireDate ? d.hireDate.substring(0,10) : '';
+          document.getElementById('staffSalary').value    = d.annualSalary ?? '';
+          document.getElementById('staffPassword').value  = '';
+        }
+
+        // save (create/update) 
+        document.getElementById('addStaffForm').addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          const id = document.getElementById('editingStaffId').value;
+          const payload = {
+            id: id ? Number(id) : null,
+            firstName: document.getElementById('staffFirstName').value.trim(),
+            lastName:  document.getElementById('staffLastName').value.trim(),
+            email:     document.getElementById('staffEmail').value.trim(),
+            phone:     document.getElementById('staffPhone').value.trim(),
+            address:   document.getElementById('staffAddress').value.trim(),
+            role:      document.getElementById('staffRole').value,
+            status:    document.getElementById('staffStatus').value,
+            hireDate:  document.getElementById('staffHireDate').value || null,
+            annualSalary: Number(document.getElementById('staffSalary').value || 0),
+            password:  document.getElementById('staffPassword').value || null
+          };
+
+          const url = id ? `${baseUrl}/Update/${id}` : `${baseUrl}/Create`;
+          const method = id ? 'PUT' : 'POST';
+
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const json = await res.json();
+          if(!json.ok){ alert(json.message || 'Failed'); return; }
+
+          closeModal();
+          await loadTable();
+        });
+
+        //delete 
+        let staffToDeleteId = null;
+        window.deleteStaff = function(id){
+          staffToDeleteId = id;
+          document.getElementById('deleteStaffName').textContent =
+            document.querySelector(`tr[data-id="${id}"] td .text-gray-900`).textContent;
+          const m = document.getElementById('deleteStaffModal'); m.classList.remove('hidden'); m.classList.add('flex');
+        };
+        window.hideDeleteStaffConfirm = function(){
+          staffToDeleteId = null;
+          const m = document.getElementById('deleteStaffModal'); m.classList.add('hidden'); m.classList.remove('flex');
+        };
+        document.getElementById('confirmDeleteStaffBtn').addEventListener('click', async ()=>{
+          if(!staffToDeleteId) return;
+          const res = await fetch(`${baseUrl}/Delete/${staffToDeleteId}`, { method: 'DELETE' });
+          const json = await res.json();
+          if(json.ok){
+            document.querySelector(`tr[data-id="${staffToDeleteId}"]`)?.remove();
+          }
+          window.hideDeleteStaffConfirm();
+        });
+
+        // boot 
+        document.addEventListener('DOMContentLoaded', loadTable);
+    </script>
+}
+

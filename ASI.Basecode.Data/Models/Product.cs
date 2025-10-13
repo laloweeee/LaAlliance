@@ -6,18 +6,21 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public class Product
+    public partial class Product
     {
-        public int ProductId { get; set; }
-        public int CategoryId { get; set; }
-        public int RestaurantId { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ImageUrl { get; set; }
-        public decimal Price { get; set; }
-        public int CreatedBy { get; set; } // UserID of the creator
-        public DateTime CreatedTime { get; set; } // Timestamp of creation
-        public int UpdatedBy { get; set; } // UserID of the last updater
-        public DateTime UpdatedTime { get; set; } // Timestamp of last update
+        public int ProductID { get; set; }
+        public int CategoryID { get; set; }
+        public string ProductName { get; set; }
+        public string ProductImage { get; set; }
+        public string ProductDescription { get; set; }
+        public decimal ProductPrice { get; set; }
+        public bool IsActive { get; set; } = true;
+
+        // Navigator
+        public ProductCategory ProductCategory { get; set; } // One product belongs to one product category
+        public ICollection<OrderItems> OrderItems { get; set; } = new List<OrderItems>(); // One product can be in multiple order items
+        public ICollection<PromotionProducts> PromotionProducts { get; set; } = new List<PromotionProducts>(); // One product can be in multiple promotional products
+        public ICollection<ProductOptionGroup> ProductOptionGroup { get; set; } = new List<ProductOptionGroup>(); // One product can have multiple product option groups
+        public ICollection<CustomerProductFavorites> CustomerProductFavorites { get; set; } = new List<CustomerProductFavorites>(); // One product can be favorited by multiple customers
     }
 }

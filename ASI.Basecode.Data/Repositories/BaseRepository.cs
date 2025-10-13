@@ -2,7 +2,6 @@
 using ASI.Basecode.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Repositories
 {
@@ -18,11 +17,21 @@ namespace ASI.Basecode.Data.Repositories
             UnitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Get the DbSet for the specified entity type.
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
         protected virtual DbSet<TEntity> GetDbSet<TEntity>() where TEntity : class
         {
             return Context.Set<TEntity>();
         }
 
+        /// <summary>
+        /// Set the entity state for the specified entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="entityState"></param>
         protected virtual void SetEntityState(object entity, EntityState entityState)
         {
             Context.Entry(entity).State = entityState;

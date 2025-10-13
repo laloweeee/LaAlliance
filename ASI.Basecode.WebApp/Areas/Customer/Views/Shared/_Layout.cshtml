@@ -12,10 +12,10 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    @await Html.PartialAsync("_CustomerNavbar")
-    <main>
+    <partial name="_TopBar" />    
+    <div class="bg-neutral-100">
         @RenderBody()
-    </main>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -25,7 +25,6 @@
     <script src="https://kit.fontawesome.com/7a7c645416.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script>
-        // Configure Toastr options
         toastr.options = {
             positionClass: "toast-top-center", // Set the notification position to center
             timeOut: 3000,

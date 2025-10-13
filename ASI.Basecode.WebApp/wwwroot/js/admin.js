@@ -90,9 +90,11 @@ window.initPromoAnalytics = function () {
     });
 };
 
-// =====================================================
-// Exact JavaScript from sampleAdminPortal.html (after // Navigation)
-// =====================================================
+window.addEventListener('click', function (e) {
+    if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('show');
+    }
+});
 
 // Navigation
 function showSection(sectionId) {
@@ -170,9 +172,7 @@ function filterStaff() {
     });
 }
 
-// ==============================
-// MENU STATE
-// ==============================
+//menu state
 const menuState = {
     categories: [
         { id: 'Burgers', name: 'Burgers' },
@@ -187,9 +187,7 @@ const menuState = {
 
 const genId = (p = 'i') => p + Math.random().toString(36).slice(2, 8);
 
-// ==============================
-// RENDERERS
-// ==============================
+//renders
 function renderCategoryFilter() {
     const sel = document.getElementById('categoryFilter');
     if (!sel) return;
@@ -262,17 +260,13 @@ function renderAllMenu() {
     renderItemsTable();
 }
 
-// ==============================
-// FILTER
-// ==============================
+//filter
 window.applyCategoryFilter = function (value) {
     menuState.filter = value || 'ALL';
     renderItemsTable();
 };
 
-// ==============================
-// CATEGORY: add / edit / delete
-// ==============================
+//category
 window.showAddCategory = () => openModal('addCategoryModal');
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -428,3 +422,36 @@ window.showDeleteItem = (id) => {
     document.getElementById('deleteItemId').value = id;
     openModal('deleteConfirmModal');
 };
+
+//dropdown menu
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('userMenuButton');
+    const menu = document.getElementById('userMenu');
+    if (!btn || !menu) return;
+
+    function openMenu() {
+        menu.classList.remove('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+    }
+    function closeMenu() {
+        if (!menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        menu.classList.contains('hidden') ? openMenu() : closeMenu();
+    });
+
+    // click outside
+    document.addEventListener('click', function (e) {
+        if (!menu.contains(e.target) && e.target !== btn) closeMenu();
+    });
+
+    // Esc to close
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeMenu();
+    });
+});

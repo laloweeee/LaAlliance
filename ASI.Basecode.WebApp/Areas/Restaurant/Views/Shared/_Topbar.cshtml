@@ -1,31 +1,254 @@
-﻿<div id="topbar" class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center">
-            <button class="mr-4 text-gray-500 md:hidden" id="menu-toggle">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
-                <p class="text-sm text-gray-500">Welcome back, John! Here's what's happening today.</p>
-            </div>
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    var currentAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLower();
+    var currentController = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "").ToLower();
+
+    string IsActive(string controller, string action = "*")
+    {
+        return currentController.Equals(controller.ToLower()) &&
+        (action == "*" || currentAction.Equals(action.ToLower()))
+        ? "bg-emerald-600 text-white font-bold hover:bg-emerald-700"
+        : "text-black hover:bg-emerald-400 hover:bg-opacity-30";
+    }
+
+    string ItemClass(string controller, string action = "*")
+    => $"nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {IsActive(controller, action)}";
+
+    string IconClass(string controller, string action = "*")
+    => currentController.Equals(controller.ToLower()) &&
+    (action == "*" || currentAction.Equals(action.ToLower()))
+    ? "w-5 text-white transition-all duration-300 ease-in-out"
+    : "w-5 text-black transition-all duration-300 ease-in-out";
+}
+
+<div id="topbar" class="px-4 py-3 md:px-6 md:py-4 w-full">
+    <div class="flex items-center justify-between w-full max-w-full">
+        <!-- Logo Section -->
+        <div class="flex items-center gap-1">
+            <img src="~/img/LaAlliance-logo.png" alt="logo" class="h-8 w-auto md:h-12" />
+            <span class="text-xl md:text-3xl font-bold sidebar-logo">LaAlliancé</span>
         </div>
 
-        <div class="flex items-center space-x-4">
-            <div class="relative hidden md:block">
-                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+        <div class="align-center flex flex-row items-center gap-2 md:gap-4">
+            <!-- Mobile Menu Toggle -->
+            <button id="mobileMenuToggle" class="lg:hidden rounded-lg p-2 text-gray-600 hover:bg-gray-100">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <!-- NAV LINKS -->
+            <div id="navLinks" class="hidden lg:flex space-x-2 xl:space-x-4 bg-gray-100 p-2 rounded-xl items-center">
+                <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index"
+                    class="@(ItemClass("Dashboard"))">
+                    <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Dashboard</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Profile" asp-action="Index" class="@ItemClass("Profile")">
+                    <i class="fas fa-store @IconClass("Profile")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Restaurant</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
+                    <i class="fas fa-utensils @IconClass("Menu")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Menu Book</span>
+                </a>
+                <a asp-area="Restaurant" asp-controller="Promotions" asp-action="Index"
+                    class="@ItemClass("Promotions")">
+                    <i class="fas fa-bullhorn @IconClass("Promotions")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Promotions</span>
+                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-area="Restaurant" asp-controller="Staff" asp-action="Index" class="@ItemClass("Staff")">
+                        <i class="fas fa-users @IconClass("Staff")"></i>
+                        <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Staff</span>
+                    </a>
+                }
+                <a asp-area="Restaurant" asp-controller="Finance" asp-action="Index" class="@ItemClass("Finance")"> 
+                    <i class="fas fa-money-bill-wave @IconClass("Finance")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Finance</span>
+                </a>
             </div>
 
-            <button class="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
-                <i class="fas fa-bell text-xl"></i>
+            <!-- Notification Button -->
+            <button class="relative rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                <i class="fas fa-bell text-lg md:text-xl"></i>
                 <span class="notification-dot"></span>
             </button>
 
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-user text-green-600"></i>
+            <!-- PROFILE ICON -->
+            <div class="relative">
+                <button id="profileBtn"
+                    class="flex flex-row items-center space-x-2 focus:outline-none hover:opacity-80 transition-opacity">
+                    <i class="fa fa-user-circle fa-2x"></i>
+                    <h3 class="text-lg">@ViewBag.UserName</h3>
+                    <i id="chevron" class="fa fa-chevron-down ml-1 transition-transform"></i>
+                </button>
+                <!-- Dropdown Menu -->
+                <div id="dropdownMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden z-50">
+                    <div class="py-1">
+                        <a asp-area="" asp-controller="Account" asp-action="Logout" class="block px-4 py-2 text-gray-800 hover:bg-emerald-500 hover:text-white transition-colors">
+                            <i class="fa fa-sign-out mr-2"></i>Logout
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-emerald-500 hover:text-white transition-colors">
+                            <i class="fa fa-user mr-2"></i>Profile
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-emerald-500 hover:text-white transition-colors">
+                            <i class="fa fa-cog mr-2"></i>Settings
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobileMenu" class="lg:hidden hidden mt-4 bg-gray-100 rounded-xl p-4 space-y-2">
+        <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index"
+            class="@(ItemClass("Dashboard"))">
+            <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Dashboard</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Profile" asp-action="Index" class="@ItemClass("Profile")">
+            <i class="fas fa-store @IconClass("Profile")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Restaurant</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
+            <i class="fas fa-utensils @IconClass("Menu")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Menu Book</span>
+        </a>
+        <a asp-area="Restaurant" asp-controller="Promotions" asp-action="Index"
+            class="@ItemClass("Promotions")">
+            <i class="fas fa-bullhorn @IconClass("Promotions")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Promotions</span>
+        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-area="Restaurant" asp-controller="Staff" asp-action="Index" class="@ItemClass("Staff")">
+                <i class="fas fa-users @IconClass("Staff")"></i>
+                <span class="menu-text transition-all duration-300 ease-in-out">Staff</span>
+            </a>
+        }
+        <a asp-area="Restaurant" asp-controller="Finance" asp-action="Index" class="@ItemClass("Finance")"> 
+            <i class="fas fa-money-bill-wave @IconClass("Finance")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Finance</span>
+        </a>
+    </div>
 </div>
+
+<style>
+    #topbar {
+        flex: 1;
+        width: 100%;
+    }
+
+    .notification-dot {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        height: 0.5rem;
+        width: 0.5rem;
+        background-color: #ef4444;
+        border-radius: 50%;
+    }
+    
+    .menu-text {
+        white-space: nowrap;
+    }
+
+    /* Responsive nav items */
+    .nav-item {
+        justify-content: center;
+    }
+
+    @@media (min-width: 1280px) {
+        .nav-item {
+            justify-content: flex-start;
+        }
+    }
+
+    @@media (min-width: 768px) {
+        #topbar {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+    }
+
+    /* Mobile menu animation */
+    #mobileMenu {
+        animation: slideDown 0.3s ease-in-out;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (mobileMenuToggle && mobileMenu) {
+            mobileMenuToggle.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Mobile sidebar toggle (existing code)
+        const mobileToggleBtn = document.getElementById('mobileSidebarToggle');
+
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', function () {
+                const sidebar = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebarBackdrop');
+
+                if (sidebar && backdrop) {
+                    sidebar.classList.toggle('sidebar-mobile-open');
+                    backdrop.classList.toggle('hidden');
+                }
+            });
+        }
+    });
+
+    const profileBtn = document.getElementById('profileBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const chevron = document.getElementById('chevron');
+
+    // Toggle dropdown on button click
+    profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = dropdownMenu.classList.contains('hidden');
+
+        if (isHidden) {
+            dropdownMenu.classList.remove('hidden');
+            chevron.classList.add('rotate-180');
+        } else {
+            dropdownMenu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
+    });
+
+    // Close dropdown when clicking a link (optional)
+    dropdownMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            dropdownMenu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        });
+    });
+</script>
