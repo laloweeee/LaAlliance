@@ -23,10 +23,10 @@ namespace ASI.Basecode.Data.Configuration
                 .IsRequired();
 
             // Relationships
-            builder.HasOne(pog => pog.CartItemOption)
+            builder.HasMany(pog => pog.CartItemOptions)
                 .WithOne(cio => cio.ProductOptionGroup)
-                .HasForeignKey<CartItemOption>(cio => cio.ProductOptionGroupID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(cio => cio.ProductOptionGroupID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(pog => pog.ProductOptionItems)
                 .WithOne(poi => poi.ProductOptionGroup)
@@ -36,7 +36,7 @@ namespace ASI.Basecode.Data.Configuration
             builder.HasMany(pog => pog.OrderItemOption)
                 .WithOne(oio => oio.ProductOptionGroup)
                 .HasForeignKey(oio => oio.ProductOptionGroupID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Table Name
             builder.ToTable("ProductOptionGroups");

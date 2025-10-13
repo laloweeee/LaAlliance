@@ -146,11 +146,9 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasIndex("CartItemID");
 
-                    b.HasIndex("ProductOptionGroupID")
-                        .IsUnique();
+                    b.HasIndex("ProductOptionGroupID");
 
-                    b.HasIndex("ProductOptionItemID")
-                        .IsUnique();
+                    b.HasIndex("ProductOptionItemID");
 
                     b.ToTable("CartItemOptions", (string)null);
                 });
@@ -902,15 +900,15 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ASI.Basecode.Data.Models.ProductOptionGroup", "ProductOptionGroup")
-                        .WithOne("CartItemOption")
-                        .HasForeignKey("ASI.Basecode.Data.Models.CartItemOption", "ProductOptionGroupID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .WithMany("CartItemOptions")
+                        .HasForeignKey("ProductOptionGroupID")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ASI.Basecode.Data.Models.ProductOptionItems", "ProductOptionItems")
-                        .WithOne("CartItemOption")
-                        .HasForeignKey("ASI.Basecode.Data.Models.CartItemOption", "ProductOptionItemID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .WithMany("CartItemOptions")
+                        .HasForeignKey("ProductOptionItemID")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CartItem");
@@ -976,13 +974,13 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasOne("ASI.Basecode.Data.Models.ProductOptionGroup", "ProductOptionGroup")
                         .WithMany("OrderItemOption")
                         .HasForeignKey("ProductOptionGroupID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ASI.Basecode.Data.Models.ProductOptionItems", "ProductOptionItems")
                         .WithMany("OrderItemOption")
                         .HasForeignKey("ProductOptionItemID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("OrderItems");
@@ -1230,7 +1228,7 @@ namespace ASI.Basecode.Data.Migrations
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.ProductOptionGroup", b =>
                 {
-                    b.Navigation("CartItemOption");
+                    b.Navigation("CartItemOptions");
 
                     b.Navigation("OrderItemOption");
 
@@ -1239,7 +1237,7 @@ namespace ASI.Basecode.Data.Migrations
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.ProductOptionItems", b =>
                 {
-                    b.Navigation("CartItemOption");
+                    b.Navigation("CartItemOptions");
 
                     b.Navigation("OrderItemOption");
                 });

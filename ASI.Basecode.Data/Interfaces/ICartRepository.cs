@@ -1,49 +1,24 @@
 using ASI.Basecode.Data.Models;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace ASI.Basecode.Data.Interfaces
 {
-    /// <summary>
-    /// Interface for Cart Repository
-    /// </summary>
     public interface ICartRepository
     {
-        /// <summary>
-        /// Add a new cart
-        /// </summary>
-        /// <param name="cart"></param>
+        // Cart operations
+        IQueryable<Cart> GetCarts();
+        Cart GetCartByUserID(int userId);
         void AddCart(Cart cart);
-
-        /// <summary>
-        /// Update an existing cart
-        /// </summary>
-        /// <param name="cart"></param>
         void UpdateCart(Cart cart);
+        void ClearCart(int userId);
 
-        /// <summary>
-        /// Delete a cart by its ID
-        /// </summary>
-        /// <param name="cartID"></param>
-        void DeleteCart(int cartID);
-
-        /// <summary>
-        /// Get a cart by its ID
-        /// </summary>
-        /// <param name="cartID"></param>
-        /// <returns></returns>
-        Cart GetCartById(int cartID);
-
-        /// <summary>
-        /// Get cart by user ID
-        /// </summary>
-        /// <param name="userID"></param>
-        /// <returns></returns>
-        Cart GetCartByUserId(int userID);
-
-        /// <summary>
-        /// Get all carts
-        /// </summary>
-        /// <returns></returns>
-        IEnumerable<Cart> GetAllCarts();
+        // CartItem operations
+        IQueryable<CartItem> GetCartItems();
+        void UpdateCartItem(CartItem cartItem);
+        void AddCartItem(CartItem cartItem);
+        CartItem GetCartItemByID(int cartItemId);
+        void RemoveCartItem(CartItem cartItem);
+        void AddCartItemOptions(int cartItemId, Dictionary<int, List<int>> selectedOptions);
     }
 }

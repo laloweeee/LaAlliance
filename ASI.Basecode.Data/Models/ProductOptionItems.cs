@@ -15,7 +15,7 @@ namespace ASI.Basecode.Data.Models
 
         // Navigator
         public ProductOptionGroup ProductOptionGroup { get; set; } // One product option item belongs to one product option group
-        public CartItemOption CartItemOption { get; set; } // One product option item can be associated with one cart item option
+        public ICollection<CartItemOption> CartItemOptions { get; set; } = new List<CartItemOption>(); // One product option item can be associated with multiple cart item options
         public ICollection<OrderItemOption> OrderItemOption { get; set; } = new List<OrderItemOption>(); // One product option item can be associated with multiple order item options
     }
 }

@@ -42,12 +42,14 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IFileHandlingService, FileHandlingService>();
             this._services.AddScoped<IProductService, ProductService>();
             this._services.AddScoped<IRestaurantProfileService, RestaurantProfileService>();
+            this._services.AddScoped<ICartService, CartService>();
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
             this._services.AddScoped<ICategoryRepository, CategoryRepository>();
             this._services.AddScoped<IProductRepository, ProductRepository>();
             this._services.AddScoped<IRestaurantProfileRepository, RestaurantProfileRepository>();
+            this._services.AddScoped<ICartRepository, CartRepository>();
 
             // Manager Class
             this._services.AddScoped<SignInManager>();

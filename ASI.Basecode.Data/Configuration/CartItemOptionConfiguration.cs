@@ -21,8 +21,6 @@ namespace ASI.Basecode.Data.Configuration
             builder.Property(cio => cio.ProductOptionItemID)
                 .IsRequired();
 
-            // Relationships are configured in CartItemConfiguration, ProductOptionGroupConfiguration, and ProductOptionItemsConfiguration
-
             // Table Name
             builder.ToTable("CartItemOptions");
         }

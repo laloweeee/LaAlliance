@@ -21,15 +21,15 @@ namespace ASI.Basecode.Data.Configuration
                 .HasPrecision(18, 2);
 
             // Relationships
-            builder.HasOne(poi => poi.CartItemOption)
+            builder.HasMany(poi => poi.CartItemOptions)
                 .WithOne(cio => cio.ProductOptionItems)
-                .HasForeignKey<CartItemOption>(cio => cio.ProductOptionItemID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(cio => cio.ProductOptionItemID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(poi => poi.OrderItemOption)
                 .WithOne(oio => oio.ProductOptionItems)
                 .HasForeignKey(oio => oio.ProductOptionItemID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Table Name
             builder.ToTable("ProductOptionItems");
