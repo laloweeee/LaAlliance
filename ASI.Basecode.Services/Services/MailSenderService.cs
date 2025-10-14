@@ -80,16 +80,16 @@ namespace ASI.Basecode.Services.Services
             {
                 var subject = "Verify Your Email - LaAllianc�";
                 var htmlContent = $@"
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-                <h2 style='color: #4CAF50;'>Verify Your Email Address</h2>
-                <p>Thank you for registering with LaAllianc�! To complete your registration, please use the verification code below:</p>
-                <div style='background-color: #f2f2f2; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;'>
-                    {otpCode}
-                </div>
-                <p>This code will expire in 10 minutes.</p>
-                <p>If you didn't create an account with LaAllianc�, you can safely ignore this email.</p>
-                <p>Thank you,<br>The LaAllianc� Team</p>
-            </div>";
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                        <h2 style='color: #4CAF50;'>Verify Your Email Address</h2>
+                        <p>Thank you for registering with LaAllianc�! To complete your registration, please use the verification code below:</p>
+                        <div style='background-color: #f2f2f2; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;'>
+                            {otpCode}
+                        </div>
+                        <p>This code will expire in 10 minutes.</p>
+                        <p>If you didn't create an account with LaAllianc�, you can safely ignore this email.</p>
+                        <p>Thank you,<br>The LaAllianc� Team</p>
+                    </div>";
 
                 await sendCustomEmailAsync(toEmail, subject, htmlContent);
                 _logger.LogInformation($"Verification email sent to {toEmail}");

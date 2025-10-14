@@ -251,5 +251,157 @@ namespace ASI.Basecode.Services.Services
 
             _repository.UpdateUser(user);
         }
+
+        #region Password Reset Methods
+
+        /// <summary>
+        /// Creates and sends OTP for password reset
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<bool> CreatePasswordResetOtp(string email)
+        {
+            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var otp = GenerateOtp();
+            var timestamp = DateTime.UtcNow;
+            var encryptedOtp = EncryptOtp(otp, timestamp);
+
+            user.ResetPasswordHashToken = encryptedOtp;
+            _repository.UpdateUser(user);
+
+            await _mailSender.SendPasswordResetEmailAsync(email, otp.ToString());
+            return true;
+        }
+
+        /// <summary>
+        /// Verifies password reset OTP
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="otpCode"></param>
+        /// <returns></returns>
+        public bool VerifyPasswordResetOTP(string email, int otpCode)
+        {
+            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+
+            if (user == null || string.IsNullOrEmpty(user.ResetPasswordHashToken))
+                return false;
+
+            try
+            {
+                var (storedOtp, timestamp) = DecryptOtp(user.ResetPasswordHashToken);
+
+                if (storedOtp != otpCode)
+                    return false;
+
+                if (DateTime.UtcNow.Subtract(timestamp).TotalMinutes > OtpExpiryMinutes)
+                    return false;
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Clears password reset OTP
+        /// </summary>
+        /// <param name="email"></param>
+        public void ClearPasswordResetOtp(string email)
+        {
+            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+
+            if (user != null)
+            {
+                user.ResetPasswordHashToken = null;
+                _repository.UpdateUser(user);
+            }
+        }
+
+        #endregion
+
+        #region Email Change Methods
+
+        /// <summary>
+        /// Creates and sends OTP for email change (can be for current email or new email)
+        /// </summary>
+        /// <param name="email">Email address to send OTP to</param>
+        /// <param name="newEmail">Optional: If provided, stores this as the pending new email</param>
+        /// <returns></returns>
+        public async Task<bool> CreateEmailChangeOtp(string email, string newEmail = null)
+        {
+            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var otp = GenerateOtp();
+            var timestamp = DateTime.UtcNow;
+            var encryptedOtp = EncryptOtp(otp, timestamp);
+
+            // Store OTP in EmailHashToken for email change verification
+            user.EmailHashToken = encryptedOtp;
+            _repository.UpdateUser(user);
+
+            await _mailSender.SendEmailVerificationAsync(email, otp);
+            return true;
+        }
+
+        /// <summary>
+        /// Verifies email change OTP
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="otpCode"></param>
+        /// <returns></returns>
+        public bool VerifyEmailChangeOTP(string email, int otpCode)
+        {
+            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+
+            if (user == null || string.IsNullOrEmpty(user.EmailHashToken))
+                return false;
+
+            try
+            {
+                var (storedOtp, timestamp) = DecryptOtp(user.EmailHashToken);
+
+                if (storedOtp != otpCode)
+                    return false;
+
+                if (DateTime.UtcNow.Subtract(timestamp).TotalMinutes > OtpExpiryMinutes)
+                    return false;
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Clears email change OTP
+        /// </summary>
+        /// <param name="email"></param>
+        public void ClearEmailChangeOtp(string email)
+        {
+            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+
+            if (user != null)
+            {
+                user.EmailHashToken = null;
+                _repository.UpdateUser(user);
+            }
+        }
+
+        #endregion
     }
 }

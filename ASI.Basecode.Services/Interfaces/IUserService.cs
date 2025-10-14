@@ -14,5 +14,10 @@ namespace ASI.Basecode.Services.Interfaces
 
         void UpdatePassword(int userID, string newPassword);
         bool VerifyPassword(int userID, string currentPassword);
+
+        // Email change methods
+        User GetUserByEmail(string email);
+        bool IsEmailAvailable(string email);
+        void UpdateEmail(int userID, string newEmail);
     }
 }

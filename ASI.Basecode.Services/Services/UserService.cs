@@ -100,7 +100,7 @@ namespace ASI.Basecode.Services.Services
             }
             return true;
         }
-        
+
         /// <summary>
         /// Update password
         /// </summary>
@@ -119,6 +119,51 @@ namespace ASI.Basecode.Services.Services
             var passwordKey = PasswordManager.EncryptPassword(newPassword);
             user.Password = passwordKey;
 
+            _repository.UpdateUser(user);
+        }
+
+        /// <summary>
+        /// Get user by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public User GetUserByEmail(string email)
+        {
+            return _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+        }
+
+        /// <summary>
+        /// Check if email is available (not already taken)
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public bool IsEmailAvailable(string email)
+        {
+            return !_repository.UserExists(email);
+        }
+
+        /// <summary>
+        /// Update user email
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="newEmail"></param>
+        /// <exception cref="InvalidDataException"></exception>
+        public void UpdateEmail(int userID, string newEmail)
+        {
+            var user = GetUserByID(userID);
+
+            if (user == null)
+            {
+                throw new InvalidDataException("User not found.");
+            }
+
+            if (!IsEmailAvailable(newEmail))
+            {
+                throw new InvalidDataException("Email is already in use.");
+            }
+
+            user.Email = newEmail;
+            user.IsEmailVerified = true;
             _repository.UpdateUser(user);
         }
     }
