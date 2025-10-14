@@ -9,11 +9,10 @@ namespace ASI.Basecode.Services.Interfaces
     public interface IUserService
     {
         LoginResult AuthenticateUser(string email, string password, ref User user);
-        bool IsCustomer(User user);
-        bool IsRestaurant(User user);
-        // bool IsRestaurantAdmin(User user);
-        // bool IsRestaurantStaff(User user);
         void AddUser(UserViewModel model);
         User GetUserByID(int userID);
+
+        void UpdatePassword(int userID, string newPassword);
+        bool VerifyPassword(int userID, string currentPassword);
     }
 }

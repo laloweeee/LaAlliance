@@ -15,6 +15,7 @@ namespace ASI.Basecode.Data.Configuration
             // Properties
             builder.Property(u => u.Email)
                 .IsRequired()
+                .HasColumnType("varchar(255)")
                 .HasMaxLength(255);
 
             builder.Property(u => u.Password)

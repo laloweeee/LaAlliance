@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.WebApp.Areas.Customer.Models;
 using ASI.Basecode.Services.ServiceModels;
+using System.IO;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -17,18 +18,21 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
     {
         private readonly IUserService _userService;
         private readonly IUserProfileService _userProfileService;
+        private readonly IAddressService _addressService;
         public AccountController(
                     IHttpContextAccessor httpContextAccessor,
                     ILoggerFactory loggerFactory,
                     IConfiguration configuration,
                     IUserService userService,
                     IUserProfileService userProfileService,
+                    IAddressService addressService,
                     IMapper mapper = null,
                     ICartService cartService = null)
                     : base(httpContextAccessor, loggerFactory, configuration, mapper, cartService
         )
         {
             _userService = userService;
+            _addressService = addressService;
             _userProfileService = userProfileService;
         }
 
@@ -40,7 +44,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         public IActionResult Index()
         {
             var user = _userService.GetUserByID(UserId);
-            var address = _userProfileService.GetUserAddresses(UserId);
+            var address = _addressService.GetUserAddresses(UserId);
 
             if (user == null)
             {
@@ -133,6 +137,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             }
         }
 
+        #region Address Management
+
         /// <summary>
         /// Displays the address form for adding or editing an address.
         /// </summary>
@@ -149,7 +155,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             // If id is provided, load the existing address for editing
             if (id.HasValue)
             {
-                var addresses = _userProfileService.GetUserAddresses(UserId);
+                var addresses = _addressService.GetUserAddresses(UserId);
                 var address = addresses.FirstOrDefault(a => a.UserAddressID == id.Value);
 
                 if (address != null)
@@ -198,12 +204,12 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 // Check if AddressID is present to determine if it's an update or new address
                 if (model.AddressID > 0)
                 {
-                    _userProfileService.UpdateUserAddress(userAddress, UserId);
+                    _addressService.UpdateUserAddress(userAddress, UserId);
                     TempData["SuccessMessage"] = "Address updated successfully.";
                 }
                 else
                 {
-                    _userProfileService.AddUserAddress(userAddress);
+                    _addressService.AddUserAddress(userAddress);
                     TempData["SuccessMessage"] = "Address added successfully.";
                 }
 
@@ -226,20 +232,105 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteAddress(int addressID)
+        public IActionResult DeleteAddress(int id)
         {
             try
             {
-                _userProfileService.RemoveUserAddress(addressID);
+                _addressService.RemoveUserAddress(id, UserId);
                 TempData["SuccessMessage"] = "Address deleted successfully.";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting address ID {AddressId} for user ID {UserId}", addressID, UserId);
+                _logger.LogError(ex, "Error deleting address ID {AddressId} for user ID {UserId}", id, UserId);
                 TempData["ErrorMessage"] = "An error occurred while deleting the address. Please try again.";
             }
 
             return RedirectToAction("Index");
         }
+
+        #endregion
+
+        #region Password Management
+
+        
+
+        /// <summary>
+        /// Displays the password change form.
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult PasswordForm()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Changes the user's password.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChangePassword(PasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("PasswordForm", model);
+            }
+
+            if (TempData != null)
+            {
+                TempData.Remove("ErrorMessage");
+                TempData.Remove("SuccessMessage");
+            }
+
+            var user = _userService.GetUserByID(UserId);
+
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Login", "Auth", new { area = "Customer" });
+            }
+
+            if (model.NewPassword == model.CurrentPassword)
+            {
+                TempData["ErrorMessage"] = "The new password must be different from the current password.";
+                return View("PasswordForm", model);
+            }
+
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                TempData["ErrorMessage"] = "The new password and confirmation password do not match.";
+                return View("PasswordForm", model);
+            }
+
+
+            try
+            {
+                // Verify current password
+                if (!_userService.VerifyPassword(UserId, model.CurrentPassword))
+                {
+                    return View("PasswordForm", model);
+                }
+
+                // Update to new password
+                //_userService.UpdatePassword(UserId, model.NewPassword);
+                TempData["SuccessMessage"] = "Password changed successfully.";
+                return RedirectToAction("Index");
+            }
+            catch (InvalidDataException ex)
+            {
+                _logger.LogError(ex, "Error changing password for user ID {UserId}", UserId);
+                TempData["ErrorMessage"] = ex.Message;
+                return View("PasswordForm", model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for user ID {UserId}", UserId);
+                TempData["ErrorMessage"] = "An error occurred while changing your password. Please try again.";
+                return View("PasswordForm", model);
+            }
+        }
+
+        #endregion
     }
 }
