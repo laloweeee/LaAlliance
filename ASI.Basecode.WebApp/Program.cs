@@ -29,9 +29,11 @@ appBuilder.Logging
 var configurer = new StartupConfigurer(appBuilder.Configuration);
 configurer.ConfigureServices(appBuilder.Services);
 
+// Register DbContext
 appBuilder.Services.AddDbContext<AsiBasecodeDBContext>(options =>
     options.UseSqlServer(appBuilder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register Staff Repository and Service
 appBuilder.Services.AddScoped<IStaffRepository, StaffRepository>();
 appBuilder.Services.AddScoped<IStaffService, StaffService>();
 
