@@ -18,7 +18,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         public int CartID { get; set; }
         public int ProductID { get; set; }
         public string ProductName { get; set; }
-        public decimal ProductPrice { get; set; }
+        public decimal ProductPrice { get; set; } 
         public int Quantity { get; set; }
         public List<CartItemOptionViewModel> CartItemOptions { get; set; } = new List<CartItemOptionViewModel>();
     }
@@ -29,8 +29,10 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         public int CartItemID { get; set; }
         public int ProductOptionGroupID { get; set; }
         public string OptionGroupName { get; set; }
-        public int ProductOptionItemsID { get; set; }
+        public int ProductOptionItemID { get; set; }
         public string OptionName { get; set; }
-        public decimal AdditionalPrice { get; set; } = 0;
+        public decimal AdditionalPrice { get; set; }
     }
+
+    
 }
