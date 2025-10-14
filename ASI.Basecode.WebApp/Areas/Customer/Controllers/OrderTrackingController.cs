@@ -14,6 +14,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             ViewBag.GoogleMapsApiKey = "AIzaSyCJ5dBVFR0g-nYJwXv04NYuqoZLu37WqRw";
             
             // Create sample data for testing
+            //NOTE i connect pani sa admin so i dont know unsaon pag call
             var viewModel = new OrderTrackingViewModel
             {
                 CurrentOrder = new CurrentOrderViewModel
@@ -74,25 +75,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                         Address = "Driver Current Location",
                         Title = "Driver"
                     }
-                },
-                OrderHistory = new List<OrderHistoryViewModel>
-                {
-                    new OrderHistoryViewModel
-                    {
-                        OrderNumber = "FF2024000",
-                        Items = "Margherita Pizza + Coke",
-                        OrderDate = DateTime.Now.AddDays(-1),
-                        TotalAmount = 24.99m,
-                        Status = "Delivered"
-                    },
-                    new OrderHistoryViewModel
-                    {
-                        OrderNumber = "FF2023999", 
-                        Items = "Chicken Burger Combo",
-                        OrderDate = DateTime.Now.AddDays(-2),
-                        TotalAmount = 18.50m,
-                        Status = "Delivered"
-                    }
                 }
             };
 
@@ -100,4 +82,3 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         }
     }
 }
-
