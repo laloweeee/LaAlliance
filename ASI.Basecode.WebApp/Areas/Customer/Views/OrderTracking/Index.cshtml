@@ -1,4 +1,5 @@
-@model ASI.Basecode.WebApp.Models.OrderTrackingViewModel  
+@model ASI.Basecode.WebApp.Models.OrderTrackingViewModel 
+
 @{
     ViewData["Title"] = "Order Tracking";
 }
@@ -7,7 +8,7 @@
 <section id="ordersSection">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 class="text-3xl font-bold mb-8 text-gray-800">Order Tracking</h2>
-        
+       
         <!-- Current Order -->
         @if (Model.CurrentOrder != null)
         {
@@ -16,7 +17,7 @@
                     <h3 class="text-xl font-semibold">Order #@Model.CurrentOrder.OrderNumber</h3>
                     <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">@Model.CurrentOrder.Status</span>
                 </div>
-                
+               
                 <!-- Order Progress -->
                 <div class="mb-6">
                     <div class="flex justify-between items-center mb-2">
@@ -27,7 +28,7 @@
                         <div id="orderProgress" class="bg-green-600 h-2 rounded-full" style="width: @(Model.CurrentOrder.ProgressPercentage)%"></div>
                     </div>
                 </div>
-                
+               
                 <!-- Order Steps -->
                 <div class="space-y-4">
                     @foreach (var step in Model.CurrentOrder.OrderSteps)
@@ -43,14 +44,14 @@
                         </div>
                     }
                 </div>
-                
+               
                 <!-- Live Tracking Map -->
                 @if (Model.CurrentOrder.DeliveryLocation?.Latitude != 0 && Model.CurrentOrder.DeliveryLocation?.Longitude != 0)
                 {
                     <div class="mt-6 space-y-4">
                         <h4 class="font-semibold text-gray-800">Live Delivery Tracking</h4>
-                        <div id="orderTrackingMap" 
-                             data-delivery-lat="@Model.CurrentOrder.DeliveryLocation.Latitude" 
+                        <div id="orderTrackingMap"
+                             data-delivery-lat="@Model.CurrentOrder.DeliveryLocation.Latitude"
                              data-delivery-lng="@Model.CurrentOrder.DeliveryLocation.Longitude"
                              data-delivery-address="@Model.CurrentOrder.DeliveryLocation.Address"
                              data-restaurant-lat="@Model.CurrentOrder.RestaurantLocation?.Latitude"
@@ -66,6 +67,16 @@
                             </svg>
                             <span>Real-time tracking • Delivery to: @Model.CurrentOrder.DeliveryLocation.Address</span>
                         </div>
+                        
+                        <!-- Cancel Order Button -->
+                        <div class="flex justify-end pt-4">
+                            <button id="cancelOrderBtn" 
+                                    type="button" 
+                                    class="bg-red-500 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                                <i class="fas fa-times-circle mr-2"></i>
+                                Cancel Order
+                            </button>
+                        </div>
                     </div>
                 }
                 else
@@ -77,10 +88,20 @@
                             <p class="text-sm text-gray-400 mt-1">Location data not available</p>
                         </div>
                     </div>
+                    
+                    <!-- Cancel Order Button (for when map is not available) -->
+                    <div class="flex justify-end pt-4">
+                        <button id="cancelOrderBtn" 
+                                type="button" 
+                                class="bg-red-500 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            Cancel Order
+                        </button>
+                    </div>
                 }
             </div>
         }
-        
+       
         <!-- Order History -->
         @if (Model.OrderHistory != null && Model.OrderHistory.Any())
         {
@@ -112,4 +133,5 @@
         <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
         <script src="~/js/order-tracking-map.js"></script>
     }
+    
 }
