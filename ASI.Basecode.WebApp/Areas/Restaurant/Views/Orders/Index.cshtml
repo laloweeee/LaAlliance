@@ -1,0 +1,307 @@
+@{
+    ViewData["Title"] = "Order List";
+}
+
+<div id="orders" class="section active">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-start mb-6">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="relative">
+                <input type="text" placeholder="Search orders..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full md:w-64">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Filter Tabs -->
+    <div class="mb-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto">
+                <button onclick="filterOrders('all')" class="order-filter-tab active border-b-2 border-emerald-500 py-2 px-1 text-sm font-medium text-emerald-600 whitespace-nowrap">
+                    All Orders
+                </button>
+                <button onclick="filterOrders('new')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    New
+                </button>
+                <button onclick="filterOrders('preparing')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    Preparing
+                </button>
+                <button onclick="filterOrders('ready')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    Ready
+                </button>
+                <button onclick="filterOrders('completed')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    Completed
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Active Orders Section -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">ACTIVE ORDERS</h3>
+        
+        <!-- Orders Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Order #349 - New -->
+            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-green-500" data-status="new">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">1</div>
+                            <span class="font-semibold text-gray-800">#349</span>
+                        </div>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">New</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-gray-800">Sarah Wilson</p>
+                        <p class="text-sm text-gray-600">23 Feb 2021, 08:28 PM</p>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span>1x Vegetable Fritters with Egg</span>
+                            <span class="font-medium">$5.30</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>1x Fresh Prawn mix salad</span>
+                            <span class="font-medium">$5.30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-600">2 Items</span>
+                        <span class="text-lg font-bold text-green-600">$10.60</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                            Accept
+                        </button>
+                        <button class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order #350 - Preparing -->
+            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-orange-500" data-status="preparing">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">1</div>
+                            <span class="font-semibold text-gray-800">#350</span>
+                        </div>
+                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">Preparing</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-gray-800">Tom Brown</p>
+                        <p class="text-sm text-gray-600">23 Feb 2021, 07:28 PM</p>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span>1x Fresh Meat with salad</span>
+                            <span class="font-medium">$25.30</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>1x Vegetable Mixups</span>
+                            <span class="font-medium">$5.30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-600">2 Items</span>
+                        <span class="text-lg font-bold text-blue-600">$30.60</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button class="w-full bg-blue-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-blue-700 transition-colors">
+                            Mark Ready
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order #351 - Ready -->
+            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-blue-500" data-status="ready">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">1</div>
+                            <span class="font-semibold text-gray-800">#351</span>
+                        </div>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Ready</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-gray-800">Lisa Davis</p>
+                        <p class="text-sm text-gray-600">23 Feb 2021, 08:28 PM</p>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span>1x Vegetable Fritters with Egg</span>
+                            <span class="font-medium">$5.30</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>1x Fresh Prawn mix salad</span>
+                            <span class="font-medium">$5.30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-600">2 Items</span>
+                        <span class="text-lg font-bold text-green-600">$10.60</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button class="w-full bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                            Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order #352 - New -->
+            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-green-500" data-status="new">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">2</div>
+                            <span class="font-semibold text-gray-800">#352</span>
+                        </div>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">New</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-gray-800">Robert Miller</p>
+                        <p class="text-sm text-gray-600">23 Feb 2021, 07:45 PM</p>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span>2x Vegetable Mixups</span>
+                            <span class="font-medium">$5.30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-600">1 Item</span>
+                        <span class="text-lg font-bold text-green-600">$10.60</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                            Accept
+                        </button>
+                        <button class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order #353 - Preparing -->
+            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-orange-500" data-status="preparing">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">2</div>
+                            <span class="font-semibold text-gray-800">#353</span>
+                        </div>
+                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">Preparing</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-gray-800">Emily Wilson</p>
+                        <p class="text-sm text-gray-600">23 Feb 2021, 08:15 PM</p>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span>1x Fresh Meat</span>
+                            <span class="font-medium">$25.30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-600">1 Item</span>
+                        <span class="text-lg font-bold text-blue-600">$25.30</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button class="w-full bg-blue-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-blue-700 transition-colors">
+                            Mark Ready
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order #354 - Ready -->
+            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-blue-500" data-status="ready">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">2</div>
+                            <span class="font-semibold text-gray-800">#354</span>
+                        </div>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Ready</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-gray-800">David Clark</p>
+                        <p class="text-sm text-gray-600">23 Feb 2021, 08:30 PM</p>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span>3x Prawn Mix Salad</span>
+                            <span class="font-medium">$5.30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-600">1 Item</span>
+                        <span class="text-lg font-bold text-green-600">$15.90</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button class="w-full bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                            Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterOrders(status) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.order-filter-tab').forEach(tab => {
+        tab.classList.remove('active', 'border-emerald-500', 'text-emerald-600');
+        tab.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Add active class to clicked tab
+    event.target.classList.add('active', 'border-emerald-500', 'text-emerald-600');
+    event.target.classList.remove('border-transparent', 'text-gray-500');
+    
+    // Filter order cards
+    const orderCards = document.querySelectorAll('.order-card');
+    orderCards.forEach(card => {
+        if (status === 'all' || card.dataset.status === status) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>
