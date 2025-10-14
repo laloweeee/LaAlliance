@@ -18,7 +18,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
     [Area("Customer")]
     public class CartController : ControllerBase<CartController>
     {
-        private readonly ICartService _cartService;
+        private new readonly ICartService _cartService;
         public CartController(IHttpContextAccessor httpContextAccessor,
                               ILoggerFactory loggerFactory,
                               IConfiguration configuration,

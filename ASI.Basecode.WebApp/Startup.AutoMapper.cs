@@ -74,6 +74,8 @@ namespace ASI.Basecode.WebApp
                 // Address mappings
                 CreateMap<Address, AddressViewModel>()
                     .ReverseMap();
+
+                CreateMap<UserProfile, UserProfileServiceModel>().ReverseMap();
             }
         }
     }

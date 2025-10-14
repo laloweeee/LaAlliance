@@ -43,6 +43,10 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IProductService, ProductService>();
             this._services.AddScoped<IRestaurantProfileService, RestaurantProfileService>();
             this._services.AddScoped<ICartService, CartService>();
+            this._services.AddScoped<IUserProfileService, UserProfileService>();
+
+            // Notification Service
+            this._services.AddScoped<IOrderNotificationService, OrderNotificationService>();
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
@@ -50,6 +54,7 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IProductRepository, ProductRepository>();
             this._services.AddScoped<IRestaurantProfileRepository, RestaurantProfileRepository>();
             this._services.AddScoped<ICartRepository, CartRepository>();
+            this._services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 
             // Manager Class
             this._services.AddScoped<SignInManager>();
