@@ -44,7 +44,7 @@ namespace ASI.Basecode.WebApp
                     .ForMember(dest => dest.ProductOptionItems, opt => opt.MapFrom(src => src.ProductOptionItems))
                     .ReverseMap()
                     .ForMember(dest => dest.Product, opt => opt.Ignore())
-                    .ForMember(dest => dest.CartItemOption, opt => opt.Ignore())
+                    .ForMember(dest => dest.CartItemOptions, opt => opt.Ignore())
                     .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore())
                     .ForMember(dest => dest.ProductOptionItems, opt => opt.MapFrom(src => src.ProductOptionItems));
 
@@ -52,14 +52,14 @@ namespace ASI.Basecode.WebApp
                 CreateMap<ProductOptionItems, ProductOptionItemViewModel>()
                     .ReverseMap()
                     .ForMember(dest => dest.ProductOptionGroup, opt => opt.Ignore())
-                    .ForMember(dest => dest.CartItemOption, opt => opt.Ignore())
+                    .ForMember(dest => dest.CartItemOptions, opt => opt.Ignore())
                     .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore());
 
                 // Add mapping for ProductOptionItemViewModel if needed
                 CreateMap<ProductOptionItems, ProductOptionItemViewModel>()
                     .ReverseMap()
                     .ForMember(dest => dest.ProductOptionGroup, opt => opt.Ignore())
-                    .ForMember(dest => dest.CartItemOption, opt => opt.Ignore())
+                    .ForMember(dest => dest.CartItemOptions, opt => opt.Ignore())
                     .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore());
 
                 // Restaurant profile mappings
@@ -74,6 +74,8 @@ namespace ASI.Basecode.WebApp
                 // Address mappings
                 CreateMap<Address, AddressViewModel>()
                     .ReverseMap();
+
+                CreateMap<UserProfile, UserProfileServiceModel>().ReverseMap();
             }
         }
     }

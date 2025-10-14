@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ASI.Basecode.Data.Models;
 using ASI.Basecode.Data.Configuration;
+using System;
 
 namespace ASI.Basecode.Data
 {
@@ -14,7 +15,15 @@ namespace ASI.Basecode.Data
             : base(options)
         {
         }
-        
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseMySql("Server=laalliance-giepoint.c.aivencloud.com;Port=21352;Database=laalliance;User=avnadmin;Password=AVNS_0AHFUgbnghTBf4VkfTZ;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21)));
+            }
+        }
+
         // User related
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserProfile> UserProfiles { get; set; }
