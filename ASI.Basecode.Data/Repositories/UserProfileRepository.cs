@@ -31,8 +31,36 @@ namespace ASI.Basecode.Data.Repositories
             return _dbContext.UserAddresses.Where(ua => ua.UserID == userID).Include(ua => ua.Address);
         }
 
+        /// <summary>
+        /// Adds a new user address, ensuring no duplicate addresses are created.
+        /// </summary>
+        /// <param name="userAddress"></param>
         public void AddUserAddress(UserAddress userAddress)
         {
+            // Check if the Address already exists
+            var existingAddress = _dbContext.Addresses
+                .FirstOrDefault(a =>
+                    a.Street == userAddress.Address.Street &&
+                    a.City == userAddress.Address.City &&
+                    a.ZipCode == userAddress.Address.ZipCode);
+
+            if (existingAddress == null)
+            {
+                // Create and save the new address first
+                _dbContext.Addresses.Add(userAddress.Address);
+                _dbContext.SaveChanges();
+
+                // Assign the new AddressID to the junction entity
+                userAddress.AddressID = userAddress.Address.AddressID;
+            }
+            else
+            {
+                // If it exists, link to the existing address
+                userAddress.AddressID = existingAddress.AddressID;
+                userAddress.Address = null;
+            }
+
+            // Now add the UserAddress entry
             _dbContext.UserAddresses.Add(userAddress);
             _dbContext.SaveChanges();
         }
@@ -43,12 +71,19 @@ namespace ASI.Basecode.Data.Repositories
             _dbContext.SaveChanges();
         }
 
-        public void RemoveUserAddress(int userAddressID)
+        /// <summary>
+        /// Removes the user address.
+        /// </summary>
+        /// <param name="userAddressID"></param>
+        public void RemoveUserAddress(int userAddressID, int userID)
         {
-            var userAddress = _dbContext.UserAddresses.Find(userAddressID);
+            var userAddress = _dbContext.UserAddresses
+                .FirstOrDefault(ua => ua.UserAddressID == userAddressID && ua.UserID == userID);
+
             if (userAddress != null)
             {
                 _dbContext.UserAddresses.Remove(userAddress);
+                _dbContext.SaveChanges();
             }
         }
     }
