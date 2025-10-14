@@ -21,6 +21,7 @@ using System;
 using System.IO;
 using System.Text;
 using Azure.Storage.Blobs;
+using ASI.Basecode.Services.Hubs;
 
 namespace ASI.Basecode.WebApp
 {
@@ -85,6 +86,8 @@ namespace ASI.Basecode.WebApp
             this._services = services;
 
             services.AddMemoryCache();
+
+            services.AddSignalR();
 
             services.AddDataProtection()
                 .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "DataProtection-Keys")))
@@ -206,6 +209,8 @@ namespace ASI.Basecode.WebApp
 
                 // Default fallback (non-area controllers/views)
                 endpoints.MapDefaultControllerRoute();
+
+                endpoints.MapHub<OrderHub>("/orderHub");
             });
         }
     }

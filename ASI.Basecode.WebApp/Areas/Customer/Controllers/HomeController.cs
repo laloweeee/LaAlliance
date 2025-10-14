@@ -18,7 +18,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
-        private readonly ICartService _cartService;
+        private new readonly ICartService _cartService;
 
         public HomeController(
             IHttpContextAccessor httpContextAccessor,
@@ -162,12 +162,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         /// </summary>
         /// <param name="form"></param>
         /// <returns></returns>
-
-        /// <summary>
-        /// Extract selected options from form data
-        /// </summary>
-        /// <param name="form"></param>
-        /// <returns></returns>
         private Dictionary<int, List<int>> ExtractSelectedOptions(IFormCollection form)
         {
             var selectedOptions = new Dictionary<int, List<int>>();
@@ -211,7 +205,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        private ProductViewModel MapProductToViewModel(Data.Models.Product product)
+        private static ProductViewModel MapProductToViewModel(Data.Models.Product product)
         {
             return new ProductViewModel
             {

@@ -14,6 +14,6 @@ namespace ASI.Basecode.Services.Interfaces
         // bool IsRestaurantAdmin(User user);
         // bool IsRestaurantStaff(User user);
         void AddUser(UserViewModel model);
-        IQueryable<User> GetUserByID(int userID);
+        User GetUserByID(int userID);
     }
 }
