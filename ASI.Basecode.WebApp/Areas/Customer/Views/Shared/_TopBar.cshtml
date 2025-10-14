@@ -1,31 +1,31 @@
-<div id="topbar" class="px-6 py-4 w-full bg-white shadow-sm border-b border-gray-100">
+<div id="topbar" class="px-6 py-3 w-full bg-white shadow-md border-b border-gray-200">
     <div class="flex items-center justify-between w-full max-w-full">
         <!-- LOGO -->
-        <div class="flex items-center gap-4">
-            <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-2.5 shadow-sm">
-                <img src="~/img/LaAlliance-logo.png" alt="LaAlliancé Logo" class="h-8 w-auto filter brightness-0 invert" />
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-2 shadow-md">
+                <img src="~/img/LaAlliance-logo.png" alt="LaAlliancé Logo" class="h-7 w-auto filter brightness-0 invert" />
             </div>
             <div class="flex flex-col">
-                <span class="text-2xl font-bold text-gray-900 tracking-tight">LaAlliancé</span>
-                <p class="text-sm text-gray-500 font-medium">Premium Food Delivery</p>
+                <span class="text-xl font-bold text-gray-800 tracking-tight">LaAlliancé</span>
+                <p class="text-xs text-gray-600">Premium Food Delivery</p>
             </div>
         </div>
         
         <!-- NAVIGATION LINKS -->
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-2">
             <!-- MENU -->
             <a asp-area="Customer" asp-controller="Home" asp-action="Index" 
-               class="flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:text-green-600 hover:bg-green-30 rounded-lg transition-all duration-200 font-medium group">
-                <i class="fa-solid fa-utensils text-lg group-hover:scale-110 transition-transform"></i>
-                <span class="text-sm">Menu</span>
+               class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                <i class="fa-solid fa-utensils text-base"></i>
+                <span class="text-sm font-semibold">Menu</span>
             </a>
 
             <!-- NOTIFICATIONS -->
-            <div class="relative group">
-                <button class="flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:text-green-600 hover:bg-green-30 rounded-lg transition-all duration-200 font-medium">
-                    <i class="fa-solid fa-bell text-lg"></i>
-                    <span class="text-sm hidden lg:block">Notifications</span>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+            <div class="relative">
+                <button class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200 relative">
+                    <i class="fa-solid fa-bell text-base"></i>
+                    <span class="text-sm font-semibold hidden lg:block">Notifications</span>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-sm">
                         3
                     </span>
                 </button>
@@ -33,10 +33,10 @@
 
             <!-- CART -->
             <a asp-area="Customer" asp-controller="Cart" asp-action="Index" 
-               class="flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:text-green-600 hover:bg-green-30 rounded-lg transition-all duration-200 font-medium group relative">
-                <i class="fa-solid fa-shopping-bag text-lg group-hover:scale-110 transition-transform"></i>
-                <span class="text-sm hidden lg:block">Cart</span>
-                <span id="cartBadge" class="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+               class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group relative border border-transparent hover:border-green-200">
+                <i class="fa-solid fa-shopping-bag text-base"></i>
+                <span class="text-sm font-semibold hidden lg:block">Cart</span>
+                <span id="cartBadge" class="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-sm">
                     @(ViewBag.CartCount ?? 0)
                 </span>
             </a>
@@ -44,32 +44,32 @@
             <!-- PROFILE DROPDOWN -->
             <div class="relative">
                 <button id="profileBtn" 
-                        class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200 border border-gray-200">
+                        class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-green-50 rounded-lg transition-all duration-200 border border-gray-300 hover:border-green-300">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-sm">
-                            <i class="fa-solid fa-user text-white text-sm"></i>
+                        <div class="w-7 h-7 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-user text-white text-xs"></i>
                         </div>
                         <div class="text-left hidden lg:block">
-                            <p class="text-sm font-semibold text-gray-900 truncate max-w-[120px]">
+                            <p class="text-sm font-semibold text-gray-800 truncate max-w-[100px]">
                                 @((ViewBag.UserName ?? "Guest"))
                             </p>
                             <p class="text-xs text-gray-500">Customer</p>
                         </div>
                     </div>
-                    <i id="chevron" class="fa fa-chevron-down text-gray-400 text-xs transition-transform duration-200"></i>
+                    <i id="chevron" class="fa fa-chevron-down text-gray-500 text-xs transition-transform duration-200 ml-1"></i>
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="dropdownMenu" class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 hidden z-50 overflow-hidden">
+                <div id="dropdownMenu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 hidden z-50 overflow-hidden">
                     <!-- User Header -->
-                    <div class="px-4 py-3 border-b border-gray-100">
+                    <div class="px-4 py-3 bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-sm">
-                                <i class="fa-solid fa-user text-white"></i>
+                            <div class="w-9 h-9 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-user text-white text-sm"></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 truncate">@((ViewBag.UserName ?? "Guest"))</p>
-                                <p class="text-xs text-gray-500 truncate">customer@laalliance.com</p>
+                                <p class="text-sm font-bold text-gray-800 truncate">@((ViewBag.UserName ?? "Guest"))</p>
+                                <p class="text-xs text-gray-600 truncate">customer@laalliance.com</p>
                             </div>
                         </div>
                     </div>
@@ -77,34 +77,34 @@
                     <!-- Menu Items -->
                     <div class="py-2">
                         <a asp-area="Customer" asp-controller="Account" asp-action="Index" 
-                            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-emerald-50 transition-colors group">
-                            <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
-                                <i class="fa fa-user text-emerald-600 text-sm"></i>
+                            class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500">
+                            <div class="w-7 h-7 bg-green-100 rounded flex items-center justify-center">
+                                <i class="fa fa-user text-green-600 text-xs"></i>
                             </div>
                             <span class="text-sm font-medium">Profile</span>
                         </a>
 
                         <a asp-area="Customer" asp-controller="Order" asp-action="Index" 
-                            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-emerald-50 transition-colors group">
-                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                                <i class="fa fa-shopping-bag text-blue-600 text-sm"></i>
+                            class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500">
+                            <div class="w-7 h-7 bg-green-100 rounded flex items-center justify-center">
+                                <i class="fa fa-shopping-bag text-green-600 text-xs"></i>
                             </div>
                             <span class="text-sm font-medium">Orders</span>
                         </a>
 
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors group">
-                            <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-red-100 transition-colors">
-                                <i class="fa-solid fa-heart text-gray-600 text-sm"></i>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500">
+                            <div class="w-7 h-7 bg-green-100 rounded flex items-center justify-center">
+                                <i class="fa-solid fa-heart text-green-600 text-xs"></i>
                             </div>
                             <span class="text-sm font-medium">Favorites</span>
                         </a>
 
-                        <div class="border-t border-gray-100 my-2"></div>
+                        <div class="border-t border-gray-200 my-1"></div>
 
                         <a asp-area="" asp-controller="Account" asp-action="Logout" 
-                           class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors group mt-1">
-                            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-arrow-right-from-bracket text-red-600 text-sm"></i>
+                           class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors group border-l-2 border-transparent hover:border-red-500">
+                            <div class="w-7 h-7 bg-red-100 rounded flex items-center justify-center">
+                                <i class="fa-solid fa-arrow-right-from-bracket text-red-600 text-xs"></i>
                             </div>
                             <span class="text-sm font-medium">Logout</span>
                         </a>
@@ -115,13 +115,13 @@
     </div>
 
     <!-- Mobile Search Bar -->
-    <div class="lg:hidden mt-4">
+    <div class="lg:hidden mt-3">
         <div class="relative w-full max-w-md mx-auto">
             <input type="text" 
                    id="mobileSearch"
                    placeholder="Search restaurants or dishes..." 
-                   class="w-full px-4 py-3 pl-11 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all text-sm border border-gray-200">
-            <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                   class="w-full px-4 py-2.5 pl-10 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all text-sm border border-gray-300">
+            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
         </div>
     </div>
 </div>
