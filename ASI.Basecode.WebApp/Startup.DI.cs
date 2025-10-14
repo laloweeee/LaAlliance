@@ -42,16 +42,13 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IFileHandlingService, FileHandlingService>();
             this._services.AddScoped<IProductService, ProductService>();
             this._services.AddScoped<IRestaurantProfileService, RestaurantProfileService>();
-<<<<<<< HEAD
             this._services.AddScoped<IStaffService, StaffService>();
 
-=======
             this._services.AddScoped<ICartService, CartService>();
             this._services.AddScoped<IUserProfileService, UserProfileService>();
 
             // Notification Service
             this._services.AddScoped<IOrderNotificationService, OrderNotificationService>();
->>>>>>> master
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
