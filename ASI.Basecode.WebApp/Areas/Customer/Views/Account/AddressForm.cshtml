@@ -1,0 +1,329 @@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel
+@{
+    ViewData["Title"] = Model?.UserAddressID > 0 ? "Edit Address - LaAlliancé" : "Add Address - LaAlliancé";
+    var isEdit = Model?.UserAddressID > 0;
+}
+
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-teal-50/30 to-gray-50">
+    <div class="p-4 md:p-6 lg:p-8">
+        <div class="max-w-5xl mx-auto">
+            <!-- Back Navigation -->
+            <nav class="flex items-center gap-2 text-sm text-gray-600 mb-6">
+                <a asp-action="Index" asp-controller="Home" asp-area="Customer" class="hover:text-teal-600 transition-colors">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <a asp-action="Index" asp-controller="Account" asp-area="Customer" class="hover:text-teal-600 transition-colors">
+                    My Account
+                </a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-teal-600 font-medium">@(isEdit ? "Edit Address" : "Add Address")</span>
+            </nav>
+
+            <form asp-action="SaveAddress" asp-controller="Account" asp-area="Customer" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="UserAddressID" />
+                <input type="hidden" asp-for="AddressID" />
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- LEFT SIDE: Form Fields -->
+                    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-teal-600 to-teal-700 p-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                                    <i class="fas @(isEdit ? "fa-edit" : "fa-map-location-dot") text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-2xl font-bold text-white">@(isEdit ? "Edit Address" : "Add New Address")</h1>
+                                    <p class="text-teal-100 text-sm mt-1">@(isEdit ? "Update your delivery location" : "Add a new delivery location")</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="p-6 space-y-5">
+                            <!-- Address Type & Default -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">
+                                        Address Type <span class="text-red-500">*</span>
+                                    </label>
+                                    <select asp-for="AddressType"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none">
+                                        <option value="Home">🏠 Home</option>
+                                        <option value="Work">💼 Work</option>
+                                        <option value="Other">📍 Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">
+                                        Set as Default
+                                    </label>
+                                    <div class="flex items-center h-12 px-4 border-2 border-gray-200 rounded-xl bg-gray-50">
+                                        <input type="checkbox" 
+                                               asp-for="IsDefault"
+                                               class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500" />
+                                        <span class="ml-3 text-gray-700">Default address</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Street Address -->
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                                    <i class="fas fa-road text-teal-600"></i>
+                                    Street Address <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       asp-for="Street"
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                                       placeholder="House/Unit No., Building, Street Name"
+                                       required />
+                            </div>
+
+                            <!-- Barangay & City -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">
+                                        Barangay <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           asp-for="Barangay"
+                                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                                           placeholder="Barangay"
+                                           required />
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">
+                                        City <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           asp-for="City"
+                                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                                           placeholder="City"
+                                           required />
+                                </div>
+                            </div>
+
+                            <!-- Province & Zip Code -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">
+                                        Province <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           asp-for="Province"
+                                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                                           placeholder="Province"
+                                           required />
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">
+                                        Zip Code <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           asp-for="ZipCode"
+                                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                                           placeholder="Postal Code"
+                                           pattern="[0-9]{4}"
+                                           required />
+                                </div>
+                            </div>
+
+                            <!-- Address Note -->
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                                    <i class="fas fa-sticky-note text-teal-600"></i>
+                                    Additional Notes
+                                </label>
+                                <textarea asp-for="AddressNote"
+                                          rows="3"
+                                          class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none resize-none"
+                                          placeholder="Landmarks, special instructions, etc."></textarea>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Help our delivery team find you easily
+                                </p>
+                            </div>
+
+                            <!-- Coordinates (Hidden inputs, updated by map) -->
+                            <input type="hidden" asp-for="Latitude" id="latitude" />
+                            <input type="hidden" asp-for="Longitude" id="longitude" />
+
+                            <!-- Coordinates Display -->
+                            <div class="bg-teal-50 border-2 border-teal-200 rounded-xl p-4">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-map-pin text-teal-600 text-lg mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Pin Location</h4>
+                                        <p class="text-sm text-gray-700 mb-2">
+                                            Click on the map or drag the marker to set your exact location
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+                                <button type="submit" 
+                                        class="flex-1 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-3.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-save"></i>
+                                    <span>@(isEdit ? "Update Address" : "Save Address")</span>
+                                </button>
+                                <a asp-action="Index" asp-controller="Account" asp-area="Customer"
+                                   class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-times"></i>
+                                    <span>Cancel</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE: Interactive Map -->
+                    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden lg:sticky lg:top-6 h-fit">
+                        <!-- Map Header -->
+                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fas fa-map"></i>
+                                Pin Your Location
+                            </h3>
+                            <p class="text-blue-100 text-sm mt-1">Drag the marker to adjust</p>
+                        </div>
+
+                        <!-- Map Container -->
+                        <div class="relative">
+                            <div id="addressMap" class="w-full h-[500px] lg:h-[600px]"></div>
+                            
+                            <!-- Map Controls Overlay -->
+                            <div class="absolute top-4 left-4 right-4 z-10">
+                                <div class="bg-white rounded-xl shadow-lg p-3 flex gap-2">
+                                    <button type="button" 
+                                            id="currentLocationBtn"
+                                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-location-crosshairs"></i>
+                                        <span class="hidden sm:inline">Use Current Location</span>
+                                        <span class="sm:hidden">Current</span>
+                                    </button>
+                                    <button type="button" 
+                                            id="searchAddressBtn"
+                                            class="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-search"></i>
+                                        <span class="hidden sm:inline">Search on Map</span>
+                                        <span class="sm:hidden">Search</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Map Instructions -->
+                        <div class="p-4 bg-gray-50 border-t border-gray-200">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+                                <div class="text-sm text-gray-700">
+                                    <p class="font-semibold mb-1">How to use:</p>
+                                    <ul class="space-y-1 text-xs">
+                                        <li>• Click and drag the red marker to your exact location</li>
+                                        <li>• Use "Current Location" to auto-detect your position</li>
+                                        <li>• Zoom in/out for better accuracy</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Coordinates Display -->
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <div class="flex items-center justify-center gap-4 text-xs text-gray-600">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-location-dot text-blue-600"></i>
+                                        <span class="font-semibold">Lat:</span>
+                                        <span id="displayLat" class="font-mono">@(Model?.Latitude.ToString("F6") ?? "10.315700")</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-location-dot text-teal-600"></i>
+                                        <span class="font-semibold">Lng:</span>
+                                        <span id="displayLng" class="font-mono">@(Model?.Longitude.ToString("F6") ?? "123.885400")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
+    <script src="~/js/maps.js"></script>
+    <script>
+        // Setup search address button to use form fields
+        function setupSearchButton() {
+            const searchBtn = document.getElementById('searchAddressBtn');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    const streetInput = document.querySelector('input[name="Street"]');
+                    const barangayInput = document.querySelector('input[name="Barangay"]');
+                    const cityInput = document.querySelector('input[name="City"]');
+                    const provinceInput = document.querySelector('input[name="Province"]');
+                    
+                    const street = streetInput ? streetInput.value.trim() : '';
+                    const barangay = barangayInput ? barangayInput.value.trim() : '';
+                    const city = cityInput ? cityInput.value.trim() : '';
+                    const province = provinceInput ? provinceInput.value.trim() : '';
+                    
+                    if (!street && !city && !barangay) {
+                        alert('Please fill in at least Street, Barangay, or City fields to search.');
+                        return;
+                    }
+
+                    // Build address string
+                    const addressParts = [street, barangay, city, province, 'Philippines'].filter(part => part);
+                    const address = addressParts.join(', ');
+                    
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span class="hidden sm:inline">Searching...</span>';
+                    this.disabled = true;
+
+                    // Use the global geocoder from maps.js
+                    if (typeof geocoder !== 'undefined') {
+                        geocoder.geocode({ address: address }, (results, status) => {
+                            if (status === 'OK' && results[0]) {
+                                const location = results[0].geometry.location;
+                                
+                                // Use the global map and placeMarker function from maps.js
+                                if (typeof map !== 'undefined' && typeof placeMarker === 'function') {
+                                    map.setCenter(location);
+                                    map.setZoom(17);
+                                    placeMarker(location);
+                                }
+                                
+                                this.innerHTML = '<i class="fas fa-check"></i> <span class="hidden sm:inline">Found!</span>';
+                            } else {
+                                alert('Address not found on map. Please click on the map to set location manually.');
+                                this.innerHTML = '<i class="fas fa-times"></i> <span class="hidden sm:inline">Not Found</span>';
+                            }
+                            
+                            setTimeout(() => {
+                                this.innerHTML = originalHTML;
+                                this.disabled = false;
+                            }, 2000);
+                        });
+                    } else {
+                        alert('Map is not ready yet. Please try again in a moment.');
+                        this.innerHTML = originalHTML;
+                        this.disabled = false;
+                    }
+                });
+            }
+        }
+
+        // Initialize when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for maps.js to initialize
+            setTimeout(function() {
+                setupSearchButton();
+            }, 500);
+        });
+    </script>
+}

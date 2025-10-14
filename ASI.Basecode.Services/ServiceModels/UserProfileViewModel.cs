@@ -17,6 +17,7 @@ namespace ASI.Basecode.Services.ServiceModels
     public class UserAddressServiceModel
     {
         public int UserAddressID { get; set; }
+        public int UserID { get; set; }
         public int AddressID { get; set; }
         public bool IsDefault { get; set; }
         public string AddressType { get; set; }
