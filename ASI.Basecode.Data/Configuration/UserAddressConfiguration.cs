@@ -22,10 +22,17 @@ namespace ASI.Basecode.Data.Configuration
                 .HasMaxLength(500);
 
             // Relationships
+            // Many UserAddresses can reference one Address
             builder.HasOne(ua => ua.Address)
-                .WithOne(a => a.UserAddress)
-                .HasForeignKey<UserAddress>(ua => ua.AddressID)
+                .WithMany(a => a.UserAddresses)
+                .HasForeignKey(ua => ua.AddressID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Many UserAddresses can belong to one User
+            builder.HasOne(ua => ua.User)
+                .WithMany(u => u.UserAddress)
+                .HasForeignKey(ua => ua.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Table Name
             builder.ToTable("UserAddresses");

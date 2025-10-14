@@ -30,14 +30,20 @@
                 </div>
             </div>
             <div class="w-full lg:w-auto">
-                <select class="w-full lg:w-64 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-200 transition-colors font-medium outline-none appearance-none bg-white">
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
-                    <option>Newest First</option>
-                </select>
+                <div class="relative">
+                    <select id="sortSelect" class="w-full lg:w-64 px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-200 transition-colors font-medium outline-none appearance-none bg-white">
+                        <option value="">Sort by Pricing</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="name">Name: A to Z</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
             </div>
         </div>
-            
+                    
         <!-- Filter Section -->
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Categories</h2>
         <div class="flex flex-wrap gap-6 mb-8">
@@ -78,12 +84,14 @@
                             </div>
                             
                             <!-- Products Grid -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div class="products-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-category="@category.CategoryID">
                                 @foreach (var product in productsInCategory)
                                 {
                                     <div class="product-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                                          data-product-name="@product.ProductName.ToLower()"
-                                         data-product-description="@product.ProductDescription.ToLower()">
+                                         data-product-description="@product.ProductDescription.ToLower()"
+                                         data-product-price="@product.ProductPrice"
+                                         data-product-id="@product.ProductID">
                                         <!-- Product Image -->
                                         <div class="h-40 bg-gray-100 overflow-hidden relative">
                                             @if (!string.IsNullOrEmpty(product.ProductImage))
@@ -120,7 +128,7 @@
                                             </div>
 
                                             <div class="flex items-center justify-between">
-                                                <span class="text-lg font-bold text-green-600">₱@product.ProductPrice.ToString("0.00")</span>
+                                                <span class="text-lg font-bold text-green-600 product-price">₱@product.ProductPrice.ToString("0.00")</span>
                                                 <a asp-action="ProductToCart" asp-controller="Home" asp-area="Customer"
                                                 asp-route-productID="@product.ProductID"
                                                 class="bg-green-500 text-white px-3 py-2 rounded-md font-semibold hover:bg-green-600 transition-colors flex items-center gap-1">
@@ -296,19 +304,32 @@
     .product-card.hidden {
         display: none;
     }
-</style>
 
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+@section Scripts {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const categoryFilters = document.querySelectorAll('.category-filter');
         const categorySections = document.querySelectorAll('.category-section');
         const searchInput = document.getElementById('menuSearch');
+        const sortSelect = document.getElementById('sortSelect');
         const productCards = document.querySelectorAll('.product-card');
+
+        let currentCategory = 'all';
+        let currentSort = '';
 
         // Category filter functionality
         categoryFilters.forEach(button => {
             button.addEventListener('click', function() {
-                const category = this.getAttribute('data-category');
+                currentCategory = this.getAttribute('data-category');
                 
                 // Update active button
                 categoryFilters.forEach(btn => {
@@ -319,13 +340,13 @@
                 this.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
 
                 // Show/hide categories
-                if (category === 'all') {
+                if (currentCategory === 'all') {
                     categorySections.forEach(section => {
                         section.style.display = 'block';
                     });
                 } else {
                     categorySections.forEach(section => {
-                        if (section.id === `category-${category}`) {
+                        if (section.id === `category-${currentCategory}`) {
                             section.style.display = 'block';
                         } else {
                             section.style.display = 'none';
@@ -333,46 +354,53 @@
                     });
                 }
 
-                // Apply current search filter after category change
-                applySearchFilter();
+                // Apply current filters
+                applyFilters();
             });
         });
 
         // Search functionality
         if (searchInput) {
             searchInput.addEventListener('input', function(e) {
-                applySearchFilter();
+                applyFilters();
             });
         }
 
-        function applySearchFilter() {
+        // Sort functionality
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                currentSort = this.value;
+                applyFilters();
+            });
+        }
+
+        function applyFilters() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             
-            // If no search term, show all products
-            if (searchTerm === '') {
+            // Reset all products first
+            productCards.forEach(card => {
+                card.classList.remove('hidden', 'fade-in');
+            });
+
+            // Apply search filter
+            if (searchTerm !== '') {
                 productCards.forEach(card => {
-                    card.classList.remove('hidden');
+                    const productName = card.getAttribute('data-product-name');
+                    const productDescription = card.getAttribute('data-product-description');
+                    
+                    if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
+                        card.classList.remove('hidden');
+                        card.classList.add('fade-in');
+                    } else {
+                        card.classList.add('hidden');
+                    }
                 });
-                categorySections.forEach(section => {
-                    section.style.display = 'block';
-                });
-                return;
             }
 
-            let totalVisibleProducts = 0;
-
-            // Filter products based on search term
-            productCards.forEach(card => {
-                const productName = card.getAttribute('data-product-name');
-                const productDescription = card.getAttribute('data-product-description');
-                
-                if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
-                    card.classList.remove('hidden');
-                    totalVisibleProducts++;
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
+            // Apply sorting
+            if (currentSort) {
+                applySorting();
+            }
 
             // Show/hide category sections based on visible products
             categorySections.forEach(section => {
@@ -382,6 +410,42 @@
                 } else {
                     section.style.display = 'none';
                 }
+            });
+        }
+
+        function applySorting() {
+            const productGrids = document.querySelectorAll('.products-grid');
+            
+            productGrids.forEach(grid => {
+                const visibleProducts = Array.from(grid.querySelectorAll('.product-card:not(.hidden)'));
+                
+                if (visibleProducts.length === 0) return;
+
+                visibleProducts.sort((a, b) => {
+                    const priceA = parseFloat(a.getAttribute('data-product-price'));
+                    const priceB = parseFloat(b.getAttribute('data-product-price'));
+                    const nameA = a.getAttribute('data-product-name');
+                    const nameB = b.getAttribute('data-product-name');
+                    
+                    switch (currentSort) {
+                        case 'price-low':
+                            return priceA - priceB;
+                        case 'price-high':
+                            return priceB - priceA;
+                        case 'name':
+                            return nameA.localeCompare(nameB);
+                        default:
+                            return 0;
+                    }
+                });
+
+                // Reorder products in the grid with animation
+                visibleProducts.forEach((product, index) => {
+                    setTimeout(() => {
+                        grid.appendChild(product);
+                        product.classList.add('fade-in');
+                    }, index * 50);
+                });
             });
         }
 
@@ -417,3 +481,4 @@
         });
     });
 </script>
+}

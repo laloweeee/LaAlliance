@@ -803,8 +803,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasKey("UserAddressID");
 
-                    b.HasIndex("AddressID")
-                        .IsUnique();
+                    b.HasIndex("AddressID");
 
                     b.HasIndex("UserID");
 
@@ -1136,8 +1135,8 @@ namespace ASI.Basecode.Data.Migrations
             modelBuilder.Entity("ASI.Basecode.Data.Models.UserAddress", b =>
                 {
                     b.HasOne("ASI.Basecode.Data.Models.Address", "Address")
-                        .WithOne("UserAddress")
-                        .HasForeignKey("ASI.Basecode.Data.Models.UserAddress", "AddressID")
+                        .WithMany("UserAddresses")
+                        .HasForeignKey("AddressID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1184,7 +1183,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Navigation("RestaurantAddress");
 
-                    b.Navigation("UserAddress");
+                    b.Navigation("UserAddresses");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Cart", b =>

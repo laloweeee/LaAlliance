@@ -5,6 +5,7 @@ using ASI.Basecode.Services.ServiceModels;
 using System.Linq;
 using ASI.Basecode.Data.Models;
 using System;
+using System.Collections.Generic;
 using ASI.Basecode.Services.Helper;
 using CsvHelper;
 
@@ -70,10 +71,10 @@ namespace ASI.Basecode.Services.Services
         /// </summary>
         /// <param name="userID"></param>
         /// <returns></returns>
-        public UserAddressServiceModel GetUserAddresses(int userID)
+        public List<UserAddressServiceModel> GetUserAddresses(int userID)
         {
             var userAddresses = _userProfileRepository.GetUserAddresses(userID);
-            return _mapper.ProjectTo<UserAddressServiceModel>(userAddresses).FirstOrDefault();
+            return _mapper.ProjectTo<UserAddressServiceModel>(userAddresses).ToList();
         }
 
         /// <summary>

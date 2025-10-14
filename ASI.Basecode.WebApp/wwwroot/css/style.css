@@ -6,30 +6,11 @@
     backdrop-filter: blur(6px);
 }
 
-/* Add this to your existing CSS */
-    .line-clamp-1 {
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 1;
-    }
-    
-    .line-clamp-2 {
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-    }
+.hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+}
 
-    .product-card {
-        transition: all 0.3s ease;
-    }
-
-    .product-card.hidden {
-        display: none;
-    }
-
-    /* Smooth scrolling for anchor links */
-    html {
-        scroll-behavior: smooth;
-    }
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+}

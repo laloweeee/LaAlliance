@@ -1,0 +1,156 @@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+    var subtotal = Model.Cart?.CartItems?.Sum(item => {
+        var itemPrice = item.UnitPrice;
+        var optionsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0;
+        return item.Quantity * (itemPrice + optionsTotal);
+    }) ?? 0;
+    var deliveryFee = 50.00m;
+    var total = subtotal + deliveryFee;
+}
+
+<div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <h1 class="text-3xl font-bold mb-6">Checkout</h1>
+    <form asp-action="Index" method="post" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+            <!-- Delivery Address -->
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Delivery Address</label>
+                <input asp-for="DeliveryAddress" class="w-full border rounded px-4 py-2" placeholder="Enter your address" />
+                <span asp-validation-for="DeliveryAddress" class="text-red-500 text-sm"></span>
+            </div>
+            <!-- Delivery Options -->
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Delivery Option</label>
+                <select asp-for="DeliveryOption" class="w-full border rounded px-4 py-2">
+                    <option value="">Select an option</option>
+                    <option value="Saver">Saver (2-3 days)</option>
+                    <option value="Standard">Standard (Next day)</option>
+                    <option value="Priority">Priority (Same day)</option>
+                    <option value="Schedule">Schedule</option>
+                </select>
+                <span asp-validation-for="DeliveryOption" class="text-red-500 text-sm"></span>
+                <div id="scheduleField" class="mt-2" style="display:none;">
+                    <input asp-for="ScheduledDateTime" type="datetime-local" class="w-full border rounded px-4 py-2" />
+                </div>
+            </div>
+            <!-- Personal Details -->
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Full Name</label>
+                <input asp-for="FullName" class="w-full border rounded px-4 py-2" />
+                <span asp-validation-for="FullName" class="text-red-500 text-sm"></span>
+            </div>
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Email</label>
+                <input asp-for="Email" class="w-full border rounded px-4 py-2" />
+                <span asp-validation-for="Email" class="text-red-500 text-sm"></span>
+            </div>
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Contact Number</label>
+                <input asp-for="ContactNumber" class="w-full border rounded px-4 py-2" />
+                <span asp-validation-for="ContactNumber" class="text-red-500 text-sm"></span>
+            </div>
+            <!-- Payment Options -->
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Payment Method</label>
+                <select asp-for="PaymentMethod" class="w-full border rounded px-4 py-2">
+                    <option value="">Select payment method</option>
+                    <option value="Cash">Cash on Delivery</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Card">Credit/Debit Card</option>
+                </select>
+                <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm"></span>
+            </div>
+            <!-- Vouchers -->
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Voucher Code</label>
+                <input asp-for="VoucherCode" class="w-full border rounded px-4 py-2" placeholder="Enter voucher code" />
+                @if (Model.AvailableVouchers != null && Model.AvailableVouchers.Any())
+                {
+                    <div class="mt-2 text-sm text-gray-500">
+                        Available: @string.Join(", ", Model.AvailableVouchers)
+                    </div>
+                }
+            </div>
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mt-4">Place Order</button>
+        </div>
+        <!-- Order Summary / Receipt -->
+        <div>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+                <div class="divide-y">
+                    @foreach (var item in Model.Cart.CartItems)
+                    {
+                        <div class="py-4 flex flex-col gap-1">
+                            <div class="flex justify-between">
+                                <span class="font-semibold">@item.ProductName</span>
+                                <span>x@item.Quantity</span>
+                            </div>
+                            @if (item.Options != null && item.Options.Any())
+                            {
+                                <div class="ml-2 text-sm text-gray-600">
+                                    @foreach (var opt in item.Options)
+                                    {
+                                        <div>
+                                            + @opt.OptionName
+                                            @if (opt.AdditionalPrice > 0)
+                                            {
+                                                <span>(₱@opt.AdditionalPrice.ToString("F2"))</span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            <div class="flex justify-between text-sm">
+                                <span>Unit Price:</span>
+                                <span>₱@item.UnitPrice.ToString("F2")</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>Item Total:</span>
+                                <span>
+                                    ₱@((item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))).ToString("F2"))
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="border-t pt-4 mt-4 space-y-2">
+                    <div class="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>₱@subtotal.ToString("F2")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Delivery Fee:</span>
+                        <span>₱@deliveryFee.ToString("F2")</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-lg">
+                        <span>Total:</span>
+                        <span>₱@total.ToString("F2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Show/hide schedule field
+        document.addEventListener('DOMContentLoaded', function () {
+            var deliveryOption = document.querySelector('[name="DeliveryOption"]');
+            var scheduleField = document.getElementById('scheduleField');
+            function toggleSchedule() {
+                if (deliveryOption.value === "Schedule") {
+                    scheduleField.style.display = "";
+                } else {
+                    scheduleField.style.display = "none";
+                }
+            }
+            deliveryOption.addEventListener('change', toggleSchedule);
+            toggleSchedule();
+        });
+    </script>
+}
