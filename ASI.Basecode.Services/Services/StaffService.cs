@@ -67,8 +67,9 @@ namespace ASI.Basecode.Services.Services
                 {
                     UserProfile = new UserProfile
                     {
-                        FirstName = model.FirstName?.Trim(),
-                        LastName = model.LastName?.Trim()
+                        FirstName     = model.FirstName?.Trim(),
+                        LastName      = model.LastName?.Trim(),
+                        ContactNumber = string.IsNullOrWhiteSpace(model.ContactNumber) ? "N/A" : model.ContactNumber.Trim()
                     },
                     Email = model.Email?.Trim(),
                     UserType = Enums.UserType.Restaurant,
@@ -88,25 +89,35 @@ namespace ASI.Basecode.Services.Services
         /// </summary>
         public void UpdateStaff(StaffViewModel model)
         {
-            var staff = _staffRepository.GetStaffByID(model.StaffID) ?? throw new ArgumentException("Staff member not found.");
+            var staff = _staffRepository.GetStaffByID(model.StaffID) 
+                ?? throw new ArgumentException("Staff member not found.");
 
+            // Check if email is already used by another staff member
             var existingStaff = _staffRepository.GetAllStaff()
-                .FirstOrDefault(s => s.User.Email.ToLower().Trim() == model.Email.ToLower().Trim() && s.StaffID != model.StaffID);
+                .FirstOrDefault(s => s.User.Email.ToLower().Trim() == model.Email.ToLower().Trim() 
+                                && s.StaffID != model.StaffID);
 
             if (existingStaff != null)
                 throw new ArgumentException("A staff member with this email already exists.");
 
+            // Update basic info
             staff.User.UserProfile.FirstName = model.FirstName?.Trim();
             staff.User.UserProfile.LastName  = model.LastName?.Trim();
+            staff.User.UserProfile.ContactNumber = string.IsNullOrWhiteSpace(model.ContactNumber) 
+                ? "N/A" 
+                : model.ContactNumber.Trim();
             staff.User.Email = model.Email?.Trim();
 
+            // Only update password if provided
             if (!string.IsNullOrWhiteSpace(model.Password))
                 staff.User.Password = PasswordManager.EncryptPassword(model.Password);
 
+            // Parse and update role
             Enums.StaffRole roleEnum;
             if (!Enum.TryParse(model.Role, ignoreCase: true, out roleEnum))
                 roleEnum = Enums.StaffRole.Staff;
 
+            // Parse and update status
             Enums.AccountStatus statusEnum;
             if (!Enum.TryParse(model.Status, ignoreCase: true, out statusEnum))
                 statusEnum = Enums.AccountStatus.Active;

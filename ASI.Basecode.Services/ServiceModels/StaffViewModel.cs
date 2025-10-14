@@ -2,7 +2,7 @@ namespace ASI.Basecode.Services.ServiceModels
 {
     public class StaffViewModel
     {
-        public int    StaffID       { get; set; }   // or Id—just match how the service reads it
+        public int    StaffID       { get; set; }   
         public string FirstName     { get; set; }
         public string LastName      { get; set; }
         public string Email         { get; set; }

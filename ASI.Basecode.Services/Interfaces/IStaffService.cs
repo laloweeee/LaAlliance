@@ -15,6 +15,6 @@ namespace ASI.Basecode.Services.Interfaces
         void AddStaff(StaffViewModel model);
         void UpdateStaff(StaffViewModel model);
         void DeleteStaff(int staffID);
-        Task<List<StaffList>> ListAsync();   
+        Task<List<StaffList>> ListAsync();
     }
 }
