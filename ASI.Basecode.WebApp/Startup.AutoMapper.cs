@@ -2,6 +2,8 @@
 using ASI.Basecode.Data.Models;
 using ASI.Basecode.Services.ServiceModels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using CustomerModels = ASI.Basecode.WebApp.Areas.Customer.Models;
 
 namespace ASI.Basecode.WebApp
 {
@@ -55,7 +57,7 @@ namespace ASI.Basecode.WebApp
                     .ForMember(dest => dest.CartItemOptions, opt => opt.Ignore())
                     .ForMember(dest => dest.OrderItemOption, opt => opt.Ignore());
 
-                // Add mapping for ProductOptionItemViewModel if needed
+                // Add mapping for ProductOptionItemServiceModel if needed
                 CreateMap<ProductOptionItems, ProductOptionItemViewModel>()
                     .ReverseMap()
                     .ForMember(dest => dest.ProductOptionGroup, opt => opt.Ignore())
@@ -76,6 +78,30 @@ namespace ASI.Basecode.WebApp
                     .ReverseMap();
 
                 CreateMap<UserProfile, UserProfileServiceModel>().ReverseMap();
+                
+                // UserAddress mapping - handle nested Address entity
+                CreateMap<UserAddress, UserAddressServiceModel>()
+                    .ForMember(dest => dest.Street, opt => opt.MapFrom(src => src.Address.Street))
+                    .ForMember(dest => dest.Barangay, opt => opt.MapFrom(src => src.Address.Barangay))
+                    .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City))
+                    .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Address.Province))
+                    .ForMember(dest => dest.ZipCode, opt => opt.MapFrom(src => src.Address.ZipCode.ToString()))
+                    .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Address.Longitude))
+                    .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Address.Latitude))
+                    .ReverseMap()
+                    .ForMember(dest => dest.Address, opt => opt.MapFrom(src => new Address
+                    {
+                        Street = src.Street,
+                        Barangay = src.Barangay,
+                        City = src.City,
+                        Province = src.Province,
+                        ZipCode = string.IsNullOrEmpty(src.ZipCode) ? 0 : int.Parse(src.ZipCode),
+                        Longitude = src.Longitude,
+                        Latitude = src.Latitude
+                    }));
+
+                // UserAddressServiceModel to UserAddressViewModel mapping
+                CreateMap<UserAddressServiceModel, CustomerModels.UserAddressViewModel>().ReverseMap();
             }
         }
     }

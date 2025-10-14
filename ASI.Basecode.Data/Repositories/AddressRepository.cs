@@ -60,7 +60,7 @@ namespace ASI.Basecode.Data.Repositories
         public Address GetAddressById(int addressID)
         {
             return _dbContext.Addresses
-                .Include(a => a.UserAddress)
+                .Include(a => a.UserAddresses)
                 .Include(a => a.RestaurantAddress)
                 .Include(a => a.Order)
                 .FirstOrDefault(a => a.AddressID == addressID);

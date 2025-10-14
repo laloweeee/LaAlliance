@@ -20,7 +20,7 @@ namespace ASI.Basecode.Data.Models
         public string Country { get; } = "Philippines";
 
         //Navigator
-        public UserAddress UserAddress { get; set; } // One address can belong to one user
+        public ICollection<UserAddress> UserAddresses { get; set; } // One address can be used by multiple users
         public RestaurantAddress RestaurantAddress { get; set; } // One address can belong to one restaurant
         public Order Order { get; set; } // One address can belong to one order
     }
