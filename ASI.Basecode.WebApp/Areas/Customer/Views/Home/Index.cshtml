@@ -3,338 +3,417 @@
     ViewData["Title"] = "LaAlliancé";
 }
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-gray-50">
-    <div class="p-2 md:p-4 lg:p-6">
-        <div class="max-w-[1600px] mx-auto">
-            <div class="flex flex-col lg:flex-row gap-6 w-full">
-                <!-- LEFT SIDE: CATEGORIES SIDEBAR -->
-                <aside class="lg:w-72">
-                    <div class="sticky top-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                        <!-- Category Header -->
-                        <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-5">
-                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                                <i class="fas fa-filter"></i>
-                                Categories
-                            </h2>
-                            <p class="text-emerald-100 text-sm mt-1">Browse by category</p>
-                        </div>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-                        <!-- Categories List -->
-                        <div class="p-4">
-                            <div class="flex flex-col gap-2 max-h-[calc(100vh-250px)] overflow-y-auto hide-scrollbar pr-1">
-                                <!-- All Items Option -->
-                                <label class="category-option cursor-pointer block">
-                                    <input type="radio" name="category" value="all" class="hidden category-radio" checked>
-                                    <div class="category-pill group px-4 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-medium shadow-md border-2 border-emerald-500 transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex items-center gap-3">
-                                                <i class="fas fa-th-large"></i>
-                                                <span class="category-name font-semibold">All Items</span>
-                                            </div>
-                                            <svg class="checkmark w-5 h-5 opacity-100 transition-opacity duration-200"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </label>
+<div class="min-h-screen bg-gray-50 font-inter">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                                @foreach (var category in Model.Categories)
-                                {
-                                    <label class="category-option cursor-pointer block mx-1">
-                                        <input type="radio" name="category" value="@category.CategoryID" class="hidden category-radio"
-                                            data-category-id="@category.CategoryID">
-                                        <div class="category-pill group px-4 py-3.5 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl font-medium shadow-sm border-2 border-transparent transition-all duration-200 hover:shadow-md hover:border-emerald-300 hover:from-emerald-50 hover:to-emerald-100 hover:scale-[1.02]">
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-3">
-                                                    <i class="fas fa-utensils text-emerald-600 group-hover:scale-110 transition-transform"></i>
-                                                    <span class="category-name">@category.CategoryName</span>
-                                                </div>
-                                                <svg class="checkmark w-5 h-5 text-emerald-600 opacity-0 transition-opacity duration-200"
-                                                    fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </label>
-                                }
-                            </div>
-                        </div>
+        <!-- Hero Banner -->
+        <div class="rounded-2xl mb-8 relative overflow-hidden h-96">
+            <img src="https://template.canva.com/EAGc0MQo6qY/1/0/1600w-NDIQ-aX6840.jpg" alt="Delivery person" class="w-full h-full object-fill">
+            <button class="absolute bottom-6 right-6 bg-white text-gray-800 px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 hover:bg-gray-50 active:scale-95">
+                Order Now
+            </button>
+        </div>
 
-                        <!-- Quick Stats -->
-                        <div class="p-4 border-t border-gray-100 bg-gradient-to-br from-emerald-50 to-green-50">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="text-center p-3 bg-white rounded-xl shadow-sm">
-                                    <div class="text-2xl font-bold text-emerald-600">@Model.Categories.Count()</div>
-                                    <div class="text-xs text-gray-600 mt-1">Categories</div>
-                                </div>
-                                <div class="text-center p-3 bg-white rounded-xl shadow-sm">
-                                    <div class="text-2xl font-bold text-emerald-600">@Model.Products.Count()</div>
-                                    <div class="text-xs text-gray-600 mt-1">Products</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </aside>
+       <!-- Search Section -->
+        <div class="flex flex-col lg:flex-row gap-4 items-center mb-8">
+            <div class="flex-1 w-full">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input id="menuSearch"
+                        type="text"
+                        placeholder="Search for delicious food..."
+                        class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-200 transition-colors outline-none"
+                        autocomplete="off">
+                </div>
+            </div>
+            <div class="w-full lg:w-auto">
+                <select class="w-full lg:w-64 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-200 transition-colors font-medium outline-none appearance-none bg-white">
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                    <option>Newest First</option>
+                </select>
+            </div>
+        </div>
+            
+        <!-- Filter Section -->
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Categories</h2>
+        <div class="flex flex-wrap gap-6 mb-8">
+            <div class="flex flex-col items-center">
+                <button class="category-filter w-20 h-20 rounded-lg bg-gray-200 overflow-hidden mb-2 transition-all" data-category="all">
+                    <img src="https://i.pinimg.com/1200x/c4/40/0f/c4400f1f2c8441cb7c6eea6844a79135.jpg" alt="All Items" class="w-full h-full object-cover transition-transform">
+                </button>
+                <span class="text-sm font-medium text-gray-700">All Items</span>
+            </div>
+            
+            @foreach (var category in Model.Categories)
+            {
+                <div class="flex flex-col items-center">
+                    <button class="category-filter w-20 h-20 rounded-lg bg-gray-200 overflow-hidden mb-2 transition-all"
+                            data-category="@category.CategoryID">
+                        <img src="https://i.pinimg.com/1200x/c4/40/0f/c4400f1f2c8441cb7c6eea6844a79135.jpg" alt="@category.CategoryName" class="w-full h-full object-cover transition-transform">
+                    </button>
+                    <span class="text-sm font-medium text-gray-700">@category.CategoryName</span>
+                </div>
+            }
+        </div>
 
-                <!-- CENTER: MAIN CONTENT -->
-                <main class="flex-1 min-w-0">
-                    <!-- HERO BANNER -->
-                    <div class="mb-6">
-                        <div class="w-full bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 rounded-2xl p-8 md:p-10 flex items-center justify-between relative overflow-hidden shadow-xl">
-                            <!-- Animated Decorative Elements -->
-                            <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-white/20 transform -skew-x-12 animate-pulse"></div>
-                            <div class="absolute left-10 top-10 w-12 h-12 bg-white rounded-full opacity-20 animate-bounce"></div>
-                            <div class="absolute right-20 bottom-8 w-16 h-16 bg-white rounded-full opacity-10"></div>
-                            <div class="absolute left-1/3 top-1/2 w-6 h-6 bg-white rounded-full opacity-20"></div>
-                            <div class="absolute right-1/4 top-1/4 w-8 h-8 bg-white rounded-full opacity-15"></div>
-
-                            <!-- Content -->
-                            <div class="flex items-center w-full gap-8 relative z-10">
-                                <!-- Illustration -->
-                                <div class="hidden md:block flex-shrink-0">
-                                    <div class="relative">
-                                        <div class="absolute inset-0 bg-white/20 rounded-full blur-3xl"></div>
-                                        <img src="~/img/food-delivery.png" alt="Delivery person"
-                                            class="h-64 w-auto object-contain drop-shadow-2xl relative z-10 transform hover:scale-105 transition-transform duration-500">
-                                    </div>
-                                </div>
-
-                                <!-- Text Content -->
-                                <div class="flex flex-col flex-1">
-                                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full mb-4 w-fit">
-                                        <i class="fas fa-star text-yellow-300"></i>
-                                        <span class="text-sm font-semibold">Premium Quality Food</span>
-                                    </div>
-                                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-4">
-                                        Hello There!
-                                    </h1>
-                                    <p class="text-lg md:text-xl text-white/95 mb-6 max-w-xl">
-                                        Discover delicious meals delivered fresh to your doorstep in just 30 minutes
-                                    </p>
-                                    <div class="flex flex-col sm:flex-row gap-3">
-                                        <div class="flex items-center gap-2 bg-emerald-800 text-white px-6 py-3.5 rounded-xl hover:bg-emerald-900 transition-all font-semibold shadow-lg">
-                                            <i class="fas fa-map-marker-alt text-lg group-hover:bounce"></i>
-                                            <span>1234 Main St, City, Country</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 bg-emerald-800 text-white px-6 py-3.5 rounded-xl hover:bg-emerald-900 transition-all font-semibold shadow-lg">
-                                            <i class="fas fa-clock"></i>
-                                            <span>Order Now</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Features Banner -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-shipping-fast text-blue-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">Fast Delivery</h3>
-                                    <p class="text-sm text-gray-600">In 30-45 minutes</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-leaf text-green-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">Fresh Ingredients</h3>
-                                    <p class="text-sm text-gray-600">100% organic</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                    <i class="fas fa-award text-purple-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">Best Quality</h3>
-                                    <p class="text-sm text-gray-600">Gordon Rated</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Search and Sort Bar -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="flex-1 relative">
-                                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" 
-                                       placeholder="Search for delicious food..." 
-                                       class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors">
-                            </div>
-                            <select class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors font-medium">
-                                <option>Price: Low to High</option>
-                                <option>Price: High to Low</option>
-                                <option>Newest First</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- PRODUCTS SECTION -->
-                    @if (Model.Products.Any() && Model.Categories.Any())
+        <!-- Products Section -->
+        @if (Model.Products.Any() && Model.Categories.Any())
+        {
+            <div class="space-y-8">
+                @foreach (var category in Model.Categories)
+                {
+                    var productsInCategory = Model.Products.Where(p => p.CategoryID == category.CategoryID).ToList();
+                    
+                    if (productsInCategory.Any())
                     {
-                        <div class="space-y-10">
-                            @foreach (var category in Model.Categories)
-                            {
-                                var productsInCategory = Model.Products.Where(p => p.CategoryID == category.CategoryID).ToList();
-                                
-                                if (productsInCategory.Any())
+                        <div id="category-@category.CategoryID" class="category-section">
+                            <!-- Category Header -->
+                            <div class="mb-4">
+                                <h3 class="text-xl font-bold text-gray-900">@category.CategoryName</h3>
+                                <p class="text-gray-600">Discover our delicious @category.CategoryName offerings</p>
+                            </div>
+                            
+                            <!-- Products Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                                @foreach (var product in productsInCategory)
                                 {
-                                    <div id="category-@category.CategoryID" class="category-section scroll-mt-4">
-                                        <!-- Category Header -->
-                                        <div class="flex items-center justify-between mb-6">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
-                                                    <i class="fas fa-utensils text-white text-xl"></i>
-                                                </div>
-                                                <div>
-                                                    <h3 class="text-2xl font-bold text-gray-900">@category.CategoryName</h3>
-                                                    <p class="text-sm text-gray-600">@productsInCategory.Count items available</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Products Grid -->
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                                            @foreach (var product in productsInCategory)
+                                    <div class="product-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                                         data-product-name="@product.ProductName.ToLower()"
+                                         data-product-description="@product.ProductDescription.ToLower()">
+                                        <!-- Product Image -->
+                                        <div class="h-40 bg-gray-100 overflow-hidden relative">
+                                            @if (!string.IsNullOrEmpty(product.ProductImage))
                                             {
-                                                <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-emerald-200 transform hover:-translate-y-2">
-                                                    <!-- Product Image -->
-                                                    <div class="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                                                        @if (!string.IsNullOrEmpty(product.ProductImage))
-                                                        {
-                                                            <img src="@product.ProductImage" 
-                                                                 alt="@product.ProductName" 
-                                                                 class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
-                                                        }
-                                                        else
-                                                        {
-                                                            <div class="flex items-center justify-center h-full">
-                                                                <i class="fas fa-image text-gray-300 text-5xl"></i>
-                                                            </div>
-                                                        }
-                                                        
-                                                        <!-- Badges -->
-                                                        <div class="absolute top-3 left-3 flex flex-col gap-2">
-                                                            <span class="bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                                                                <i class="fas fa-star"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Product Info -->
-                                                    <div class="p-5">
-                                                        <div class="mb-3">
-                                                            <h3 class="font-bold text-lg mb-2 text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-1">
-                                                                @product.ProductName
-                                                            </h3>
-                                                            <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
-                                                                @(product.ProductDescription?.Length > 80 ? product.ProductDescription.Substring(0, 77) + "..." : product.ProductDescription)
-                                                            </p>
-                                                        </div>
-
-                                                        <!-- Price and CTA -->
-                                                        <div class="flex items-center justify-between">
-                                                            <div>
-                                                                <span class="text-2xl font-bold text-emerald-600">₱@product.ProductPrice.ToString("0.00")</span>
-                                                            </div>
-                                                            <a asp-action="ProductToCart" asp-controller="Home" asp-area="Customer" 
-                                                               asp-route-productID="@product.ProductID"
-                                                               class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-5 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-2">
-                                                                <i class="fas fa-cart-plus"></i>
-                                                                <span class="hidden sm:inline">Add</span>
-                                                            </a>
-                                                        </div>
-                                                    </div>
+                                                <img src="@product.ProductImage"
+                                                    alt="@product.ProductName"
+                                                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                                            }
+                                            else
+                                            {
+                                                <div class="flex items-center justify-center h-full">
+                                                    <i class="fas fa-image text-gray-300 text-3xl"></i>
                                                 </div>
                                             }
                                         </div>
+
+                                        <div class="p-3">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <h3 class="product-name font-bold text-lg text-gray-900 line-clamp-1">
+                                                    @product.ProductName
+                                                </h3>
+                                                <div class="bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <span class="text-xs font-semibold text-gray-700">4.8</span>
+                                                </div>
+                                            </div>
+                                            <p class="product-description text-gray-600 text-sm mb-2 line-clamp-2 leading-snug">
+                                                @(product.ProductDescription?.Length > 80 ? product.ProductDescription.Substring(0, 77) + "..." : product.ProductDescription)
+                                            </p>
+
+                                            <div class="flex items-center text-gray-500 text-sm mb-2">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                <span>25-30 min</span>
+                                            </div>
+
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-lg font-bold text-green-600">₱@product.ProductPrice.ToString("0.00")</span>
+                                                <a asp-action="ProductToCart" asp-controller="Home" asp-area="Customer"
+                                                asp-route-productID="@product.ProductID"
+                                                class="bg-green-500 text-white px-3 py-2 rounded-md font-semibold hover:bg-green-600 transition-colors flex items-center gap-1">
+                                                    <i class="fas fa-cart-plus text-sm"></i>
+                                                    <span class="text-sm">Add</span>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 }
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <!-- Empty State -->
-                        <div class="bg-white rounded-2xl shadow-sm p-16 text-center">
-                            <div class="max-w-md mx-auto">
-                                <div class="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <i class="fas fa-shopping-basket text-gray-400 text-5xl"></i>
-                                </div>
-                                <h2 class="text-2xl font-bold text-gray-900 mb-3">No Products Available</h2>
-                                <p class="text-gray-600 mb-6">Check back soon for delicious new items!</p>
-                                <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
-                                    <i class="fas fa-bell mr-2"></i>Notify Me
-                                </button>
                             </div>
                         </div>
                     }
-                </main>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Footer -->
+<footer class="bg-gray-900 text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Company Info -->
+            <div class="lg:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-utensils text-white text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-bold">LaAlliancé</span>
+                </div>
+                <p class="text-gray-300 mb-6 max-w-md">
+                    Experience the finest culinary delights delivered right to your doorstep. 
+                    Fresh ingredients, authentic flavors, and exceptional service since 2024.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-green-500 rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-green-500 rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-green-500 rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-green-500 rounded-lg flex items-center justify-center transition-colors duration-300">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="#" class="text-gray-300 hover:text-green-400 transition-colors duration-300 flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-green-500"></i>
+                            Our Menu
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-300 hover:text-green-400 transition-colors duration-300 flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-green-500"></i>
+                            About Us
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-300 hover:text-green-400 transition-colors duration-300 flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-green-500"></i>
+                            Contact
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-300 hover:text-green-400 transition-colors duration-300 flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-green-500"></i>
+                            Careers
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-center gap-3 text-gray-300">
+                        <i class="fas fa-map-marker-alt text-green-500"></i>
+                        <span>123 Food Street, City, State 12345</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-gray-300">
+                        <i class="fas fa-phone text-green-500"></i>
+                        <span>+1 (555) 123-4567</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-gray-300">
+                        <i class="fas fa-envelope text-green-500"></i>
+                        <span>hello@laalliance.com</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-gray-300">
+                        <i class="fas fa-clock text-green-500"></i>
+                        <span>Open 24/7</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Delivery Areas -->
+        <div class="mt-8 pt-8 border-t border-gray-700">
+            <h3 class="text-lg font-semibold mb-4 text-center">We Deliver To</h3>
+            <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
+                <span class="bg-gray-800 px-3 py-1 rounded-full">Downtown</span>
+                <span class="bg-gray-800 px-3 py-1 rounded-full">Business District</span>
+                <span class="bg-gray-800 px-3 py-1 rounded-full">Residential Areas</span>
+                <span class="bg-gray-800 px-3 py-1 rounded-full">University Zone</span>
+                <span class="bg-gray-800 px-3 py-1 rounded-full">Shopping Centers</span>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-4">
+            <span class="text-gray-300 text-sm">We Accept:</span>
+            <div class="flex gap-3">
+                <div class="w-10 h-6 bg-white rounded flex items-center justify-center">
+                    <i class="fab fa-cc-visa text-blue-600"></i>
+                </div>
+                <div class="w-10 h-6 bg-white rounded flex items-center justify-center">
+                    <i class="fab fa-cc-mastercard text-red-600"></i>
+                </div>
+                <div class="w-10 h-6 bg-white rounded flex items-center justify-center">
+                    <i class="fab fa-cc-paypal text-blue-500"></i>
+                </div>
+                <div class="w-10 h-6 bg-white rounded flex items-center justify-center">
+                    <i class="fab fa-cc-apple-pay text-gray-800"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="mt-8 pt-8 border-t border-gray-700">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-gray-400 text-sm">
+                    © 2024 LaAlliancé. All rights reserved.
+                </p>
+                <div class="flex gap-6 text-sm text-gray-400">
+                    <a href="#" class="hover:text-green-400 transition-colors duration-300">Privacy Policy</a>
+                    <a href="#" class="hover:text-green-400 transition-colors duration-300">Terms of Service</a>
+                    <a href="#" class="hover:text-green-400 transition-colors duration-300">Cookie Policy</a>
+                </div>
             </div>
         </div>
     </div>
+</footer>
 </div>
 
 <style>
-    /* Hide Scrollbar */
-    .hide-scrollbar::-webkit-scrollbar {
+    .line-clamp-1 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+    }
+    
+    .line-clamp-2 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .product-card {
+        transition: all 0.3s ease;
+    }
+
+    .product-card.hidden {
         display: none;
     }
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    /* Category Radio Selection */
-    .category-radio:checked + .category-pill {
-        background: linear-gradient(to right, rgb(5, 150, 105), rgb(4, 120, 87));
-        color: white;
-        border-color: rgb(5, 150, 105);
-        box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.3);
-    }
-
-    .category-radio:checked + .category-pill .checkmark {
-        opacity: 1;
-    }
-
-    .category-radio:checked + .category-pill i {
-        color: white;
-    }
-
-    /* Line Clamp */
-    .line-clamp-1 {
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    /* Smooth Animations */
-    * {
-        transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryFilters = document.querySelectorAll('.category-filter');
+        const categorySections = document.querySelectorAll('.category-section');
+        const searchInput = document.getElementById('menuSearch');
+        const productCards = document.querySelectorAll('.product-card');
+
+        // Category filter functionality
+        categoryFilters.forEach(button => {
+            button.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                
+                // Update active button
+                categoryFilters.forEach(btn => {
+                    btn.classList.remove('bg-green-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                });
+                this.classList.add('bg-green-600', 'text-white');
+                this.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+
+                // Show/hide categories
+                if (category === 'all') {
+                    categorySections.forEach(section => {
+                        section.style.display = 'block';
+                    });
+                } else {
+                    categorySections.forEach(section => {
+                        if (section.id === `category-${category}`) {
+                            section.style.display = 'block';
+                        } else {
+                            section.style.display = 'none';
+                        }
+                    });
+                }
+
+                // Apply current search filter after category change
+                applySearchFilter();
+            });
+        });
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                applySearchFilter();
+            });
+        }
+
+        function applySearchFilter() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            // If no search term, show all products
+            if (searchTerm === '') {
+                productCards.forEach(card => {
+                    card.classList.remove('hidden');
+                });
+                categorySections.forEach(section => {
+                    section.style.display = 'block';
+                });
+                return;
+            }
+
+            let totalVisibleProducts = 0;
+
+            // Filter products based on search term
+            productCards.forEach(card => {
+                const productName = card.getAttribute('data-product-name');
+                const productDescription = card.getAttribute('data-product-description');
+                
+                if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                    totalVisibleProducts++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Show/hide category sections based on visible products
+            categorySections.forEach(section => {
+                const visibleProductsInSection = section.querySelectorAll('.product-card:not(.hidden)');
+                if (visibleProductsInSection.length > 0) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        // Filter button hover effects
+        categoryFilters.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.classList.add('ring-2', 'ring-green-300');
+                    const img = this.querySelector('img');
+                    img.classList.add('scale-105');
+                }
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.classList.remove('ring-2', 'ring-green-300');
+                    const img = this.querySelector('img');
+                    img.classList.remove('scale-105');
+                }
+            });
+            
+            button.addEventListener('click', function() {
+                categoryFilters.forEach(btn => {
+                    btn.classList.remove('active', 'ring-2', 'ring-green-300');
+                    const img = btn.querySelector('img');
+                    img.classList.remove('scale-105');
+                });
+                
+                this.classList.add('active', 'ring-2', 'ring-green-300');
+                const img = this.querySelector('img');
+                img.classList.add('scale-105');
+            });
+        });
+    });
+</script>

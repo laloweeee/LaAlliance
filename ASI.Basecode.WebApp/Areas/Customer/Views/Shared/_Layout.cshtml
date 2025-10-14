@@ -6,32 +6,37 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-    @RenderSection("Styles", required: false)
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <partial name="_TopBar" />    
+    <partial name="_TopBar" />
     <div class="bg-neutral-100">
         @RenderBody()
     </div>
 
+    <div id="productModalHost"></div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.js"></script>
     <script src="https://kit.fontawesome.com/7a7c645416.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script>
         toastr.options = {
-            positionClass: "toast-top-center", // Set the notification position to center
+            positionClass: "toast-top-center",
             timeOut: 3000,
             closeButton: true,
             progressBar: true
         };
     </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
