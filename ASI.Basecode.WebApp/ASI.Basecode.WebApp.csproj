@@ -28,6 +28,12 @@
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+
+    <!-- EF Core runtime + provider (needed for AddDbContext/UseSqlServer) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
+
+    <!-- Design-time tools (you already had this; keep it) -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -37,6 +43,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ASI.Basecode.Resources\ASI.Basecode.Resources.csproj" />
     <ProjectReference Include="..\ASI.Basecode.Services\ASI.Basecode.Services.csproj" />
+    <!-- Reference Data project so WebApp can access AsiBasecodeDBContext -->
+    <ProjectReference Include="..\ASI.Basecode.Data\ASI.Basecode.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,4 +52,5 @@
     <Folder Include="Areas\Customer\Views\Shared\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>
+
 </Project>
