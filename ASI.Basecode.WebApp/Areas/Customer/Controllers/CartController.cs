@@ -84,28 +84,31 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     Addresses = new List<UserAddressViewModel>()
                 };
 
-                // Try to get user addresses - handle based on actual service model structure
+                // Try to get user addresses - now returns a list
                 try
                 {
-                    var userAddress = _userProfileService.GetUserAddresses(UserId);
-                    if (userAddress != null)
+                    var userAddresses = _userProfileService.GetUserAddresses(UserId);
+                    if (userAddresses != null && userAddresses.Any())
                     {
-                        // If the service returns a single address, add it to the list
-                        accountViewModel.Addresses.Add(new UserAddressViewModel
+                        // Add all addresses to the list
+                        foreach (var userAddress in userAddresses)
                         {
-                            UserAddressID = userAddress.UserAddressID,
-                            AddressID = userAddress.AddressID,
-                            IsDefault = userAddress.IsDefault,
-                            AddressType = userAddress.AddressType,
-                            AddressNote = userAddress.AddressNote,
-                            Street = userAddress.Street,
-                            Barangay = userAddress.Barangay,
-                            City = userAddress.City,
-                            Province = userAddress.Province,
-                            ZipCode = userAddress.ZipCode,
-                            Longitude = userAddress.Longitude,
-                            Latitude = userAddress.Latitude
-                        });
+                            accountViewModel.Addresses.Add(new UserAddressViewModel
+                            {
+                                UserAddressID = userAddress.UserAddressID,
+                                AddressID = userAddress.AddressID,
+                                IsDefault = userAddress.IsDefault,
+                                AddressType = userAddress.AddressType,
+                                AddressNote = userAddress.AddressNote,
+                                Street = userAddress.Street,
+                                Barangay = userAddress.Barangay,
+                                City = userAddress.City,
+                                Province = userAddress.Province,
+                                ZipCode = userAddress.ZipCode,
+                                Longitude = userAddress.Longitude,
+                                Latitude = userAddress.Latitude
+                            });
+                        }
                     }
                 }
                 catch
