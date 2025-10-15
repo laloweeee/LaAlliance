@@ -16,7 +16,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private readonly ICartService _cartService;
         private readonly ILogger<CheckoutController> _logger;
         private readonly IUserProfileService _userProfileService;
-        private readonly IAddressService _addressService; // <-- add this
+        private readonly IAddressService _addressService; 
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
 
@@ -24,14 +24,14 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             ICartService cartService,
             ILogger<CheckoutController> logger,
             IUserProfileService userProfileService,
-            IAddressService addressService, // <-- add this
+            IAddressService addressService, 
             IConfiguration configuration,
             IMapper mapper = null)
         {
             _cartService = cartService;
             _logger = logger;
             _userProfileService = userProfileService;
-            _addressService = addressService; // <-- assign here
+            _addressService = addressService; 
             _mapper = mapper;
             _configuration = configuration;
         }
@@ -49,7 +49,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             }
 
             var userProfile = _userProfileService.GetUserProfile(userId);
-            var addresses = _addressService.GetUserAddresses(userId); // <-- use address service
+            var addresses = _addressService.GetUserAddresses(userId); 
 
             var model = new CheckoutViewModel
             {
@@ -70,7 +70,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Index(CheckoutViewModel model)
+        public IActionResult PlaceOrder(CheckoutViewModel model)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
             model.Cart = _cartService.GetOrCreateCart(userId);
