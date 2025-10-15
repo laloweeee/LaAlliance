@@ -375,51 +375,66 @@
             });
 
             // Custom search functionality for the checkout page
-            function setupSearchButton() {
-                const searchBtn = document.getElementById('searchAddressBtn');
-                if (searchBtn) {
-                    searchBtn.addEventListener('click', function() {
-                        const street = document.querySelector('input[name="DeliveryAddress"]').value;
-                        const barangay = document.querySelector('input[name="Addresses[0].Barangay"]').value;
-                        const city = document.querySelector('input[name="Addresses[0].City"]').value;
-                        const province = document.querySelector('input[name="Addresses[0].Province"]').value;
-                        
-                        const addressParts = [street, barangay, city, province, 'Philippines'].filter(part => part);
-                        const address = addressParts.join(', ');
-                        
-                        if (!address.trim()) {
-                            alert('Please fill in at least one address field to search.');
-                            return;
-                        }
+            // Setup search address button to use form fields
+        function setupSearchButton() {
+            const searchBtn = document.getElementById('searchAddressBtn');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    const streetInput = document.querySelector('input[name="Street"]');
+                    const barangayInput = document.querySelector('input[name="Barangay"]');
+                    const cityInput = document.querySelector('input[name="City"]');
+                    const provinceInput = document.querySelector('input[name="Province"]');
+                    
+                    const street = streetInput ? streetInput.value.trim() : '';
+                    const barangay = barangayInput ? barangayInput.value.trim() : '';
+                    const city = cityInput ? cityInput.value.trim() : '';
+                    const province = provinceInput ? provinceInput.value.trim() : '';
+                    
+                    if (!street && !city && !barangay) {
+                        alert('Please fill in at least Street, Barangay, or City fields to search.');
+                        return;
+                    }
 
-                        const originalHTML = this.innerHTML;
-                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-                        this.disabled = true;
+                    // Build address string
+                    const addressParts = [street, barangay, city, province, 'Philippines'].filter(part => part);
+                    const address = addressParts.join(', ');
+                    
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+                    this.disabled = true;
 
-                        // Use the geocoder from maps.js
-                        if (window.geocoder) {
-                            window.geocoder.geocode({ address: address }, (results, status) => {
-                                if (status === 'OK' && results[0]) {
-                                    const location = results[0].geometry.location;
-                                    window.map.setCenter(location);
-                                    window.map.setZoom(17);
-                                    window.placeMarker(location, 'latitudeInput', 'longitudeInput');
-                                    
-                                    this.innerHTML = '<i class="fas fa-check"></i> Found!';
-                                } else {
-                                    alert('Address not found on map. Please click on the map to set location manually.');
-                                    this.innerHTML = '<i class="fas fa-times"></i> Not Found';
+                    // Use the global geocoder from maps.js
+                    if (typeof geocoder !== 'undefined') {
+                        geocoder.geocode({ address: address }, (results, status) => {
+                            if (status === 'OK' && results[0]) {
+                                const location = results[0].geometry.location;
+                                
+                                // Use the global map and placeMarker function from maps.js
+                                if (typeof map !== 'undefined' && typeof placeMarker === 'function') {
+                                    map.setCenter(location);
+                                    map.setZoom(17);
+                                    placeMarker(location);
                                 }
                                 
-                                setTimeout(() => {
-                                    this.innerHTML = originalHTML;
-                                    this.disabled = false;
-                                }, 2000);
-                            });
-                        }
-                    });
-                }
+                                this.innerHTML = '<i class="fas fa-check"></i> Found!';
+                            } else {
+                                alert('Address not found on map. Please click on the map to set location manually.');
+                                this.innerHTML = '<i class="fas fa-times"></i> Not Found';
+                            }
+                            
+                            setTimeout(() => {
+                                this.innerHTML = originalHTML;
+                                this.disabled = false;
+                            }, 2000);
+                        });
+                    } else {
+                        alert('Map is not ready yet. Please try again in a moment.');
+                        this.innerHTML = originalHTML;
+                        this.disabled = false;
+                    }
+                });
             }
+        }
 
             // Wait for maps.js to initialize, then setup our custom search
             setTimeout(() => {
