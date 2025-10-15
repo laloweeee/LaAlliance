@@ -1,253 +1,323 @@
-@*
-
-*@
-
 @model ASI.Basecode.Services.ServiceModels.CartViewModel
 @{
     ViewData["Title"] = "LaAlliancé";
+    
+    // Calculate totals - using the actual property names from your service model
+    var totalItems = Model?.CartItems?.Sum(item => item.Quantity) ?? 0;
+    var subtotal = Model?.CartItems?.Sum(item => {
+        var itemPrice = item.UnitPrice;
+        var optionsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0;
+        return item.Quantity * (itemPrice + optionsTotal);
+    }) ?? 0;
+    var deliveryFee = 50.00m;
+    var total = subtotal + deliveryFee;
+    
+    // Check for success messages (only for delete)
+    var successMessage = TempData["SuccessMessage"] as string;
 }
 
-<div class="p-1 md:p-2 lg:p-4 bg-gray-50 min-h-screen">
+<div class="p-6 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="mb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Shopping Cart</h1>
-            <p class="text-gray-600 mt-2">Review your items before checkout</p>
+        <!-- Toast Notification - Only show for delete actions -->
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="fixed top-4 right-4 z-50 animate-fade-in">
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl shadow-sm flex items-center gap-3">
+                    <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-trash text-white text-xs"></i>
+                    </div>
+                    <span class="font-medium">@successMessage</span>
+                </div>
+            </div>
+        }
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm mx-4">
+                <div class="text-center">
+                    <!-- Warning Icon -->
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Remove Item</h3>
+                    <p class="text-gray-600 mb-6" id="modalMessage">Are you sure you want to remove this item from your cart?</p>
+                    
+                    <div class="flex gap-3">
+                        <button type="button" 
+                                id="cancelDelete" 
+                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                        <form id="deleteForm" method="post" style="display: inline; flex: 1;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="cartItemID" id="modalCartItemId" />
+                            <button type="submit" 
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-trash"></i>
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="flex flex-col lg:flex-row gap-6">
-            <!-- Cart Items Section -->
-            <div class="flex-1">
-                <!-- Empty Cart State -->
-                @if (Model?.CartItems == null || !Model.CartItems.Any())
-                {
-                    <div class="bg-white rounded-2xl shadow-sm p-12 text-center">
-                        <div class="flex flex-col items-center">
-                            <div class="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                                <i class="fas fa-shopping-cart text-gray-400 text-5xl"></i>
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Your Cart</h1>
+            <p class="text-gray-600">Review and manage your selected items</p>
+        </div>
+
+        <!-- Main Content Container -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Cart Items Section -->
+                <div class="flex-1">
+                    @if (Model?.CartItems == null || !Model.CartItems.Any())
+                    {
+                        <div class="text-center py-12">
+                            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-shopping-cart text-gray-400 text-3xl"></i>
                             </div>
                             <h2 class="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
                             <p class="text-gray-600 mb-6">Add some delicious items to get started!</p>
-                            <a href="/" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors inline-flex items-center gap-2">
+                            <a href="@Url.Action("Index", "Home", new { area = "Customer" })" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors inline-flex items-center gap-2">
                                 <i class="fas fa-utensils"></i>
                                 <span>Browse Menu</span>
                             </a>
                         </div>
-                    </div>
-                }
-                else
-                {
-                    <!-- Cart Items List -->
-                    <div class="space-y-4">
-                        @foreach (var item in Model.CartItems)
-                        {
-                            <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                                <div class="p-4 md:p-6">
-                                    <div class="flex gap-4">
-                                        <!-- Product Image -->
-                                        <div class="flex-shrink-0">
-                                            <div class="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden bg-gray-100">
-                                                @if (!string.IsNullOrEmpty(item.ProductImage))
-                                                {
-                                                    <img src="@item.ProductImage" 
-                                                         alt="@item.ProductName" 
-                                                         class="w-full h-full object-cover" />
-                                                }
-                                                else
-                                                {
-                                                    <div class="w-full h-full flex items-center justify-center">
-                                                        <i class="fas fa-image text-gray-300 text-3xl"></i>
+                    }
+                    else
+                    {
+                        <!-- Cart Items List -->
+                        <div class="space-y-4">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+                                
+                                <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden" id="cart-item-@item.CartItemID">
+                                    <div class="p-6">
+                                        <div class="flex gap-4">
+                                            <!-- Product Details -->
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <div class="flex-1">
+                                                        <h3 class="text-lg font-bold text-gray-900 mb-1">@item.ProductName</h3>
+                                                        
+                                                        <!-- Display Customized Orders -->
+                                                        @if (item.Options != null && item.Options.Any())
+                                                        {
+                                                            <div class="mb-3 p-3 rounded-lg">
+                                                                @foreach (var option in item.Options)
+                                                                {
+                                                                    <div class="text-sm text-gray-600 ml-2">
+                                                                        <span class="font-medium">@option.OptionGroupName:</span>
+                                                                        <span>@option.OptionName</span>
+                                                                        @if (option.AdditionalPrice > 0)
+                                                                        {
+                                                                            <span class="text-green-600 ml-1">(+₱@option.AdditionalPrice.ToString("F2"))</span>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="mb-3">
+                                                                <span class="text-sm text-gray-500">No customizations</span>
+                                                            </div>
+                                                        }
+                                                        
+                                                        <p class="text-sm text-gray-500 font-semibold">Base Price: ₱@item.UnitPrice.ToString("F2")</p>
+                                                        <!-- Item Total -->
+                                                        <p class="text-green-600 font-semibold">Total Price: ₱@itemTotalPrice.ToString("F2")</p>
                                                     </div>
-                                                }
-                                            </div>
-                                        </div>
-
-                                        <!-- Product Details -->
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-1">
-                                                        @item.ProductName
-                                                    </h3>
-                                                    <p class="text-emerald-600 font-semibold text-lg">
-                                                        ₱@item.UnitPrice.ToString("F2")
-                                                    </p>
-                                                </div>
-                                                <button type="button" class="text-gray-400 hover:text-red-500 transition-colors p-2">
-                                                    <i class="fas fa-trash text-lg"></i>
-                                                </button>
-                                            </div>
-
-                                            <!-- Selected Options -->
-                                            @if (item.Options != null && item.Options.Any())
-                                            {
-                                                <div class="mb-3 space-y-1">
-                                                    @foreach (var option in item.Options)
-                                                    {
-                                                        <div class="flex items-center text-sm text-gray-600">
-                                                            <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>
-                                                            <span class="font-medium">@option.OptionGroupName:</span>
-                                                            <span class="ml-1">@option.OptionName</span>
-                                                            @if (option.AdditionalPrice > 0)
-                                                            {
-                                                                <span class="ml-2 text-emerald-600 font-semibold">
-                                                                    (+₱@option.AdditionalPrice.ToString("F2"))
-                                                                </span>
-                                                            }
+                                                    <div class="flex flex-col items-end gap-4">
+                                                        <!-- Action Buttons -->
+                                                        <div class="flex gap-2">
+                                                            <!-- Edit Button - Fixed URL to point to ProductToCart -->
+                                                            <a href="@Url.Action("ProductToCart", "Home", new { area = "Customer", productId = item.ProductID, cartItemId = item.CartItemID })" 
+                                                               class="text-blue-600 hover:text-blue-800 p-2 transition-colors"
+                                                               title="Edit customizations">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <!-- Delete Button -->
+                                                            <button type="button" 
+                                                                    class="text-red-600 hover:text-red-800 p-2 transition-colors delete-btn"
+                                                                    title="Remove from cart"
+                                                                    data-cart-item-id="@item.CartItemID"
+                                                                    data-product-name="@item.ProductName">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
                                                         </div>
-                                                    }
-                                                </div>
-                                            }
 
-                                            <!-- Quantity Controls & Total -->
-                                            <div class="flex items-center justify-between mt-4">
-                                                <!-- Quantity Control -->
-                                                <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-1">
-                                                    <button type="button" 
-                                                            class="w-8 h-8 flex items-center justify-center bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm">
-                                                        <i class="fas fa-minus text-gray-600 text-xs"></i>
-                                                    </button>
-                                                    <span class="w-8 text-center font-bold text-gray-900">@item.Quantity</span>
-                                                    <button type="button" 
-                                                            class="w-8 h-8 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shadow-sm">
-                                                        <i class="fas fa-plus text-xs"></i>
-                                                    </button>
-                                                </div>
-
-                                                <!-- Item Total -->
-                                                <div class="text-right">
-                                                    <p class="text-sm text-gray-500 mb-1">Item Total</p>
-                                                    <p class="text-xl font-bold text-gray-900">
-                                                        ₱@item.TotalPrice.ToString("F2")
-                                                    </p>
+                                                        <!-- Quantity Selector -->
+                                                        <div class="flex flex-col items-end gap-2">
+                                                            <form asp-action="UpdateQuantity" asp-controller="Cart" asp-area="Customer" method="post" class="quantity-form">
+                                                                <input type="hidden" name="cartItemID" value="@item.CartItemID" />
+                                                                @Html.AntiForgeryToken()
+                                                                <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                                                                    <button type="submit" 
+                                                                            name="quantity" 
+                                                                            value="@(item.Quantity - 1)"
+                                                                            class="w-8 h-8 flex items-center justify-center bg-white hover:bg-gray-200 rounded transition-colors"
+                                                                            @(item.Quantity <= 1 ? "disabled" : "")>
+                                                                        <i class="fas fa-minus text-gray-600 text-xs"></i>
+                                                                    </button>
+                                                                    <span class="w-8 text-center font-bold text-gray-900">@item.Quantity</span>
+                                                                    <button type="submit" 
+                                                                            name="quantity" 
+                                                                            value="@(item.Quantity + 1)"
+                                                                            class="w-8 h-8 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded transition-colors">
+                                                                        <i class="fas fa-plus text-xs"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        
+                                                            
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
+                            }
+                        </div>
+                    }
+                </div>
 
-                    <!-- Continue Shopping Button -->
-                    <div class="mt-6">
-                        <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold transition-colors">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Continue Shopping</span>
-                        </a>
+                <!-- Order Summary Sidebar -->
+                @if (Model?.CartItems != null && Model.CartItems.Any())
+                {
+                    <div class="lg:w-80">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
+                            <div class="space-y-3 mb-4">
+                                <div class="flex justify-between text-sm">
+                                    <span>Subtotal (@totalItems items)</span>
+                                    <span>₱@subtotal.ToString("F2")</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>Delivery Fee</span>
+                                    <span>₱@deliveryFee.ToString("F2")</span>
+                                </div>
+                                <div class="border-t border-gray-200 pt-2">
+                                    <div class="flex justify-between text-base font-bold">
+                                        <span>Total</span>
+                                        <span>₱@total.ToString("F2")</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="@Url.Action("Index", "Checkout", new { area = "Customer" })" 
+                               class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Proceed to Checkout</span>
+                            </a>
+                        </div>
                     </div>
                 }
             </div>
-
-            <!-- Order Summary Sidebar -->
-            @if (Model?.CartItems != null && Model.CartItems.Any())
-            {
-                <div class="lg:w-96">
-                    <div class="bg-white rounded-2xl shadow-sm sticky top-4">
-                        <div class="p-6">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
-
-                            <!-- Summary Details -->
-                            <div class="space-y-4 mb-6">
-                                <div class="flex justify-between items-center pb-3 border-b border-gray-100">
-                                    <span class="text-gray-600">Items (@Model.TotalItems)</span>
-                                    <span class="font-semibold text-gray-900">₱@Model.TotalAmount.ToString("F2")</span>
-                                </div>
-
-                                <div class="flex justify-between items-center pb-3 border-b border-gray-100">
-                                    <span class="text-gray-600">Delivery Fee</span>
-                                    <span class="font-semibold text-gray-900">₱50.00</span>
-                                </div>
-
-                                <div class="flex justify-between items-center pb-3 border-b border-gray-100">
-                                    <span class="text-gray-600">Service Fee</span>
-                                    <span class="font-semibold text-gray-900">₱20.00</span>
-                                </div>
-
-                                <!-- Promo Code -->
-                                <div class="pt-2">
-                                    <div class="flex gap-2">
-                                        <input type="text" 
-                                               placeholder="Enter promo code" 
-                                               class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:outline-none text-sm" />
-                                        <button type="button" 
-                                                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors text-sm">
-                                            Apply
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Total -->
-                            <div class="bg-emerald-50 rounded-xl p-4 mb-6">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-lg font-semibold text-gray-700">Total</span>
-                                    <span class="text-2xl font-bold text-emerald-600">
-                                        ₱@((Model.TotalAmount + 70).ToString("F2"))
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Checkout Button -->
-                            <button type="button" 
-                                    class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg">
-                                <i class="fas fa-lock"></i>
-                                <span>Proceed to Checkout</span>
-                            </button>
-
-                            <!-- Security Badge -->
-                            <div class="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
-                                <i class="fas fa-shield-alt text-emerald-600"></i>
-                                <span>Secure checkout</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Additional Info Card -->
-                    <div class="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 mt-4 border border-emerald-100">
-                        <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-truck text-white"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900 mb-1">Free Delivery</h3>
-                                <p class="text-sm text-gray-600">On orders over ₱500</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
         </div>
-
-        <!-- Sample Data Display (Remove when integrating real data) -->
-        @if (Model == null || !Model.CartItems.Any())
-        {
-            <!-- Demo Cart Items for Design Preview -->
-            <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                <p class="text-yellow-800 text-sm">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <strong>Design Preview:</strong> Add items to cart to see the full UI
-                </p>
-            </div>
-        }
     </div>
 </div>
-
+@section Scripts {
 <style>
-    /* Custom Scrollbar */
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    /* Animations */
+    @@keyframes fade-in {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Card Hover Effect */
-    .card-hover {
-        transition: all 0.3s ease;
+    .animate-fade-in {
+        animation: fade-in 0.3s ease-out;
     }
-    .card-hover:hover {
-        transform: translateY(-2px);
+
+    /* Modal animations */
+    @@keyframes modal-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes modal-slide-in {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-fade-in {
+        animation: modal-fade-in 0.2s ease-out;
+    }
+
+    .modal-slide-in {
+        animation: modal-slide-in 0.2s ease-out;
     }
 </style>
+
+<script>
+    // Auto-hide toast after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.querySelector('.animate-fade-in');
+        if (toast) {
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Delete modal functionality
+        const deleteModal = document.getElementById('deleteModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCartItemId = document.getElementById('modalCartItemId');
+        const deleteForm = document.getElementById('deleteForm');
+        const cancelDelete = document.getElementById('cancelDelete');
+
+        // Add click event to all delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const cartItemId = this.getAttribute('data-cart-item-id');
+                const productName = this.getAttribute('data-product-name');
+                
+                // Set modal content
+                modalMessage.textContent = `Are you sure you want to remove "${productName}" from your cart?`;
+                modalCartItemId.value = cartItemId;
+                
+                // Set form action
+                deleteForm.action = '/Customer/Cart/Remove';
+                
+                // Show modal
+                deleteModal.classList.remove('hidden');
+                deleteModal.classList.add('modal-fade-in');
+                deleteModal.querySelector('.bg-white').classList.add('modal-slide-in');
+            });
+        });
+
+        // Cancel delete
+        cancelDelete.addEventListener('click', function() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('modal-fade-in');
+            deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+        });
+
+        // Close modal when clicking outside
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('modal-fade-in');
+                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !deleteModal.classList.contains('hidden')) {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('modal-fade-in');
+                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+            }
+        });
+    });
+</script>
+}
