@@ -2,12 +2,11 @@ using ASI.Basecode.Data.Interfaces;
 using AutoMapper;
 using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.Services.ServiceModels;
-using System.Linq;
 using ASI.Basecode.Data.Models;
 using System;
 using System.Collections.Generic;
-using ASI.Basecode.Services.Helper;
-using CsvHelper;
+using System.Linq;
+using ASI.Basecode.Services.Helper;  // Ensure this is included for ValidationHelper
 
 namespace ASI.Basecode.Services.Services
 {
@@ -16,12 +15,19 @@ namespace ASI.Basecode.Services.Services
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly IUserProfileRepository _userProfileRepository;
+        private readonly IAddressService _addressService;
 
-        public UserProfileService(IUserRepository userRepository, IUserProfileRepository userProfileRepository, IMapper mapper)
+        // Updated constructor to include all dependencies
+        public UserProfileService(
+            IMapper mapper,
+            IUserRepository userRepository,
+            IUserProfileRepository userProfileRepository,
+            IAddressService addressService)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _userProfileRepository = userProfileRepository;
+            _addressService = addressService;  // This is now included but not used in the methods below
         }
 
         /// <summary>
@@ -110,9 +116,10 @@ namespace ASI.Basecode.Services.Services
         /// Removes the user address.
         /// </summary>
         /// <param name="userAddressID"></param>
-        public void RemoveUserAddress(int userAddressID)
+        /// <param name="userID"></param>
+        public void RemoveUserAddress(int userAddressID, int userID)
         {
-            _userProfileRepository.RemoveUserAddress(userAddressID);
+            _userProfileRepository.RemoveUserAddress(userAddressID, userID);
         }
     }
 }

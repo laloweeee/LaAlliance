@@ -75,9 +75,11 @@ namespace ASI.Basecode.Data.Repositories
         /// Removes the user address.
         /// </summary>
         /// <param name="userAddressID"></param>
-        public void RemoveUserAddress(int userAddressID)
+        public void RemoveUserAddress(int userAddressID, int userID)
         {
-            var userAddress = _dbContext.UserAddresses.Find(userAddressID);
+            var userAddress = _dbContext.UserAddresses
+                .FirstOrDefault(ua => ua.UserAddressID == userAddressID && ua.UserID == userID);
+
             if (userAddress != null)
             {
                 _dbContext.UserAddresses.Remove(userAddress);

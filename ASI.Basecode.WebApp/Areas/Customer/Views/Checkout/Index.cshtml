@@ -1,156 +1,441 @@
 @model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
 
 @{
-    ViewData["Title"] = "Checkout";
-    var subtotal = Model.Cart?.CartItems?.Sum(item => {
-        var itemPrice = item.UnitPrice;
-        var optionsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0;
-        return item.Quantity * (itemPrice + optionsTotal);
-    }) ?? 0;
+    ViewData["Title"] = "Checkout - LaAlliancé";
+    var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
     var deliveryFee = 50.00m;
     var total = subtotal + deliveryFee;
+    var defaultAddress = Model.Addresses?.FirstOrDefault(a => a.IsDefault);
 }
 
-<div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
-    <h1 class="text-3xl font-bold mb-6">Checkout</h1>
-    <form asp-action="Index" method="post" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-            <!-- Delivery Address -->
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Delivery Address</label>
-                <input asp-for="DeliveryAddress" class="w-full border rounded px-4 py-2" placeholder="Enter your address" />
-                <span asp-validation-for="DeliveryAddress" class="text-red-500 text-sm"></span>
-            </div>
-            <!-- Delivery Options -->
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Delivery Option</label>
-                <select asp-for="DeliveryOption" class="w-full border rounded px-4 py-2">
-                    <option value="">Select an option</option>
-                    <option value="Saver">Saver (2-3 days)</option>
-                    <option value="Standard">Standard (Next day)</option>
-                    <option value="Priority">Priority (Same day)</option>
-                    <option value="Schedule">Schedule</option>
-                </select>
-                <span asp-validation-for="DeliveryOption" class="text-red-500 text-sm"></span>
-                <div id="scheduleField" class="mt-2" style="display:none;">
-                    <input asp-for="ScheduledDateTime" type="datetime-local" class="w-full border rounded px-4 py-2" />
-                </div>
-            </div>
-            <!-- Personal Details -->
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Full Name</label>
-                <input asp-for="FullName" class="w-full border rounded px-4 py-2" />
-                <span asp-validation-for="FullName" class="text-red-500 text-sm"></span>
-            </div>
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Email</label>
-                <input asp-for="Email" class="w-full border rounded px-4 py-2" />
-                <span asp-validation-for="Email" class="text-red-500 text-sm"></span>
-            </div>
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Contact Number</label>
-                <input asp-for="ContactNumber" class="w-full border rounded px-4 py-2" />
-                <span asp-validation-for="ContactNumber" class="text-red-500 text-sm"></span>
-            </div>
-            <!-- Payment Options -->
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Payment Method</label>
-                <select asp-for="PaymentMethod" class="w-full border rounded px-4 py-2">
-                    <option value="">Select payment method</option>
-                    <option value="Cash">Cash on Delivery</option>
-                    <option value="GCash">GCash</option>
-                    <option value="Card">Credit/Debit Card</option>
-                </select>
-                <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm"></span>
-            </div>
-            <!-- Vouchers -->
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Voucher Code</label>
-                <input asp-for="VoucherCode" class="w-full border rounded px-4 py-2" placeholder="Enter voucher code" />
-                @if (Model.AvailableVouchers != null && Model.AvailableVouchers.Any())
-                {
-                    <div class="mt-2 text-sm text-gray-500">
-                        Available: @string.Join(", ", Model.AvailableVouchers)
-                    </div>
-                }
-            </div>
-            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mt-4">Place Order</button>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Review and Place Your Order</h1>
+            <p class="text-gray-600">Complete your purchase with confidence</p>
         </div>
-        <!-- Order Summary / Receipt -->
-        <div>
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                <h2 class="text-xl font-bold mb-4">Order Summary</h2>
-                <div class="divide-y">
-                    @foreach (var item in Model.Cart.CartItems)
-                    {
-                        <div class="py-4 flex flex-col gap-1">
-                            <div class="flex justify-between">
-                                <span class="font-semibold">@item.ProductName</span>
-                                <span>x@item.Quantity</span>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-800 rounded-xl flex items-center gap-3 animate-fade-in">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                <span>@TempData["ErrorMessage"]</span>
+            </div>
+        }
+
+        <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
+            @Html.AntiForgeryToken()
+
+            <!-- Left Column: Delivery Address and Personal Details -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Section 1: Delivery Address -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-map-marker-alt text-green-600"></i>
+                        Delivery Address
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Address Form -->
+                        <div class="space-y-4">
+                            <p class="text-gray-600 text-sm">Your address details will be used to pinpoint your location on the map.</p>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
+                                <input asp-for="DeliveryAddress" 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                       placeholder="Enter street address" 
+                                       value="@defaultAddress?.Street" />
+                                <span asp-validation-for="DeliveryAddress" class="text-red-500 text-sm mt-1"></span>
                             </div>
-                            @if (item.Options != null && item.Options.Any())
-                            {
-                                <div class="ml-2 text-sm text-gray-600">
-                                    @foreach (var opt in item.Options)
-                                    {
-                                        <div>
-                                            + @opt.OptionName
-                                            @if (opt.AdditionalPrice > 0)
-                                            {
-                                                <span>(₱@opt.AdditionalPrice.ToString("F2"))</span>
-                                            }
-                                        </div>
-                                    }
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Barangay</label>
+                                    <input asp-for="Addresses[0].Barangay" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.Barangay" />
                                 </div>
-                            }
-                            <div class="flex justify-between text-sm">
-                                <span>Unit Price:</span>
-                                <span>₱@item.UnitPrice.ToString("F2")</span>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                    <input asp-for="Addresses[0].City" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.City" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Province</label>
+                                    <input asp-for="Addresses[0].Province" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.Province" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
+                                    <input asp-for="Addresses[0].ZipCode" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.ZipCode" />
+                                </div>
                             </div>
-                            <div class="flex justify-between text-sm">
-                                <span>Item Total:</span>
-                                <span>
-                                    ₱@((item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))).ToString("F2"))
-                                </span>
+                            
+                            <!-- Map Controls - Moved below province and zip code -->
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-xl shadow-lg p-3 flex gap-2">
+                                    <button type="button" 
+                                            id="currentLocationBtn"
+                                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-location-crosshairs"></i>
+                                        <span class="hidden sm:inline">Use Current Location</span>
+                                        <span class="sm:hidden">Current</span>
+                                    </button>
+                                    <button type="button" 
+                                            id="searchAddressBtn"
+                                            class="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-search"></i>
+                                        <span class="hidden sm:inline">Search on Map</span>
+                                        <span class="sm:hidden">Search</span>
+                                    </button>
+                                </div>
+                                
+                                <!-- New Edit Address Details Button -->
+                                <button type="button" 
+                                        id="editAddressBtn"
+                                        class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit Address Details</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Hidden coordinates fields -->
+                            <input type="hidden" asp-for="Addresses[0].Latitude" id="latitudeInput" value="@defaultAddress?.Latitude" />
+                            <input type="hidden" asp-for="Addresses[0].Longitude" id="longitudeInput" value="@defaultAddress?.Longitude" />
+                        </div>
+                        
+                        <!-- Interactive Map -->
+                        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-fit">
+                            <!-- Map Header -->
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
+                                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <i class="fas fa-map"></i>
+                                    Pin Your Location
+                                </h3>
+                                <p class="text-blue-100 text-sm mt-1">Drag the marker to adjust</p>
+                            </div>
+
+                            <!-- Map Container -->
+                            <div class="relative">
+                                <div id="addressMap" class="w-full h-[300px] lg:h-[350px]"></div>
+                            </div>
+
+                            <!-- Map Instructions -->
+                            <div class="p-4 bg-gray-50 border-t border-gray-200">
+                                <!-- Coordinates Display -->
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <div class="flex items-center justify-center gap-4 text-xs text-gray-600">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-location-dot text-blue-600"></i>
+                                            <span class="font-semibold">Lat:</span>
+                                            <span id="displayLat" class="font-mono">@(defaultAddress?.Latitude.ToString("F6") ?? "10.315700")</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-location-dot text-teal-600"></i>
+                                            <span class="font-semibold">Lng:</span>
+                                            <span id="displayLng" class="font-mono">@(defaultAddress?.Longitude.ToString("F6") ?? "123.885400")</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    }
+                    </div>
                 </div>
-                <div class="border-t pt-4 mt-4 space-y-2">
-                    <div class="flex justify-between">
-                        <span>Subtotal:</span>
-                        <span>₱@subtotal.ToString("F2")</span>
+
+                <!-- Section 2: Personal Details -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-user text-green-600"></i>
+                        Personal Details
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input asp-for="FullName" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                   value="@Model.FullName" />
+                            <span asp-validation-for="FullName" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                            <input asp-for="ContactNumber" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                   value="@Model.ContactNumber" />
+                            <span asp-validation-for="ContactNumber" class="text-red-500 text-sm mt-1"></span>
+                        </div>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Delivery Fee:</span>
-                        <span>₱@deliveryFee.ToString("F2")</span>
+                </div>
+
+                <!-- Section 3: Payment Method -->
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-credit-card text-green-600"></i>
+                    Payment Method
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium">Select Payment Method</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
+                                <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
+                                <span>Cash on Delivery</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
+                                <input type="radio" name="PaymentMethod" value="GCash" class="radio-input" />
+                                <span>GCash</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
+                                <input type="radio" name="PaymentMethod" value="Card" class="radio-input" />
+                                <span>Credit/Debit Card</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm"></span>
                     </div>
-                    <div class="flex justify-between font-bold text-lg">
-                        <span>Total:</span>
-                        <span>₱@total.ToString("F2")</span>
+                    <div id="gcashFields" class="hidden space-y-4">
+                        <label class="block text-gray-700 font-medium">GCash Number</label>
+                        <input type="text" name="GcashNumber" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Enter GCash number" />
+                    </div>
+                    <div id="cardFields" class="hidden space-y-4">
+                        <label class="block text-gray-700 font-medium">Card Number</label>
+                        <input type="text" name="CardNumber" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="1234 5678 9012 3456" />
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-medium">Expiry (MM/YY)</label>
+                                <input type="text" name="CardExpiry" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="MM/YY" />
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium">CVV</label>
+                                <input type="text" name="CardCVV" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="123" />
+                            </div>
+                        </div>
+                        <label class="block text-gray-700 font-medium">Cardholder Name</label>
+                        <input type="text" name="CardholderName" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="John Doe" />
                     </div>
                 </div>
             </div>
         </div>
-    </form>
+
+
+            <!-- Right Column: Order Summary -->
+            <div class="lg:col-span-1">
+                <!-- Order Summary -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sticky top-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-receipt text-green-600"></i>
+                        Order Summary
+                    </h2>
+                    
+                    <!-- Order Items -->
+                    <div class="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                        @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                        {
+                            foreach (var item in Model.Cart.CartItems)
+                            {
+                                var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+                                
+                                <div class="flex gap-3 py-3 border-b border-gray-100 last:border-b-0">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-green-600 font-bold text-sm">@item.Quantity</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-semibold text-gray-900 text-sm">@item.ProductName</h4>
+                                        @if (item.Options != null && item.Options.Any())
+                                        {
+                                            <div class="mt-1 text-xs text-gray-600">
+                                                @foreach (var opt in item.Options)
+                                                {
+                                                    <div>
+                                                        + @opt.OptionName
+                                                        @if (opt.AdditionalPrice > 0)
+                                                        {
+                                                            <span class="text-green-600">(+₱@opt.AdditionalPrice.ToString("F2"))</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold text-gray-900 text-sm">₱@itemTotalPrice.ToString("F2")</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-gray-500 text-center py-4">Your cart is empty</p>
+                        }
+                    </div>
+
+                    <!-- Order Totals -->
+                    <div class="space-y-3 pt-4 border-t border-gray-200">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-gray-900">₱@subtotal.ToString("F2")</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Delivery Fee</span>
+                            <span class="text-gray-900">₱@deliveryFee.ToString("F2")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.VoucherCode))
+                        {
+                            <div class="flex justify-between text-sm text-green-600">
+                                <span>Voucher Discount</span>
+                                <span>-₱0.00</span>
+                            </div>
+                        }
+                        <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
+                            <span class="text-gray-900">Total Amount</span>
+                            <span class="text-green-600">₱@total.ToString("F2")</span>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <button type="submit" 
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 mt-6 shadow-lg shadow-green-200">
+                        <span>Place Order</span>
+                    </button>
+
+                    <!-- Security Badge -->
+                    <div class="text-center mt-4">
+                        <p class="text-xs text-gray-500 flex items-center justify-center gap-1">
+                            <i class="fas fa-shield-alt text-green-500"></i>
+                            Your payment information is secure and encrypted
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
+    <script src="~/js/maps.js"></script>
     <script>
-        // Show/hide schedule field
-        document.addEventListener('DOMContentLoaded', function () {
-            var deliveryOption = document.querySelector('[name="DeliveryOption"]');
-            var scheduleField = document.getElementById('scheduleField');
-            function toggleSchedule() {
-                if (deliveryOption.value === "Schedule") {
-                    scheduleField.style.display = "";
-                } else {
-                    scheduleField.style.display = "none";
+        // Address selection handler
+        const addressSelect = document.getElementById('addressSelect');
+        if (addressSelect) {
+            addressSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                document.querySelector('input[name="DeliveryAddress"]').value = selectedOption.dataset.street || '';
+                document.getElementById('barangayInput').value = selectedOption.dataset.barangay || '';
+                document.getElementById('cityInput').value = selectedOption.dataset.city || '';
+                document.getElementById('provinceInput').value = selectedOption.dataset.province || '';
+                document.getElementById('zipInput').value = selectedOption.dataset.zip || '';
+                document.getElementById('latitudeInput').value = selectedOption.dataset.lat || '';
+                document.getElementById('longitudeInput').value = selectedOption.dataset.lng || '';
+                
+                // Update map
+                if (window.map && window.marker) {
+                    const lat = parseFloat(selectedOption.dataset.lat) || 10.315700;
+                    const lng = parseFloat(selectedOption.dataset.lng) || 123.885400;
+                    const newLocation = new google.maps.LatLng(lat, lng);
+                    window.map.setCenter(newLocation);
+                    window.placeMarker(newLocation, 'latitudeInput', 'longitudeInput');
+                }
+            });
+        }
+        // Payment method toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentMethods = document.querySelectorAll('input[name="PaymentMethod"]');
+            const gcashFields = document.getElementById('gcashFields');
+            const cardFields = document.getElementById('cardFields');
+
+            function togglePaymentFields() {
+                const selectedMethod = document.querySelector('input[name="PaymentMethod"]:checked');
+                
+                gcashFields.classList.add('hidden');
+                cardFields.classList.add('hidden');
+                
+                if (selectedMethod && selectedMethod.value === 'GCash') {
+                    gcashFields.classList.remove('hidden');
+                } else if (selectedMethod && selectedMethod.value === 'Card') {
+                    cardFields.classList.remove('hidden');
                 }
             }
-            deliveryOption.addEventListener('change', toggleSchedule);
-            toggleSchedule();
+
+            paymentMethods.forEach(method => {
+                method.addEventListener('change', togglePaymentFields);
+            });
+
+            // Edit Address Details Button - Focus on first address field
+            document.getElementById('editAddressBtn').addEventListener('click', function() {
+                const addressInput = document.querySelector('input[name="DeliveryAddress"]');
+                addressInput.focus();
+                addressInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            // Custom search functionality for the checkout page
+            function setupSearchButton() {
+                const searchBtn = document.getElementById('searchAddressBtn');
+                if (searchBtn) {
+                    searchBtn.addEventListener('click', function() {
+                        const street = document.querySelector('input[name="DeliveryAddress"]').value;
+                        const barangay = document.querySelector('input[name="Addresses[0].Barangay"]').value;
+                        const city = document.querySelector('input[name="Addresses[0].City"]').value;
+                        const province = document.querySelector('input[name="Addresses[0].Province"]').value;
+                        
+                        const addressParts = [street, barangay, city, province, 'Philippines'].filter(part => part);
+                        const address = addressParts.join(', ');
+                        
+                        if (!address.trim()) {
+                            alert('Please fill in at least one address field to search.');
+                            return;
+                        }
+
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+                        this.disabled = true;
+
+                        // Use the geocoder from maps.js
+                        if (window.geocoder) {
+                            window.geocoder.geocode({ address: address }, (results, status) => {
+                                if (status === 'OK' && results[0]) {
+                                    const location = results[0].geometry.location;
+                                    window.map.setCenter(location);
+                                    window.map.setZoom(17);
+                                    window.placeMarker(location, 'latitudeInput', 'longitudeInput');
+                                    
+                                    this.innerHTML = '<i class="fas fa-check"></i> Found!';
+                                } else {
+                                    alert('Address not found on map. Please click on the map to set location manually.');
+                                    this.innerHTML = '<i class="fas fa-times"></i> Not Found';
+                                }
+                                
+                                setTimeout(() => {
+                                    this.innerHTML = originalHTML;
+                                    this.disabled = false;
+                                }, 2000);
+                            });
+                        }
+                    });
+                }
+            }
+
+            // Wait for maps.js to initialize, then setup our custom search
+            setTimeout(() => {
+            // Rename inputs to match what maps.js expects
+            const latInput = document.getElementById('latitudeInput');
+            const lngInput = document.getElementById('longitudeInput');
+            
+            if (latInput) latInput.id = 'latitude';
+            if (lngInput) lngInput.id = 'longitude';
+            
+            // Now initialize the map
+            if (typeof initAddressMap === 'function') {
+                initAddressMap('addressMap', 'latitude', 'longitude');
+                setupCurrentLocationButton();
+            }
+        }, 500);
         });
     </script>
 }

@@ -3,12 +3,8 @@ using System.Collections.Generic;
 
 namespace ASI.Basecode.Services.Interfaces
 {
-    public interface IUserProfileService
+    public interface IAddressService
     {
-        UserProfileServiceModel GetUserProfile(int userID);
-        void UpdateUserProfile(UserProfileServiceModel userProfile);
-
-        // Add these methods to match your service implementation:
         List<UserAddressServiceModel> GetUserAddresses(int userID);
         void AddUserAddress(UserAddressServiceModel userAddress);
         void UpdateUserAddress(UserAddressServiceModel userAddress, int userID);

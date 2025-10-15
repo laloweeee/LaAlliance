@@ -12,6 +12,6 @@ namespace ASI.Basecode.Data.Interfaces
         IQueryable<UserAddress> GetUserAddresses(int userID);
         void AddUserAddress(UserAddress userAddress);
         void UpdateUserAddress(UserAddress userAddress);
-        void RemoveUserAddress(int userAddressID);
+        void RemoveUserAddress(int userAddressID, int userID);
     }
 }
