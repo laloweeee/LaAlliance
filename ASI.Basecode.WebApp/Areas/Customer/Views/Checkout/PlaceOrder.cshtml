@@ -84,39 +84,47 @@
                         </div>
 
                         <!-- Order Items -->
-                        <div class="space-y-6 mb-8">
-                            @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+<div class="space-y-6 mb-8">
+    @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+    {
+        foreach (var item in Model.Cart.CartItems)
+        {
+            var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+            var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+            
+            <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
+                <!-- Product Image Placeholder Updated to Show Actual Image -->
+                <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    @if (!string.IsNullOrEmpty(item.ProductImage))
+                    {
+                        <img src="@item.ProductImage" alt="@item.ProductName" class="w-full h-full object-cover rounded-lg" loading="lazy" />
+                    }
+                    else
+                    {
+                        <i class="fas fa-utensils text-gray-400 text-2xl"></i>  <!-- Fallback placeholder -->
+                    }
+                </div>
+                
+                <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
+                    
+                    @if (item.Options != null && item.Options.Any())
+                    {
+                        <div class="text-sm text-gray-600 space-y-1 mb-2">
+                            @foreach (var opt in item.Options)
                             {
-                                foreach (var item in Model.Cart.CartItems)
-                                {
-                                    var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
-                                    var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
-                                    
-                                    <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
-                                        <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-utensils text-gray-400 text-2xl"></i>
-                                        </div>
-                                        
-                                        <div class="flex-1">
-                                            <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
-                                            
-                                            @if (item.Options != null && item.Options.Any())
-                                            {
-                                                <div class="text-sm text-gray-600 space-y-1 mb-2">
-                                                    @foreach (var opt in item.Options)
-                                                    {
-                                                        <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
-                                                    }
-                                                </div>
-                                            }
-                                            
-                                            <p class="text-sm text-gray-600">QTY: @item.Quantity</p>
-                                            <p class="font-semibold text-gray-900 mt-2">₱@itemTotalPrice.ToString("F2")</p>
-                                        </div>
-                                    </div>
-                                }
+                                <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
                             }
                         </div>
+                    }
+                    
+                    <p class="text-sm text-gray-600">QTY: @item.Quantity</p>
+                    <p class="font-semibold text-gray-900 mt-2">₱@itemTotalPrice.ToString("F2")</p>
+                </div>
+            </div>
+        }
+    }
+</div>
 
                         <!-- Delivery Information -->
                         <div class="grid grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
