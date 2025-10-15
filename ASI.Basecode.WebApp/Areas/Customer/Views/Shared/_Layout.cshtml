@@ -38,5 +38,8 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Footer (always at bottom) -->
+    @await Html.PartialAsync("_Footer")
 </body>
 </html>

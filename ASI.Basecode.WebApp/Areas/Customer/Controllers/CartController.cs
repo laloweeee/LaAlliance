@@ -16,16 +16,19 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
     public class CartController : ControllerBase<CartController>
     {
         private readonly IUserProfileService _userProfileService;
+        private readonly IAddressService _addressService;
 
         public CartController(
             IHttpContextAccessor httpContextAccessor,
             ILoggerFactory loggerFactory,
             IConfiguration configuration,
             ICartService cartService,
-            IUserProfileService userProfileService
+            IUserProfileService userProfileService,  // Keep this if needed
+            IAddressService addressService  // Add this parameter
         ) : base(httpContextAccessor, loggerFactory, configuration, null, cartService)
         {
-            _userProfileService = userProfileService;
+            _userProfileService = userProfileService;  // Existing line
+            _addressService = addressService;  // Add this line
         }
 
         // GET: /Customer/Cart
@@ -68,12 +71,10 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private AccountViewModel GetCustomerProfile()
         {
             try
-            {
-                // Get user profile from UserProfileService
-                var userProfile = _userProfileService.GetUserProfile(UserId);
+{
+                var userProfile = _userProfileService.GetUserProfile(UserId);  // Keep this if it exists
                 if (userProfile == null) return null;
 
-                // Create AccountViewModel with basic info
                 var accountViewModel = new AccountViewModel
                 {
                     UserID = userProfile.UserID,
@@ -87,10 +88,10 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 // Try to get user addresses - now returns a list
                 try
                 {
-                    var userAddresses = _userProfileService.GetUserAddresses(UserId);
+                    var userAddresses = _addressService.GetUserAddresses(UserId);  // Use IAddressService instead
+
                     if (userAddresses != null && userAddresses.Any())
                     {
-                        // Add all addresses to the list
                         foreach (var userAddress in userAddresses)
                         {
                             accountViewModel.Addresses.Add(new UserAddressViewModel

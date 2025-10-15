@@ -11,93 +11,91 @@ using Microsoft.Extensions.Configuration;
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    public class CheckoutController : Controller  // Inherit from ControllerBase if needed for UserId access
+    public class CheckoutController : Controller
     {
         private readonly ICartService _cartService;
         private readonly ILogger<CheckoutController> _logger;
         private readonly IUserProfileService _userProfileService;
-        private readonly IMapper _mapper;  // Inject AutoMapper if used
+        private readonly IAddressService _addressService; // <-- add this
+        private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
 
         public CheckoutController(
             ICartService cartService,
             ILogger<CheckoutController> logger,
             IUserProfileService userProfileService,
+            IAddressService addressService, // <-- add this
             IConfiguration configuration,
-            IMapper mapper = null)  // Optional if AutoMapper is not always required
-            
+            IMapper mapper = null)
         {
             _cartService = cartService;
             _logger = logger;
             _userProfileService = userProfileService;
+            _addressService = addressService; // <-- assign here
             _mapper = mapper;
             _configuration = configuration;
         }
 
-        // GET: /Customer/Checkout
         public IActionResult Index()
         {
-            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value); 
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
 
-            // Fetch the cart for the current user
             var cart = _cartService.GetOrCreateCart(userId);
-            
+
             if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
             {
                 TempData["ErrorMessage"] = "Your cart is empty.";
                 return RedirectToAction("Index", "Cart");
             }
 
-            // Fetch user profile and addresses
             var userProfile = _userProfileService.GetUserProfile(userId);
-            var addresses = _userProfileService.GetUserAddresses(userId);
+            var addresses = _addressService.GetUserAddresses(userId); // <-- use address service
 
             var model = new CheckoutViewModel
             {
                 Cart = cart,
                 AvailableVouchers = new List<string> { "WELCOME10", "FREESHIP", "SAVE20" },
-                FullName = $"{userProfile?.FirstName} {userProfile?.LastName}",  // Handle potential null
+                FullName = $"{userProfile?.FirstName} {userProfile?.LastName}",
                 Email = userProfile?.Email,
                 ContactNumber = userProfile?.ContactNumber,
-                Addresses = _mapper != null ? _mapper.Map<List<UserAddressViewModel>>(addresses) : addresses.Select(a => new UserAddressViewModel { /* Manual mapping if needed */ }).ToList()  // Fallback if _mapper is null
+                Addresses = _mapper != null
+                    ? _mapper.Map<List<UserAddressViewModel>>(addresses)
+                    : addresses.Select(a => new UserAddressViewModel { /* manual mapping if needed */ }).ToList()
             };
-            
 
             var googleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
-            ViewBag.GoogleMapsApiKey = "googleMapsApiKey";
+            ViewBag.GoogleMapsApiKey = googleMapsApiKey;
             return View(model);
         }
 
-        // POST: /Customer/Checkout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Index(CheckoutViewModel model)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
-            model.Cart = _cartService.GetOrCreateCart(userId);  // Re-fetch cart to ensure it's up-to-date
+            model.Cart = _cartService.GetOrCreateCart(userId);
 
             if (!ModelState.IsValid)
             {
                 model.AvailableVouchers = new List<string> { "WELCOME10", "FREESHIP", "SAVE20" };
-                // Re-fetch user data if needed for validation errors
                 var userProfile = _userProfileService.GetUserProfile(userId);
                 model.FullName = $"{userProfile?.FirstName} {userProfile?.LastName}";
                 model.Email = userProfile?.Email;
                 model.ContactNumber = userProfile?.ContactNumber;
-                model.Addresses = _mapper != null ? _mapper.Map<List<UserAddressViewModel>>(_userProfileService.GetUserAddresses(userId)) : new List<UserAddressViewModel>();
+                model.Addresses = _mapper != null
+                    ? _mapper.Map<List<UserAddressViewModel>>(_addressService.GetUserAddresses(userId))
+                    : new List<UserAddressViewModel>();
                 return View(model);
             }
 
-            // Here, save the order to DB, send confirmation, etc. (as per original code)
             TempData["SuccessMessage"] = "Order placed successfully!";
             return RedirectToAction("Receipt");
         }
 
-        // GET: /Customer/Checkout/Receipt
         public IActionResult Receipt()
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
-            var cart = _cartService.GetOrCreateCart(userId);  // Fetch for the correct user
+            var cart = _cartService.GetOrCreateCart(userId);
             return View("Receipt", cart);
         }
     }
