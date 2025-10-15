@@ -88,6 +88,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 return View(model);
             }
 
+            _cartService.ClearCart(userId);
             TempData["SuccessMessage"] = "Order placed successfully!";
             return RedirectToAction("Receipt");
         }

@@ -48,7 +48,7 @@
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Categories</h2>
         <div class="flex flex-wrap gap-6 mb-8">
             <div class="flex flex-col items-center">
-                <button class="category-filter w-20 h-20 rounded-lg bg-gray-200 overflow-hidden mb-2 transition-all" data-category="all">
+                <button class="category-filter w-20 h-20 rounded-lg bg-gray-200 overflow-hidden mb-2 transition-all active-category" data-category="all">
                     <img src="https://i.pinimg.com/1200x/c4/40/0f/c4400f1f2c8441cb7c6eea6844a79135.jpg" alt="All Items" class="w-full h-full object-cover transition-transform">
                 </button>
                 <span class="text-sm font-medium text-gray-700">All Items</span>
@@ -91,7 +91,8 @@
                                          data-product-name="@product.ProductName.ToLower()"
                                          data-product-description="@product.ProductDescription.ToLower()"
                                          data-product-price="@product.ProductPrice"
-                                         data-product-id="@product.ProductID">
+                                         data-product-id="@product.ProductID"
+                                         data-category="@product.CategoryID">
                                         <!-- Product Image -->
                                         <div class="h-40 bg-gray-100 overflow-hidden relative">
                                             @if (!string.IsNullOrEmpty(product.ProductImage))
@@ -146,7 +147,7 @@
             </div>
         }
     </div>
-
+</div>
 
 <style>
     .line-clamp-1 {
@@ -171,8 +172,21 @@
         display: none;
     }
 
+    .category-section.hidden {
+        display: none;
+    }
+
     .fade-in {
         animation: fadeIn 0.3s ease-in;
+    }
+
+    .active-category {
+        border: 3px solid #16a34a;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+    }
+
+    .category-filter:hover {
+        transform: scale(1.05);
     }
 
     @@keyframes fadeIn {
@@ -180,6 +194,7 @@
         to { opacity: 1; transform: translateY(0); }
     }
 </style>
+
 @section Scripts {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -197,38 +212,26 @@
             button.addEventListener('click', function() {
                 currentCategory = this.getAttribute('data-category');
                 
-                // Update active button
+                // Update active button styling
                 categoryFilters.forEach(btn => {
-                    btn.classList.remove('bg-green-600', 'text-white');
-                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                    btn.classList.remove('active-category');
                 });
-                this.classList.add('bg-green-600', 'text-white');
-                this.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                this.classList.add('active-category');
 
-                // Show/hide categories
-                if (currentCategory === 'all') {
-                    categorySections.forEach(section => {
-                        section.style.display = 'block';
-                    });
-                } else {
-                    categorySections.forEach(section => {
-                        if (section.id === `category-${currentCategory}`) {
-                            section.style.display = 'block';
-                        } else {
-                            section.style.display = 'none';
-                        }
-                    });
-                }
-
-                // Apply current filters
-                applyFilters();
+                // Filter products by category
+                filterProductsByCategory(currentCategory);
+                
+                // Apply current search and sort filters
+                applySearchFilter();
+                applySorting();
             });
         });
 
         // Search functionality
         if (searchInput) {
             searchInput.addEventListener('input', function(e) {
-                applyFilters();
+                applySearchFilter();
+                applySorting();
             });
         }
 
@@ -236,50 +239,85 @@
         if (sortSelect) {
             sortSelect.addEventListener('change', function() {
                 currentSort = this.value;
-                applyFilters();
+                applySorting();
             });
         }
 
-        function applyFilters() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            
-            // Reset all products first
+        function filterProductsByCategory(categoryId) {
+            // Show/hide products based on category
             productCards.forEach(card => {
-                card.classList.remove('hidden', 'fade-in');
+                const productCategory = card.getAttribute('data-category');
+                
+                if (categoryId === 'all' || productCategory === categoryId) {
+                    card.classList.remove('hidden');
+                    card.classList.add('fade-in');
+                } else {
+                    card.classList.add('hidden');
+                }
             });
 
-            // Apply search filter
-            if (searchTerm !== '') {
-                productCards.forEach(card => {
-                    const productName = card.getAttribute('data-product-name');
-                    const productDescription = card.getAttribute('data-product-description');
-                    
-                    if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
-                        card.classList.remove('hidden');
-                        card.classList.add('fade-in');
+            // Show/hide category sections
+            categorySections.forEach(section => {
+                const sectionCategory = section.id.replace('category-', '');
+                const visibleProductsInSection = section.querySelectorAll('.product-card:not(.hidden)');
+                
+                if (categoryId === 'all' || sectionCategory === categoryId) {
+                    if (visibleProductsInSection.length > 0) {
+                        section.classList.remove('hidden');
                     } else {
-                        card.classList.add('hidden');
+                        section.classList.add('hidden');
                     }
-                });
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+        function applySearchFilter() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                // If no search term, just apply category filter
+                filterProductsByCategory(currentCategory);
+                return;
             }
 
-            // Apply sorting
-            if (currentSort) {
-                applySorting();
-            }
+            // Apply search filter within current category
+            productCards.forEach(card => {
+                const productName = card.getAttribute('data-product-name');
+                const productDescription = card.getAttribute('data-product-description');
+                const productCategory = card.getAttribute('data-category');
+                
+                const matchesSearch = productName.includes(searchTerm) || productDescription.includes(searchTerm);
+                const matchesCategory = currentCategory === 'all' || productCategory === currentCategory;
+                
+                if (matchesSearch && matchesCategory) {
+                    card.classList.remove('hidden');
+                    card.classList.add('fade-in');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
 
-            // Show/hide category sections based on visible products
+            // Update category sections visibility
             categorySections.forEach(section => {
                 const visibleProductsInSection = section.querySelectorAll('.product-card:not(.hidden)');
-                if (visibleProductsInSection.length > 0) {
-                    section.style.display = 'block';
+                const sectionCategory = section.id.replace('category-', '');
+                
+                const shouldShowSection = (currentCategory === 'all' || sectionCategory === currentCategory) && 
+                                       visibleProductsInSection.length > 0;
+                
+                if (shouldShowSection) {
+                    section.classList.remove('hidden');
                 } else {
-                    section.style.display = 'none';
+                    section.classList.add('hidden');
                 }
             });
         }
 
         function applySorting() {
+            if (!currentSort) return;
+
             const productGrids = document.querySelectorAll('.products-grid');
             
             productGrids.forEach(grid => {
@@ -318,33 +356,24 @@
         // Filter button hover effects
         categoryFilters.forEach(button => {
             button.addEventListener('mouseenter', function() {
-                if (!this.classList.contains('active')) {
-                    this.classList.add('ring-2', 'ring-green-300');
+                if (!this.classList.contains('active-category')) {
+                    this.style.transform = 'scale(1.05)';
                     const img = this.querySelector('img');
-                    img.classList.add('scale-105');
+                    if (img) img.style.transform = 'scale(1.1)';
                 }
             });
             
             button.addEventListener('mouseleave', function() {
-                if (!this.classList.contains('active')) {
-                    this.classList.remove('ring-2', 'ring-green-300');
+                if (!this.classList.contains('active-category')) {
+                    this.style.transform = 'scale(1)';
                     const img = this.querySelector('img');
-                    img.classList.remove('scale-105');
+                    if (img) img.style.transform = 'scale(1)';
                 }
             });
-            
-            button.addEventListener('click', function() {
-                categoryFilters.forEach(btn => {
-                    btn.classList.remove('active', 'ring-2', 'ring-green-300');
-                    const img = btn.querySelector('img');
-                    img.classList.remove('scale-105');
-                });
-                
-                this.classList.add('active', 'ring-2', 'ring-green-300');
-                const img = this.querySelector('img');
-                img.classList.add('scale-105');
-            });
         });
+
+        // Initialize with "All Items" selected
+        filterProductsByCategory('all');
     });
 </script>
 }
