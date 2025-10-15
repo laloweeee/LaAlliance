@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<ASI.Basecode.Data.Models.RestaurantPromotions>
+
+@{
     ViewData["Title"] = "Promotions";
 }
 
@@ -26,8 +28,8 @@
     <nav class="flex flex-wrap gap-2" id="promoTabs">
         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="campaigns">Campaigns</button>
         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="events">Events</button>
-        <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="discounts">Discounts</button>
-        <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="trending">Trending</button>
+@*         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="discounts">Discounts</button>
+        <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="trending">Trending</button> *@
         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="analytics">Analytics</button>
     </nav>
 </div>
@@ -82,7 +84,7 @@
     </div>
 </div>
 
-<!-- Discounts -->
+@* <!-- Discounts -->
 <div id="tab-discounts" class="promo-tab section hidden">
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-4 py-3 border-b"><h3 class="font-semibold">Active Discount Codes</h3></div>
@@ -137,7 +139,7 @@
             <button class="mt-4 px-3 py-1 rounded border hover:bg-gray-50" onclick="openModal('manageTrendingModal')">Adjust</button>
         </div>
     </div>
-</div>
+</div> *@
 
 <!-- Analytics -->
 <div id="tab-analytics" class="promo-tab section hidden">

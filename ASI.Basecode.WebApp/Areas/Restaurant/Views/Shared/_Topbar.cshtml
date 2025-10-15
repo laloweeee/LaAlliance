@@ -40,22 +40,17 @@
             <div id="navLinks" class="hidden lg:flex space-x-2 xl:space-x-4 bg-gray-100 p-2 rounded-xl items-center">
                 <!-- Dashboard - Available for both Admin and Staff -->
 
-                
+                <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index"
+                   class="@(ItemClass("Dashboard"))">
+                    <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
+                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Dashboard</span>
+                </a>
                 <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
                     <i class="fas fa-utensils @IconClass("Menu")"></i>
                     <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Menu Book</span>
                 </a>
-                <a asp-area="Restaurant" asp-controller="Orders" asp-action="Index" class="@ItemClass("Orders")">
-                    <i class="fas fa-shopping-cart @IconClass("Orders")"></i>
-                    <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Orders</span>
-                </a>
                 @if(User.IsInRole("Admin"))
                 {
-                    <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index"
-                        class="@(ItemClass("Dashboard"))">
-                        <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
-                        <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Dashboard</span>
-                    </a>
                     <a asp-area="Restaurant" asp-controller="Profile" asp-action="Index" class="@ItemClass("Profile")">
                         <i class="fas fa-store @IconClass("Profile")"></i>
                         <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Restaurant</span>
@@ -68,6 +63,16 @@
                     <a asp-area="Restaurant" asp-controller="Staff" asp-action="Index" class="@ItemClass("Staff")">
                         <i class="fas fa-users @IconClass("Staff")"></i>
                         <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Staff</span>
+                    </a>
+                    <a asp-area="Restaurant" asp-controller="Finance" asp-action="Index" class="@ItemClass("Finance")">
+                        <i class="fas fa-money-bill-wave @IconClass("Finance")"></i>
+                        <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Finance</span>
+                    </a>
+                } else
+                {
+                    <a asp-area="Restaurant" asp-controller="Orders" asp-action="Index" class="@ItemClass("Orders")">
+                        <i class="fas fa-shopping-cart @IconClass("Orders")"></i>
+                        <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Orders</span>
                     </a>
                 }
             </div>
@@ -106,6 +111,10 @@
             <i class="fas fa-tachometer-alt @IconClass("Dashboard")"></i>
             <span class="menu-text transition-all duration-300 ease-in-out">Dashboard</span>
         </a>
+        <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
+            <i class="fas fa-utensils @IconClass("Menu")"></i>
+            <span class="menu-text transition-all duration-300 ease-in-out">Menu Book</span>
+        </a>
 
         @if (User.IsInRole("Admin"))
         {
@@ -113,10 +122,6 @@
             <a asp-area="Restaurant" asp-controller="Profile" asp-action="Index" class="@ItemClass("Profile")">
                 <i class="fas fa-store @IconClass("Profile")"></i>
                 <span class="menu-text transition-all duration-300 ease-in-out">Restaurant</span>
-            </a>
-            <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
-                <i class="fas fa-utensils @IconClass("Menu")"></i>
-                <span class="menu-text transition-all duration-300 ease-in-out">Menu Book</span>
             </a>
             <a asp-area="Restaurant" asp-controller="Promotions" asp-action="Index"
                 class="@ItemClass("Promotions")">
@@ -138,10 +143,6 @@
             <a asp-area="Restaurant" asp-controller="Orders" asp-action="Index" class="@ItemClass("Orders")">
                 <i class="fas fa-shopping-cart @IconClass("Orders")"></i>
                 <span class="menu-text transition-all duration-300 ease-in-out">Orders</span>
-            </a>
-            <a asp-area="Restaurant" asp-controller="Menu" asp-action="Index" class="@ItemClass("Menu")">
-                <i class="fas fa-book @IconClass("Menu")"></i>
-                <span class="menu-text transition-all duration-300 ease-in-out">Menu</span>
             </a>
         }
     </div>
