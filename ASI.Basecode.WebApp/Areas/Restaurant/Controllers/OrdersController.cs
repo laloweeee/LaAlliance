@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
-    [Authorize(Policy = "RestaurantStaff")]
+    [Authorize(Policy = "Restaurant")]
     [Area("Restaurant")]
     public class OrdersController : ControllerBase<OrdersController>
     {
