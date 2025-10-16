@@ -65,7 +65,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         [HttpGet]
         public IActionResult UpdateStaffMember(int id)
         {
-            // DEBUG: Log the received ID
+            // To log the received ID
             _logger.LogInformation("UpdateStaffMember GET called with ID: {Id}", id);
             
             try
@@ -92,7 +92,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                     // We don't retrieve password for security reasons
                 };
 
-                // DEBUG: Log what we're sending to the view
+                // We log what we're sending to the view
                 _logger.LogInformation("Loading staff: ID={Id}, Name={FirstName} {LastName}, Email={Email}, Role={Role}", 
                     model.StaffID, model.FirstName, model.LastName, model.Email, model.Role);
 
@@ -111,11 +111,11 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UpdateStaffMember(StaffViewModel model)
         {
-            // DEBUG: Log what we received
+            // We log what we received
             _logger.LogInformation("UpdateStaffMember POST called with ID: {Id}, Name: {FirstName} {LastName}", 
                 model.StaffID, model.FirstName, model.LastName);
             
-            // DEBUG: Log ModelState errors
+            // We log ModelState errors
             if (!ModelState.IsValid)
             {
                 foreach (var error in ModelState.Values.SelectMany(v => v.Errors))

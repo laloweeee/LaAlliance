@@ -304,7 +304,7 @@ namespace ASI.Basecode.Data.Migrations
                     StaffID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserID = table.Column<int>(type: "int", nullable: false),
-                    Role = table.Column<string>(type: "longtext", nullable: false, defaultValue: "Staff")
+                    Role = table.Column<string>(type: "longtext", nullable: false, defaultValue: "Admin")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<string>(type: "longtext", nullable: false, defaultValue: "Active")
                         .Annotation("MySql:CharSet", "utf8mb4")

@@ -263,5 +263,62 @@ namespace ASI.Basecode.WebApp.Controllers
             await this._signInManager.SignOutAsync();
             return Redirect("/");
         }
+
+        /// <summary>
+        /// Authenticate user and signs the user in when successful.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <param name="returnUrl">The return URL.</param>
+        /// <returns> Created response view </returns>
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
+        {
+            this._session.SetString("HasSession", "Exist");
+
+            User user = null;
+
+            var loginResult = _userService.AuthenticateUser(model.Email, model.Password, ref user);
+
+            if (loginResult == LoginResult.Success && user != null)
+            {
+                // Check account status before allowing login
+                
+                // Check if account is disabled
+                if (user.AccountStatus == AccountStatus.Disabled)
+                {
+                    TempData["ErrorMessage"] = "This account has been disabled. Please contact support for assistance.";
+                    return View();
+                }
+                
+                // Check if email is verified
+                if (!user.IsEmailVerified)
+                {
+                    TempData["ErrorMessage"] = "Please verify your email before logging in.";
+                    return View();
+                }
+
+                // Load RestaurantStaff if needed
+                if (user.UserType == UserType.Restaurant && user.RestaurantStaff == null)
+                {
+                    user = _userService.GetUserByID(user.UserID);
+                }
+                
+                await this._signInManager.SignInAsync(user);
+                this._session.SetString("UserEmail", model.Email);
+
+                return user.UserType switch
+                {
+                    UserType.Customer => RedirectToAction("Index", "Home", new { area = "Customer" }),
+                    UserType.Restaurant => RedirectToAction("Index", "Dashboard", new { area = "Restaurant" }),
+                    _ => RedirectToAction("Login", "Account"),
+                };
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Incorrect Email or Password";
+                return View();
+            }
+        }
     }
 }

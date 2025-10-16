@@ -1,3 +1,5 @@
+using System;
+
 namespace ASI.Basecode.Services.ServiceModels
 {
     public class StaffViewModel
@@ -7,7 +9,7 @@ namespace ASI.Basecode.Services.ServiceModels
         public string LastName      { get; set; }
         public string Email         { get; set; }
         public string ContactNumber { get; set; }
-        public string Role          { get; set; }   // "Admin" | "Staff"
+        public string Role { get; set; } = "Admin";   // "Admin" | "Staff"
 
         public string AddressStreet   { get; set; }
         public string AddressBarangay { get; set; }

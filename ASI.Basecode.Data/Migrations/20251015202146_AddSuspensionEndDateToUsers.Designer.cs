@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASI.Basecode.Data.Migrations
 {
     [DbContext(typeof(AsiBasecodeDBContext))]
-    [Migration("20251012213541_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251015202146_AddSuspensionEndDateToUsers")]
+    partial class AddSuspensionEndDateToUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -766,6 +766,9 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
+                    b.Property<DateTime?>("SuspensionEndDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("UserType")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -806,8 +809,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasKey("UserAddressID");
 
-                    b.HasIndex("AddressID")
-                        .IsUnique();
+                    b.HasIndex("AddressID");
 
                     b.HasIndex("UserID");
 
@@ -824,8 +826,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Property<string>("ContactNumber")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -1140,8 +1141,8 @@ namespace ASI.Basecode.Data.Migrations
             modelBuilder.Entity("ASI.Basecode.Data.Models.UserAddress", b =>
                 {
                     b.HasOne("ASI.Basecode.Data.Models.Address", "Address")
-                        .WithOne("UserAddress")
-                        .HasForeignKey("ASI.Basecode.Data.Models.UserAddress", "AddressID")
+                        .WithMany("UserAddresses")
+                        .HasForeignKey("AddressID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1188,7 +1189,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Navigation("RestaurantAddress");
 
-                    b.Navigation("UserAddress");
+                    b.Navigation("UserAddresses");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Cart", b =>
