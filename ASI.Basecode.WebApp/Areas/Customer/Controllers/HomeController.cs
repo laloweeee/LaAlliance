@@ -234,7 +234,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 CustomizationGroups = product.ProductOptionGroup.Select(g => new ProductOptionGroupViewModel
                 {
                     ProductOptionGroupID = g.ProductOptionGroupID,
-                    ProductID = g.ProductID,
+                    ProductID = g.ProductID ?? 0,
                     OptionGroupName = g.OptionGroupName,
                     IsRequired = g.IsRequired,
                     NumberOfChoice = g.NumberOfChoice,

@@ -14,7 +14,7 @@ namespace ASI.Basecode.Data.Models
     {
         public int StaffID { get; set; }
         public int UserID  { get; set; }
-        public StaffRole Role { get; set; }
+        public StaffRole? Role { get; set; }
         public AccountStatus Status { get; set; }
 
         //Navigator
