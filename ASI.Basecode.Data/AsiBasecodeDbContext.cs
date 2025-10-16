@@ -20,7 +20,7 @@ namespace ASI.Basecode.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql("Server=laalliance-giepoint.c.aivencloud.com;Port=21352;Database=development_laalliance;User=avnadmin;Password=AVNS_0AHFUgbnghTBf4VkfTZ;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21)));
+                optionsBuilder.UseMySql("Server=laalliance-giepoint.c.aivencloud.com;Port=21352;Database=laalliance;User=avnadmin;Password=AVNS_0AHFUgbnghTBf4VkfTZ;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21)));
             }
         }
 
