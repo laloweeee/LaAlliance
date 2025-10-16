@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class CustomerProductFavorites
+    /// <summary>
+    /// Customer Product Favorites entity with soft delete support
+    /// </summary>
+    public partial class CustomerProductFavorites : BaseEntity
     {
         public int CustomerProductFavoriteID { get; set; }
         public int UserID { get; set; }

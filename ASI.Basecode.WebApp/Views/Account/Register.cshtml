@@ -5,67 +5,209 @@
     ViewData["Title"] = "Register Page";
 }
 
-<div class="min-h-screen flex">
-    <div class="flex-1 flex items-center justify-center bg-gradient-to-br from-green-300 to-green-800">
-        <div class="w-full max-w-sm bg-white rounded-xl shadow p-8">
-            <!-- Logo -->
-            <div class="text-center mb-8">
-                <div class="flex items-center justify-center mb-4">
-                    <i class="fas fa-utensils text-4xl text-green-600 mr-2"></i>
-                    <span class="text-3xl font-bold text-green-600">LaAlliancé</span>
-                </div>
-                <p class="text-gray-600">Welcome to LaAlliancé</p>
-                <p class="text-gray-600">Your favorite food at the tip of your finger.</p>
-            </div>
-            <div id="loginScreen">
-                <form method="post" action="/Account/Register" class="flex flex-col gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" asp-for="Email" id="form2Example11" placeholder="Enter email" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your email" required>
-                        <span asp-validation-for="Email" class="text-danger"></span>
+<style>
+    @@keyframes float-gentle {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        33% { transform: translate(30px, -30px) rotate(3deg); }
+        66% { transform: translate(-20px, 20px) rotate(-3deg); }
+    }
+    
+    @@keyframes fade-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-float-gentle { animation: float-gentle 20s ease-in-out infinite; }
+    .animate-fade-in { animation: fade-in 0.6s ease-out; }
+    
+    .pattern-dots {
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+</style>
+
+<div class="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Large background circle overlays -->
+    <div class="absolute inset-0 overflow-hidden">
+        <!-- Large green circles in background -->
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-green-800/20 rounded-full"></div>
+        <div class="absolute -bottom-60 -left-40 w-96 h-96 bg-emerald-400/15 rounded-full"></div>
+        <div class="absolute top-1/2 left-1/3 w-72 h-72 bg-teal-400/10 rounded-full"></div>
+        <div class="absolute bottom-20 right-1/4 w-64 h-64 bg-green-300/15 rounded-full"></div>
+        
+        <!-- Additional smaller circles -->
+        <div class="absolute top-1/4 left-20 w-40 h-40 bg-emerald-400/10 rounded-full"></div>
+        <div class="absolute bottom-1/3 right-32 w-32 h-32 bg-teal-400/10 rounded-full"></div>
+    </div>
+
+    <!-- Grid pattern overlay -->
+    <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(90deg, #10b981 1px, transparent 1px), linear-gradient(0deg, #10b981 1px, transparent 1px); background-size: 50px 50px;"></div>
+
+    <!-- Main container -->
+    <div class="relative z-10 flex min-h-screen items-center justify-center px-4 py-6">
+        <div class="w-full max-w-5xl">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+                <div class="grid lg:grid-cols-2">
+                    
+                    <!-- Left Panel - Welcome Section -->
+                    <div class="relative bg-gradient-to-br from-green-100 via-emerald-500 to-teal-500 p-8 lg:p-12 text-white overflow-hidden">
+                        <!-- Pattern overlay -->
+                        <div class="absolute inset-0 pattern-dots opacity-50"></div>
+                        
+                        <!-- Decorative filled circle overlays-->
+                        <div class="absolute top-10 right-10 w-24 h-24 bg-white/10 rounded-full transform rotate-12"></div>
+                        <div class="absolute bottom-20 left-10 w-20 h-20 bg-white/10 rounded-full"></div>
+                        <div class="absolute top-50 left-10 w-12 h-12 bg-white/10 rounded-full transform -rotate-12"></div>
+                        
+                        <div class="relative z-10 flex flex-col justify-center h-full">
+                            <div class="mb-4"> 
+                                <div class="flex items-center justify-center p-1"> 
+                                    <div class="text-center">
+                                        <img src="@Url.Content("~/img/laAllianceLogo.png")" alt="LaAlliance Logo" class="max-h-40 max-w-40" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h1 class="text-3xl lg:text-4xl font-bold mb-4 leading-tight">
+                                    Join Us Today!
+                                </h1>
+                                <p class="text-base lg:text-lg text-white/90 leading-relaxed max-w-md">
+                                    Create an account to start ordering delicious meals and enjoy exclusive offers.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                        <input type="text" asp-for="FirstName" id="form2Example12" placeholder="Enter first name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                        <span asp-validation-for="FirstName" class="text-danger"></span>
+
+                    <!-- Right Panel - Register Form -->
+                    <div class="p-8 lg:p-12 flex flex-col justify-center">
+                        <!-- Header -->
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Create Account</h2>
+                            <p class="text-sm text-gray-600">
+                                Fill in your details to get started
+                            </p>
+                        </div>
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
+                            </div>
+                        }
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+                                <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
+                            </div>
+                        }
+
+                        <!-- Form -->
+                        <form method="post" action="/Account/Register" id="registerForm" class="space-y-4">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Email input -->
+                        <div>
+                            <label for="form2Example11" class="block text-xs font-semibold text-gray-700 mb-1">EMAIL</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <i class="fas fa-envelope text-sm"></i>
+                                </span>
+                                <input type="email" asp-for="Email" id="form2Example11" placeholder="you@example.com" class="w-full rounded-lg border-0 bg-gray-50 pl-10 pr-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all duration-200" required />
+                            </div>
+                            <span asp-validation-for="Email" class="text-red-500 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- First Name input -->
+                        <div>
+                            <label for="form2Example12" class="block text-xs font-semibold text-gray-700 mb-1">FIRST NAME</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-user text-sm"></i></span>
+                                <input type="text" asp-for="FirstName" id="form2Example12" placeholder="Enter your first name" class="w-full rounded-lg border-0 bg-gray-50 pl-10 pr-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all duration-200" required />
+                            </div>
+                            <span asp-validation-for="FirstName" class="text-red-500 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- Last Name input -->
+                        <div>
+                            <label for="form2Example13" class="block text-xs font-semibold text-gray-700 mb-1">LAST NAME</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-user text-sm"></i></span>
+                                <input type="text" asp-for="LastName" id="form2Example13" placeholder="Enter your last name" class="w-full rounded-lg border-0 bg-gray-50 pl-10 pr-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all duration-200" required />
+                            </div>
+                            <span asp-validation-for="LastName" class="text-red-500 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- Contact Number input -->
+                        <div>
+                            <label for="form2Example24" class="block text-xs font-semibold text-gray-700 mb-1">CONTACT NUMBER</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-phone text-sm"></i></span>
+                                <input type="tel" asp-for="ContactNumber" id="form2Example24" placeholder="Enter your contact number" class="w-full rounded-lg border-0 bg-gray-50 pl-10 pr-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all duration-200" required />
+                            </div>
+                            <span asp-validation-for="ContactNumber" class="text-red-500 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- Password input -->
+                        <div>
+                            <label for="form2Example22" class="block text-xs font-semibold text-gray-700 mb-1">PASSWORD</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-lock text-sm"></i></span>
+                                <input type="password" asp-for="Password" id="form2Example22" placeholder="••••••••••" class="w-full rounded-lg border-0 bg-gray-50 pl-10 pr-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all duration-200" required />
+                            </div>
+                            <span asp-validation-for="Password" class="text-red-500 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- Confirm Password input -->
+                        <div>
+                            <label for="confirmpassword" class="block text-xs font-semibold text-gray-700 mb-1">CONFIRM PASSWORD</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-lock text-sm"></i></span>
+                                <input type="password" asp-for="ConfirmPassword" id="confirmpassword" placeholder="••••••••••" class="w-full rounded-lg border-0 bg-gray-50 pl-10 pr-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all duration-200" required />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-red-500 text-xs mt-1 block"></span>
+                        </div>
+
+                        <!-- Register button -->
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-500/30">
+                            REGISTER
+                        </button>
+                    </form>
+
+                    <!-- Create account link -->
+                    <div class="text-center pt-3">
+                        <p class="text-sm text-gray-600">
+                            Already have an account?
+                            <a asp-controller="Account" asp-action="Login" class="font-semibold text-green-600 hover:text-green-700 transition-colors ml-1">
+                                Sign In
+                            </a>
+                        </p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                        <input type="text" asp-for="LastName" id="form2Example13" placeholder="Enter last name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                        <span asp-validation-for="LastName" class="text-danger"></span>
+
+                    <!-- Footer links -->
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <p class="text-center text-xs text-gray-500">
+                            By creating an account, you agree to our
+                            <a href="#" class="text-green-600 hover:underline">Terms of Service</a> and
+                            <a href="#" class="text-green-600 hover:underline">Privacy Policy</a>
+                        </p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-                        <input type="tel" asp-for="ContactNumber" id="form2Example24" placeholder="Enter contact number" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
-                        <span asp-validation-for="ContactNumber" class="text-danger"></span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input type="password" id="form2Example22" asp-for="Password" placeholder="Enter password" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your password" required>
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                        <input type="password" id="confirmpassword" asp-for="ConfirmPassword" placeholder="Confirm your password" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your password" required>
-                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                    </div>
-                    <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                        Register
-                    </button>
-                </form>
-                <div class="mt-6 text-center">
-                    <p class="text-gray-600">Don't have an account? <button onclick="showSignUp()" class="text-green-600 font-medium hover:text-green-700">Sign up</button></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 @section scripts {
     <script>
-        // Check for error message and display Toastr notification
-        var errorMessage = '@TempData["ErrorMessage"]';
-        if (errorMessage) {
-            toastr.error(errorMessage);
-        }
+        // Enhanced form validation
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('ring-2', 'ring-green-500/20', 'rounded-lg');
+            });
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('ring-2', 'ring-green-500/20', 'rounded-lg');
+            });
+        });
     </script>
 }

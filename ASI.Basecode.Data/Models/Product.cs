@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class Product
+    /// <summary>
+    /// Product entity with soft delete support
+    /// </summary>
+    public partial class Product : BaseEntity
     {
         public int ProductID { get; set; }
         public int CategoryID { get; set; }

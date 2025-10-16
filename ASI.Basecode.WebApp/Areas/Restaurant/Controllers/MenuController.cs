@@ -160,19 +160,31 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteCategory(int categoryID, string returnTab = "categories")
+        public IActionResult DeleteCategory(CategoryViewModel model, string returnTab = "categories")
         {
             try
             {
-                _categoryService.DeleteCategory(categoryID);
+                _categoryService.DeleteCategory(model.CategoryID, User.FindFirstValue(ClaimTypes.Name));
                 TempData["ToastrSuccess"] = "Category deleted successfully!";
+                return RedirectToAction("Index", new { activeTab = returnTab });
+
             }
             catch (Exception ex)
             {
                 TempData["ToastrError"] = ex.Message;
-            }
+                ViewBag.ReturnTab = returnTab;
 
-            return RedirectToAction("Index", new { activeTab = returnTab });
+                var category = _categoryService.GetCategoryByID(model.CategoryID);
+
+                if (category == null)
+                {
+                    TempData["ToastrError"] = "Category not found.";
+                    return RedirectToAction("Index", new { activeTab = returnTab });
+                }
+
+                var categoryViewModel = _mapper.Map<CategoryViewModel>(category);
+                return View("CategoryForm", categoryViewModel);
+            }
         }
 
         #endregion

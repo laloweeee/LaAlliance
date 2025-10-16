@@ -1,0 +1,389 @@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Order Confirmation - LaAlliancé";
+    var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
+    var deliveryFee = 50.00m;
+    var total = subtotal + deliveryFee;
+    var orderId = DateTime.Now.ToString("yyyyMMddHHmmss");
+}
+
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Container: Order Status & Details -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                    
+                    <!-- Success Header -->
+                    <div class="text-center mb-10">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-3">Your order is confirmed.</h1>
+                        <p class="text-gray-600 mb-2">Thank you for your order. We'll send tracking</p>
+                        <p class="text-gray-600">info when your order is ready.</p>
+                    </div>
+
+                    <!-- Order Timeline -->
+                    <div class="mb-10">
+                        <div class="flex items-center justify-between max-w-lg mx-auto">
+                            <!-- Step 1 -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-check text-white text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">Ordered</span>
+                                <span class="text-xs text-gray-500 mt-1">@DateTime.Now.ToString("MMM dd")</span>
+                            </div>
+                            
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            
+                            <!-- Step 2 -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-utensils text-gray-400 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-500">Preparing</span>
+                                <span class="text-xs text-gray-400 mt-1">15-20 min</span>
+                            </div>
+                            
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            
+                            <!-- Step 3 -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-check text-gray-400 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-500">Delivered</span>
+                                <span class="text-xs text-gray-400 mt-1">30-45 min</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Track Order Button -->
+                    <div class="text-center mb-10 pb-8 border-b border-gray-200">
+                        <a href="@Url.Action("Index", "OrderTracking", new { area = "Customer" })" 
+                           class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full transition-colors">
+                            Track your order
+                        </a>
+                    </div>
+
+                    <!-- Order Details Section -->
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Order details</h2>
+                        
+                        <div class="flex justify-between text-sm text-gray-600 mb-6 pb-6 border-b border-gray-200">
+                            <div>
+                                <p class="font-semibold text-gray-900 mb-1">Order number</p>
+                                <p>@orderId</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-gray-900 mb-1">Order date</p>
+                                <p>@DateTime.Now.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                    <div class="space-y-6 mb-8">
+                        @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                        {
+                            foreach (var item in Model.Cart.CartItems)
+                            {
+                                var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+                                
+                                <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
+                                    <!-- Product Image Placeholder Updated to Show Actual Image -->
+                                    <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                        @if (!string.IsNullOrEmpty(item.ProductImage))
+                                        {
+                                            <img src="@item.ProductImage" alt="@item.ProductName" class="w-full h-full object-cover rounded-lg" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-utensils text-gray-400 text-2xl"></i>  <!-- Fallback placeholder -->
+                                        }
+                                    </div>
+                                    
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
+                                        
+                                        @if (item.Options != null && item.Options.Any())
+                                        {
+                                            <div class="text-sm text-gray-600 space-y-1 mb-2">
+                                                @foreach (var opt in item.Options)
+                                                {
+                                                    <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
+                                                }
+                                            </div>
+                                        }
+                                        
+                                        <p class="text-sm text-gray-600">QTY: @item.Quantity</p>
+                                        <p class="font-semibold text-gray-900 mt-2">₱@itemTotalPrice.ToString("F2")</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                        <!-- Delivery Information -->
+                        <div class="grid grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-3">Shipping address</h3>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p>@Model.FullName</p>
+                                    <p>@Model.DeliveryAddress</p>
+                                    <p>@Model.ContactNumber</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-3">Paid with</h3>
+                                <p class="text-sm text-gray-600">@Model.PaymentMethod</p>
+                            </div>
+                        </div>
+
+                        <!-- Info Note -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
+                            <p>Delivery times are estimated. If you're experiencing difficulty with this order, please contact our support team.</p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                            <a href="@Url.Action("Index", "Home", new { area = "Customer" })" 
+                               class="flex-1 bg-white hover:bg-gray-50 text-gray-900 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 transition-colors text-center">
+                                Back to Home
+                            </a>
+                            <a href="@Url.Action("Index", "Menu", new { area = "Customer" })" 
+                               class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center">
+                                Browse Menu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Container: Receipt Style Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-8">
+                    <!-- Receipt Header -->
+                    <div class="bg-green-600 text-white p-6 rounded-t-lg">
+                        <div class="text-center">
+                            <i class="fas fa-receipt text-3xl mb-2"></i>
+                            <h3 class="text-xl font-bold">Order Summary</h3>
+                        </div>
+                    </div>
+
+                    <!-- Receipt Body -->
+                    <div class="p-6">
+                        <!-- Order ID -->
+                        <div class="text-center mb-6 pb-4 border-b-2 border-dashed border-gray-300">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Order ID</p>
+                            <p class="font-mono font-bold text-gray-900">#@orderId</p>
+                        </div>
+
+                        <!-- Items List -->
+                        <div class="space-y-4 mb-6">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-3">Items</p>
+                            @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                            {
+                                foreach (var item in Model.Cart.CartItems)
+                                {
+                                    var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                    var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+                                    
+                                    <div class="text-sm">
+                                        <div class="flex justify-between mb-1">
+                                            <span class="text-gray-900 font-medium">@item.ProductName</span>
+                                        </div>
+                                        <div class="flex justify-between text-gray-600 text-xs mb-1">
+                                            <span>Qty: @item.Quantity × ₱@((item.UnitPrice + itemAddOnsTotal).ToString("F2"))</span>
+                                            <span class="font-semibold text-gray-900">₱@itemTotalPrice.ToString("F2")</span>
+                                        </div>
+                                        @if (item.Options != null && item.Options.Any())
+                                        {
+                                            <div class="text-xs text-gray-500 ml-2 space-y-0.5">
+                                                @foreach (var opt in item.Options)
+                                                {
+                                                    <p>+ @opt.OptionName @(opt.AdditionalPrice > 0 ? $"(₱{opt.AdditionalPrice:F2})" : "")</p>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Calculations -->
+                        <div class="space-y-3 pt-4 border-t-2 border-dashed border-gray-300">
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>Subtotal</span>
+                                <span>₱@subtotal.ToString("F2")</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>Delivery Fee</span>
+                                <span>₱@deliveryFee.ToString("F2")</span>
+                            </div>
+                        </div>
+
+                        <!-- Total -->
+                        <div class="flex justify-between text-lg font-bold pt-4 mt-4 border-t-2 border-gray-900">
+                            <span>TOTAL</span>
+                            <span class="text-green-600">₱@total.ToString("F2")</span>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mt-6 pt-4 border-t border-gray-200 no-export">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Payment Method</p>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-credit-card text-green-600"></i>
+                                <span class="text-sm font-medium text-gray-900">@Model.PaymentMethod</span>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Time -->
+                        <div class="mt-4 pt-4 border-t border-gray-200 no-export">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Estimated Delivery</p>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-clock text-green-600"></i>
+                                <span class="text-sm font-medium text-gray-900">30-45 minutes</span>
+                            </div>
+                        </div>
+
+                        <!-- Download Receipt -->
+                        <div class="mt-6 no-export">
+                            <button type="button" id="downloadPNG" 
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-download"></i>
+                                <span>Download Receipt</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Receipt Footer -->
+                    <div class="bg-gray-50 p-4 rounded-b-lg text-center border-t border-gray-200 receipt-footer">
+                        <p class="text-xs text-gray-500">Thank you for your order!</p>
+                        <p class="text-xs text-gray-400 mt-1">LaAlliancé Restaurant</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- html2canvas for PNG export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate order progress after 10 seconds
+            setTimeout(() => {
+                const steps = document.querySelectorAll('.flex.flex-col.items-center');
+                const preparingStep = steps[1];
+                const line = document.querySelectorAll('.flex-1.h-0\\.5')[0];
+                
+                if (preparingStep && line) {
+                    const icon = preparingStep.querySelector('div');
+                    const iconI = icon.querySelector('i');
+                    const label = preparingStep.querySelector('.text-sm');
+                    const time = preparingStep.querySelector('.text-xs');
+                    
+                    icon.classList.remove('border-2', 'border-gray-300', 'bg-white');
+                    icon.classList.add('bg-green-600');
+                    iconI.classList.remove('text-gray-400', 'fa-utensils');
+                    iconI.classList.add('text-white', 'fa-check');
+                    label.classList.remove('text-gray-500');
+                    label.classList.add('text-gray-900');
+                    time.classList.remove('text-gray-400');
+                    time.classList.add('text-gray-600');
+                    
+                    line.classList.remove('bg-gray-300');
+                    line.classList.add('bg-green-600');
+                }
+            }, 10000);
+
+            // Download as PNG
+            document.getElementById('downloadPNG').addEventListener('click', function() {
+                const receiptElement = document.querySelector('.lg\\:col-span-1 > div');
+                const button = this;
+                const originalText = button.innerHTML;
+                
+                // Hide elements that shouldn't be in the export
+                const noExportElements = receiptElement.querySelectorAll('.no-export');
+                noExportElements.forEach(el => el.style.display = 'none');
+                
+                // Adjust footer positioning
+                const footer = receiptElement.querySelector('.receipt-footer');
+                if (footer) {
+                    footer.style.marginTop = '0';
+                    footer.parentElement.style.paddingBottom = '0';
+                }
+                
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Generating...</span>';
+                button.disabled = true;
+                
+                html2canvas(receiptElement, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'receipt-' + '@orderId' + '.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // Restore hidden elements
+                    noExportElements.forEach(el => el.style.display = '');
+                    if (footer) {
+                        footer.style.marginTop = '';
+                        footer.parentElement.style.paddingBottom = '';
+                    }
+                    
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }).catch(err => {
+                    console.error('Error generating PNG:', err);
+                    noExportElements.forEach(el => el.style.display = '');
+                    if (footer) {
+                        footer.style.marginTop = '';
+                        footer.parentElement.style.paddingBottom = '';
+                    }
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    alert('Error generating receipt. Please try again.');
+                });
+            });
+        });
+
+        
+    </script>
+    
+    <style>
+        @@media print {
+            body * {
+                visibility: hidden;
+            }
+            .lg\\:col-span-1, .lg\\:col-span-1 * {
+                visibility: visible;
+            }
+            .lg\\:col-span-1 {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            button {
+                display: none !important;
+            }
+        }
+        
+        /* Loading state for buttons */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+}

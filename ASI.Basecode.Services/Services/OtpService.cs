@@ -1,4 +1,5 @@
 ﻿using ASI.Basecode.Data.Interfaces;
+using ASI.Basecode.Data.Models;
 using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.Services.ServiceModels;
 using Microsoft.Extensions.Configuration;
@@ -20,14 +21,23 @@ namespace ASI.Basecode.Services.Services
     {
         private readonly Random _random = new();
         private readonly IConfiguration _configuration;
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly IEmailVerificationTokenRepository _emailTokenRepository;
+        private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
         private readonly IMailSender _mailSender;
         private const int OtpExpiryMinutes = 10;
 
-        public OtpService(IConfiguration configuration, IUserRepository repository, IMailSender mailSender)
+        public OtpService(
+            IConfiguration configuration, 
+            IUserRepository userRepository, 
+            IEmailVerificationTokenRepository emailTokenRepository,
+            IPasswordResetTokenRepository passwordResetTokenRepository,
+            IMailSender mailSender)
         {
             _configuration = configuration;
-            _repository = repository;
+            _userRepository = userRepository;
+            _emailTokenRepository = emailTokenRepository;
+            _passwordResetTokenRepository = passwordResetTokenRepository;
             _mailSender = mailSender;
         }
 
@@ -205,35 +215,46 @@ namespace ASI.Basecode.Services.Services
         /// Store OTP for user function
         /// </summary>
         /// <param name="email"></param>
-        /// <param name="hashedOtp"></param>
+        /// <param name="otp"></param>
         /// <param name="timestamp"></param>
         /// <exception cref="InvalidDataException"></exception>
-        public void StoreOtpForUser(string email, int otp, DateTime timestamp)
+        public async void StoreOtpForUser(string email, int otp, DateTime timestamp)
         {
-            var user = _repository.GetUsers().FirstOrDefault(u => u.Email == email)
+            var user = _userRepository.GetUsers().FirstOrDefault(u => u.Email == email)
                 ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);
 
-            // Encrypt OTP with timestamp instead of hashing
+            // Encrypt OTP with timestamp
             string encryptedOtp = EncryptOtp(otp, timestamp);
 
-            user.EmailHashToken = encryptedOtp;
+            // Create new email verification token
+            var token = new Data.Models.EmailVerificationToken
+            {
+                UserID = user.UserID,
+                Token = encryptedOtp,
+                CreatedAt = timestamp,
+                ExpiresAt = timestamp.AddMinutes(OtpExpiryMinutes),
+                IsUsed = false
+            };
 
-            _repository.UpdateUser(user);
+            await _emailTokenRepository.CreateAsync(token);
         }
 
         /// <summary>
-        /// Store OTP for user function
+        /// Get OTP details for user function
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
         /// <exception cref="InvalidDataException"></exception>
         public OtpModel GetOtpDetailsForUser(string email)
         {
-            var user = _repository.GetUsers().FirstOrDefault(u => u.Email == email) ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);
+            var user = _userRepository.GetUsers().FirstOrDefault(u => u.Email == email) 
+                ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);
+
+            var latestToken = _emailTokenRepository.GetLatestTokenByUserId(user.UserID);
 
             return new OtpModel
             {
-                HashedOtp = user.EmailHashToken,
+                HashedOtp = latestToken?.Token,
             };
         }
 
@@ -242,14 +263,20 @@ namespace ASI.Basecode.Services.Services
         /// </summary>
         /// <param name="email"></param>
         /// <exception cref="InvalidDataException"></exception>
-        public void MarkVerified(string email)
+        public async Task MarkVerified(string email)
         {
-            var user = _repository.GetUsers().First(u => u.Email == email) ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);
+            var user = _userRepository.GetUsers().First(u => u.Email == email) 
+                ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);
 
             user.IsEmailVerified = true;
-            user.EmailHashToken = null;
+            _userRepository.UpdateUser(user);
 
-            _repository.UpdateUser(user);
+            // Mark the latest token as used
+            var latestToken = _emailTokenRepository.GetLatestTokenByUserId(user.UserID);
+            if (latestToken != null)
+            {
+                await _emailTokenRepository.MarkAsUsedAsync(latestToken.TokenID);
+            }
         }
 
         #region Password Reset Methods
@@ -261,7 +288,7 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public async Task<bool> CreatePasswordResetOtp(string email)
         {
-            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+            var user = _userRepository.GetUsers().FirstOrDefault(x => x.Email == email);
 
             if (user == null)
             {
@@ -272,9 +299,17 @@ namespace ASI.Basecode.Services.Services
             var timestamp = DateTime.UtcNow;
             var encryptedOtp = EncryptOtp(otp, timestamp);
 
-            user.ResetPasswordHashToken = encryptedOtp;
-            _repository.UpdateUser(user);
+            // Create new password reset token
+            var token = new Data.Models.PasswordResetToken
+            {
+                UserID = user.UserID,
+                Token = encryptedOtp,
+                CreatedAt = timestamp,
+                ExpiresAt = timestamp.AddMinutes(OtpExpiryMinutes),
+                IsUsed = false
+            };
 
+            await _passwordResetTokenRepository.CreateAsync(token);
             await _mailSender.SendPasswordResetEmailAsync(email, otp.ToString());
             return true;
         }
@@ -287,19 +322,24 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public bool VerifyPasswordResetOTP(string email, int otpCode)
         {
-            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+            var user = _userRepository.GetUsers().FirstOrDefault(x => x.Email == email);
 
-            if (user == null || string.IsNullOrEmpty(user.ResetPasswordHashToken))
+            if (user == null)
+                return false;
+
+            var latestToken = _passwordResetTokenRepository.GetLatestTokenByUserId(user.UserID).Result;
+
+            if (latestToken == null)
                 return false;
 
             try
             {
-                var (storedOtp, timestamp) = DecryptOtp(user.ResetPasswordHashToken);
+                var (storedOtp, timestamp) = DecryptOtp(latestToken.Token);
 
                 if (storedOtp != otpCode)
                     return false;
 
-                if (DateTime.UtcNow.Subtract(timestamp).TotalMinutes > OtpExpiryMinutes)
+                if (DateTime.UtcNow > latestToken.ExpiresAt)
                     return false;
 
                 return true;
@@ -314,14 +354,17 @@ namespace ASI.Basecode.Services.Services
         /// Clears password reset OTP
         /// </summary>
         /// <param name="email"></param>
-        public void ClearPasswordResetOtp(string email)
+        public async void ClearPasswordResetOtp(string email)
         {
-            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+            var user = _userRepository.GetUsers().FirstOrDefault(x => x.Email == email);
 
             if (user != null)
             {
-                user.ResetPasswordHashToken = null;
-                _repository.UpdateUser(user);
+                var latestToken = await _passwordResetTokenRepository.GetLatestTokenByUserId(user.UserID);
+                if (latestToken != null)
+                {
+                    await _passwordResetTokenRepository.MarkAsUsedAsync(latestToken.TokenID);
+                }
             }
         }
 
@@ -337,7 +380,7 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public async Task<bool> CreateEmailChangeOtp(string email, string newEmail = null)
         {
-            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+            var user = _userRepository.GetUsers().FirstOrDefault(x => x.Email == email);
 
             if (user == null)
             {
@@ -348,10 +391,17 @@ namespace ASI.Basecode.Services.Services
             var timestamp = DateTime.UtcNow;
             var encryptedOtp = EncryptOtp(otp, timestamp);
 
-            // Store OTP in EmailHashToken for email change verification
-            user.EmailHashToken = encryptedOtp;
-            _repository.UpdateUser(user);
+            // Create new email verification token for email change
+            var token = new Data.Models.EmailVerificationToken
+            {
+                UserID = user.UserID,
+                Token = encryptedOtp,
+                CreatedAt = timestamp,
+                ExpiresAt = timestamp.AddMinutes(OtpExpiryMinutes),
+                IsUsed = false
+            };
 
+            await _emailTokenRepository.CreateAsync(token);
             await _mailSender.SendEmailVerificationAsync(email, otp);
             return true;
         }
@@ -364,19 +414,24 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public bool VerifyEmailChangeOTP(string email, int otpCode)
         {
-            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+            var user = _userRepository.GetUsers().FirstOrDefault(x => x.Email == email);
 
-            if (user == null || string.IsNullOrEmpty(user.EmailHashToken))
+            if (user == null)
+                return false;
+
+            var latestToken = _emailTokenRepository.GetLatestTokenByUserId(user.UserID);
+
+            if (latestToken == null || string.IsNullOrEmpty(latestToken.Token))
                 return false;
 
             try
             {
-                var (storedOtp, timestamp) = DecryptOtp(user.EmailHashToken);
+                var (storedOtp, timestamp) = DecryptOtp(latestToken.Token);
 
                 if (storedOtp != otpCode)
                     return false;
 
-                if (DateTime.UtcNow.Subtract(timestamp).TotalMinutes > OtpExpiryMinutes)
+                if (DateTime.UtcNow > latestToken.ExpiresAt)
                     return false;
 
                 return true;
@@ -391,14 +446,17 @@ namespace ASI.Basecode.Services.Services
         /// Clears email change OTP
         /// </summary>
         /// <param name="email"></param>
-        public void ClearEmailChangeOtp(string email)
+        public async void ClearEmailChangeOtp(string email)
         {
-            var user = _repository.GetUsers().FirstOrDefault(x => x.Email == email);
+            var user = _userRepository.GetUsers().FirstOrDefault(x => x.Email == email);
 
             if (user != null)
             {
-                user.EmailHashToken = null;
-                _repository.UpdateUser(user);
+                var latestToken = _emailTokenRepository.GetLatestTokenByUserId(user.UserID);
+                if (latestToken != null)
+                {
+                    await _emailTokenRepository.MarkAsUsedAsync(latestToken.TokenID);
+                }
             }
         }
 

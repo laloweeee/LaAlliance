@@ -2,7 +2,10 @@ using System;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class DeliveryPolicy
+    /// <summary>
+    /// Delivery Policy entity with soft delete support
+    /// </summary>
+    public partial class DeliveryPolicy : BaseEntity
     {
         public int PolicyID { get; set; }
         public int MaxDeliveryDistance { get; set; }

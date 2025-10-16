@@ -64,7 +64,8 @@ namespace ASI.Basecode.Services.Services
                 UserProfile = new UserProfile
                 {
                     FirstName = model.FirstName,
-                    LastName = model.LastName
+                    LastName = model.LastName,
+                    ContactNumber = model.ContactNumber
                 },
                 Password = PasswordManager.EncryptPassword(model.Password),
                 UserType = UserType.Customer,
