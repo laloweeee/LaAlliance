@@ -14,6 +14,7 @@ namespace ASI.Basecode.Data.Models
         public string EmailHashToken { get; set; }
         public string ResetPasswordHashToken { get; set; }
         public AccountStatus AccountStatus { get; set; } = AccountStatus.Active;
+        public DateTime? SuspensionEndDate { get; set; }
 
         // Navigator
         public UserProfile UserProfile { get; set; } // One user has one profile

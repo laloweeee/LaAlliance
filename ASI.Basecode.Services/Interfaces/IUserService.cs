@@ -12,6 +12,9 @@ namespace ASI.Basecode.Services.Interfaces
         void AddUser(UserViewModel model);
         User GetUserByID(int userID);
 
+        // To check and update account status for auto-reactivation
+        void CheckAndUpdateAccountStatus(User user);
+
         void UpdatePassword(int userID, string newPassword);
         bool VerifyPassword(int userID, string currentPassword);
 

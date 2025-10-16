@@ -763,6 +763,9 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
+                    b.Property<DateTime?>("SuspensionEndDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("UserType")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

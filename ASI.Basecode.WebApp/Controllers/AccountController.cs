@@ -78,45 +78,6 @@ namespace ASI.Basecode.WebApp.Controllers
             return this.View();
         }
 
-        /// <summary>
-        /// Authenticate user and signs the user in when successful.
-        /// </summary>
-        /// <param name="model">The model.</param>
-        /// <param name="returnUrl">The return URL.</param>
-        /// <returns> Created response view </returns>
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
-        {
-            this._session.SetString("HasSession", "Exist");
-
-            User user = null;
-
-            var loginResult = _userService.AuthenticateUser(model.Email, model.Password, ref user);
-
-            if (loginResult == LoginResult.Success && user != null)
-            {
-                if (user.UserType == UserType.Restaurant && user.RestaurantStaff == null)
-                {
-                    user = _userService.GetUserByID(user.UserID);
-                }
-                await this._signInManager.SignInAsync(user);
-                this._session.SetString("UserEmail", model.Email);
-
-                return user.UserType switch
-                {
-                    UserType.Customer => RedirectToAction("Index", "Home", new { area = "Customer" }),
-                    UserType.Restaurant => RedirectToAction("Index", "Dashboard", new { area = "Restaurant" }),
-                    _ => RedirectToAction("Login", "Account"),
-                };
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Incorrect Email or Password";
-                return View();
-            }
-        }
-
         [HttpGet]
         [AllowAnonymous]
         [ServiceFilter(typeof(AuthenticationUserFilters))]
@@ -261,6 +222,83 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             await this._signInManager.SignOutAsync();
             return Redirect("/");
+        }
+
+        /// <summary>
+        /// Authenticate user and signs the user in when successful.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <param name="returnUrl">The return URL.</param>
+        /// <returns> Created response view </returns>
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
+        {
+            this._session.SetString("HasSession", "Exist");
+
+            User user = null;
+
+            var loginResult = _userService.AuthenticateUser(model.Email, model.Password, ref user);
+
+            if (loginResult == LoginResult.Success && user != null)
+            {
+                // To check account status before allowing login
+                
+                // To heck if account is terminated
+                if (user.AccountStatus == AccountStatus.Terminated)
+                {
+                    TempData["ErrorMessage"] = "This account has been terminated. Please contact support for assistance.";
+                    return View();
+                }
+                
+                // To check if account is suspended
+                if (user.AccountStatus == AccountStatus.Suspended)
+                {
+                    // To check if suspension period has ended (auto-reactivate)
+                    _userService.CheckAndUpdateAccountStatus(user);
+                    
+                    // To re-check status after potential auto-reactivation
+                    if (user.AccountStatus == AccountStatus.Suspended)
+                    {
+                        var daysRemaining = user.SuspensionEndDate.HasValue 
+                            ? Math.Ceiling((user.SuspensionEndDate.Value - DateTime.Now).TotalDays)
+                            : 0;
+                            
+                        TempData["ErrorMessage"] = daysRemaining > 0 
+                            ? $"This account is suspended. You can login again in {daysRemaining} day(s)."
+                            : "This account is currently suspended. Please contact support.";
+                        return View();
+                    }
+                }
+                
+                // To check if email is verified
+                if (!user.IsEmailVerified)
+                {
+                    TempData["ErrorMessage"] = "Please verify your email before logging in.";
+                    return View();
+                }
+
+                // To load RestaurantStaff if needed
+                if (user.UserType == UserType.Restaurant && user.RestaurantStaff == null)
+                {
+                    user = _userService.GetUserByID(user.UserID);
+                }
+                
+                await this._signInManager.SignInAsync(user);
+                this._session.SetString("UserEmail", model.Email);
+
+                return user.UserType switch
+                {
+                    UserType.Customer => RedirectToAction("Index", "Home", new { area = "Customer" }),
+                    UserType.Restaurant => RedirectToAction("Index", "Dashboard", new { area = "Restaurant" }),
+                    _ => RedirectToAction("Login", "Account"),
+                };
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Incorrect Email or Password";
+                return View();
+            }
         }
     }
 }

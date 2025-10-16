@@ -166,5 +166,33 @@ namespace ASI.Basecode.Services.Services
             user.IsEmailVerified = true;
             _repository.UpdateUser(user);
         }
+
+        /// <summary>
+        /// Checks and updates account status based on suspension end date
+        /// Auto-reactivates accounts when suspension period ends
+        /// </summary>
+        public void CheckAndUpdateAccountStatus(User user)
+        {
+            if (user == null) return;
+
+            // Check if account is suspended and suspension period has ended
+            if (user.AccountStatus == AccountStatus.Suspended && 
+                user.SuspensionEndDate.HasValue && 
+                DateTime.Now >= user.SuspensionEndDate.Value)
+            {
+                // Auto-reactivate the account
+                user.AccountStatus = AccountStatus.Active;
+                user.SuspensionEndDate = null;
+                
+                // Update in database if you have repository access
+                // _userRepository.Update(user);
+                
+                // If using RestaurantStaff, also update its status
+                if (user.RestaurantStaff != null)
+                {
+                    user.RestaurantStaff.Status = AccountStatus.Active;
+                }
+            }
+        }
     }
 }
