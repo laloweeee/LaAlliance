@@ -489,8 +489,15 @@
         let isEditingAddress = false;
         const subtotal = @subtotal;
 
-        // Order Type Toggle Handler
+        // Initialize map functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the address map
+            if (document.getElementById('addressMap')) {
+                initAddressMap('addressMap', 'latitudeInput', 'longitudeInput');
+                setupCurrentLocationButton('currentLocationBtn');
+            }
+            
+            // Your existing order type toggle handler
             const orderTypeRadios = document.querySelectorAll('input[name="OrderType"]');
             const deliveryAddressSection = document.getElementById('deliveryAddressSection');
             const shippingAddressDisplay = document.getElementById('shippingAddressDisplay');
