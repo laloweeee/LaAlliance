@@ -5,154 +5,184 @@
     ViewData["Title"] = "Login Page";
 }
 
-<div class="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50">
-    <!-- Animated background elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <!-- Large gradient blobs -->
-        <div class="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl"></div>
-        <div class="absolute top-1/3 -right-32 h-80 w-80 rounded-full bg-teal-400/15 blur-3xl"></div>
-        <div class="absolute -bottom-32 left-1/4 h-96 w-96 rounded-full bg-green-400/15 blur-3xl"></div>
-        
+<style>
+    @@keyframes float-gentle {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        33% { transform: translate(30px, -30px) rotate(3deg); }
+        66% { transform: translate(-20px, 20px) rotate(-3deg); }
+    }
+    
+    @@keyframes fade-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-float-gentle { animation: float-gentle 20s ease-in-out infinite; }
+    .animate-fade-in { animation: fade-in 0.6s ease-out; }
+    
+    .pattern-dots {
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+</style>
 
+<div class="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Large background circle overlays -->
+    <div class="absolute inset-0 overflow-hidden">
+        <!-- Large green circles in background -->
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-green-800/20 rounded-full"></div>
+        <div class="absolute -bottom-60 -left-40 w-96 h-96 bg-emerald-400/15 rounded-full"></div>
+        <div class="absolute top-1/2 left-1/3 w-72 h-72 bg-teal-400/10 rounded-full"></div>
+        <div class="absolute bottom-20 right-1/4 w-64 h-64 bg-green-300/15 rounded-full"></div>
         
-        <!-- Grid pattern overlay -->
-        <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(90deg, #10b981 1px, transparent 1px), linear-gradient(0deg, #10b981 1px, transparent 1px); background-size: 50px 50px;"></div>
+        <!-- Additional smaller circles -->
+        <div class="absolute top-1/4 left-20 w-40 h-40 bg-emerald-400/10 rounded-full"></div>
+        <div class="absolute bottom-1/3 right-32 w-32 h-32 bg-teal-400/10 rounded-full"></div>
     </div>
+
+    <!-- Grid pattern overlay -->
+    <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(90deg, #10b981 1px, transparent 1px), linear-gradient(0deg, #10b981 1px, transparent 1px); background-size: 50px 50px;"></div>
 
     <!-- Main container -->
     <div class="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
-        <div class="w-full max-w-7xl grid lg:grid-cols-2 gap-8 lg:gap-0 items-stretch">
+        <div class="w-full max-w-6xl">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+                <div class="grid lg:grid-cols-2">
+                    
+                    <!-- Left Panel - Welcome Section -->
+                    <div class="relative bg-gradient-to-br from-green-100 via-emerald-500 to-teal-500 p-12 lg:p-16 text-white overflow-hidden">
+                        <!-- Pattern overlay -->
+                        <div class="absolute inset-0 pattern-dots opacity-50"></div>
+                        
+                        <!-- Decorative filled circle overlays-->
+                        <div class="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full transform rotate-12"></div>
+                        <div class="absolute bottom-20 left-10 w-24 h-24 bg-white/10 rounded-full"></div>
+                        <div class="absolute top-50 left-10 w-16 h-16 bg-white/10 rounded-full transform -rotate-12"></div>
+                        
+                        <div class="relative z-10 flex flex-col justify-center h-full">
 
-            <!-- Welcome side -->
-            <div class="hidden lg:flex flex-col justify-between p-12 text-white bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600 rounded-3xl rounded-r-none shadow-2xl relative overflow-hidden">
-                <!-- Background pattern -->
-                <div class="absolute inset-0 opacity-10 pointer-events-none">
-                    <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full filter blur-3xl"></div>
-                    <div class="absolute bottom-10 left-0 w-32 h-32 bg-white rounded-full filter blur-2xl"></div>
-                </div>
-
-                <div class="relative z-20 flex flex-col items-center justify-center h-full text-center">
-                    <!-- Logo placeholder -->
-                    <div class="mb-8">
-                        <div class="h-32 w-32 rounded-2xl bg-white/20 border-2 border-white/40 border-dashed flex items-center justify-center backdrop-blur-sm hover:bg-white/30 transition-all duration-300">
+                    <div class="mb-4"> 
+                        <div class="flex items-center justify-center p-1"> 
                             <div class="text-center">
-                                <i class="fas fa-image text-4xl text-white/60 block mb-2"></i>
-                                <span class="text-xs text-white/70">Logo</span>
+                                <img src="@Url.Content("~/img/laAllianceLogo.png")" alt="LaAlliance Logo" class="max-h-60 max-w-60" />
+                            </div>
+                        </div>
+                    </div>
+                            
+                            <!-- Welcome text -->
+                            <div>
+                                <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                                    Welcome Back!
+                                </h1>
+                                <p class="text-lg lg:text-2xl text-white/90 leading-relaxed max-w-md">
+                                    Login to access your dashboard and manage your orders with ease.
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Heading -->
-                    <h2 class="text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-                        Welcome Back!
-                    </h2>
-                    <p class="text-lg text-white/90 max-w-md leading-relaxed">
-                        Access your account to track orders, reorder favorites, and unlock exclusive member rewards and benefits.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Form side -->
-            <div class="bg-white rounded-3xl lg:rounded-r-3xl lg:rounded-l-none shadow-2xl overflow-hidden">
-                <div class="p-8 sm:p-12 h-full flex flex-col">
-                    <!-- Header -->
-                    <div class="mb-10">
-                        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Sign in</h1>
-                        <p class="mt-3 text-gray-600">
-                            New to us?
-                            <a asp-controller="Account" asp-action="Register" class="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
-                                Create account
-                            </a>
-                        </p>
-                    </div>
-
-                    <!-- Form -->
-                    <form method="post" action="/Account/Login" id="loginForm" class="space-y-6 flex-1">
-                        @Html.AntiForgeryToken()
-
-                        <!-- Email input -->
-                        <div>
-                            <label for="form2Example11" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                            <div class="relative group">
-                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors">
-                                    <i class="fas fa-envelope text-lg"></i>
-                                </span>
-                                <input
-                                    type="email"
-                                    asp-for="Email"
-                                    id="form2Example11"
-                                    placeholder="you@example.com"
-                                    class="w-full rounded-xl border-2 border-gray-200 pl-12 pr-4 py-3.5 text-gray-900 placeholder-gray-400
-                                           focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20
-                                           bg-gray-50/50 transition-all duration-200 hover:border-gray-300"
-                                    required />
-                            </div>
-                            <span asp-validation-for="Email" class="text-red-500 text-sm mt-1 block"></span>
+                    <!-- Right Panel - Login Form -->
+                    <div class="p-12 lg:p-16 flex flex-col justify-center">
+                        <!-- Header -->
+                        <div class="mb-10">
+                            <h2 class="text-4xl font-bold text-gray-800 mb-3">Sign In</h2>
+                            <p class="text-gray-600">
+                                Enter your credentials to access your account
+                            </p>
                         </div>
 
-                        <!-- Password input -->
-                        <div>
-                            <label for="form2Example22" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                            <div class="relative group">
-                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors">
-                                    <i class="fas fa-lock text-lg"></i>
-                                </span>
-                                <input
-                                    type="password"
-                                    asp-for="Password"
-                                    id="form2Example22"
-                                    placeholder="Enter your password"
-                                    class="w-full rounded-xl border-2 border-gray-200 pl-12 pr-4 py-3.5 text-gray-900 placeholder-gray-400
-                                           focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20
-                                           bg-gray-50/50 transition-all duration-200 hover:border-gray-300"
-                                    required />
-                            </div>
-                            <span asp-validation-for="Password" class="text-red-500 text-sm mt-1 block"></span>
-                        </div>
+                        <!-- Form -->
+                        <form method="post" action="/Account/Login" id="loginForm" class="space-y-6">
+                            @Html.AntiForgeryToken()
 
-                        <!-- Options row -->
-                        <div class="flex items-center justify-between pt-2">
-                            <label class="inline-flex items-center cursor-pointer group">
-                                <input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
-                                <span class="ml-2.5 text-sm text-gray-700 group-hover:text-gray-900">Remember me</span>
-                            </label>
-                            <button type="button"
-                                    onclick="showForgotPassword()"
-                                    class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
-                                Forgot password?
+                            <!-- Email input -->
+                            <div>
+                                <label for="form2Example11" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    EMAIL
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    <input
+                                        type="email"
+                                        asp-for="Email"
+                                        id="form2Example11"
+                                        placeholder="arjunmalwano@gmail.com"
+                                        class="w-full rounded-xl border-0 bg-gray-50 pl-12 pr-4 py-4 text-gray-900 placeholder-gray-400
+                                               focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white
+                                               transition-all duration-200"
+                                        required />
+                                </div>
+                                <span asp-validation-for="Email" class="text-red-500 text-sm mt-1 block"></span>
+                            </div>
+
+                            <!-- Password input -->
+                            <div>
+                                <label for="form2Example22" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    PASSWORD
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    <input
+                                        type="password"
+                                        asp-for="Password"
+                                        id="form2Example22"
+                                        placeholder="••••••••••"
+                                        class="w-full rounded-xl border-0 bg-gray-50 pl-12 pr-4 py-4 text-gray-900 placeholder-gray-400
+                                               focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white
+                                               transition-all duration-200"
+                                        required />
+                                </div>
+                                <span asp-validation-for="Password" class="text-red-500 text-sm mt-1 block"></span>
+                            </div>
+
+                            <!-- Remember me & Forgot password -->
+                            <div class="flex items-center justify-between">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer">
+                                    <span class="ml-2 text-sm text-gray-700">Remember Me</span>
+                                </label>
+                                <button type="button"
+                                        onclick="showForgotPassword()"
+                                        class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-colors">
+                                    Forgot Password?
+                                </button>
+                            </div>
+
+                            <!-- Login button -->
+                            <button type="submit"
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl
+                                           transition-all duration-200 shadow-lg hover:shadow-xl
+                                           focus:outline-none focus:ring-4 focus:ring-green-500/30">
+                                LOGIN
                             </button>
+
+                            <!-- Create account link -->
+                            <div class="text-center pt-4">
+                                <p class="text-gray-600">
+                                    Don't have an account?
+                                    <a asp-controller="Account" asp-action="Register" class="font-semibold text-green-600 hover:text-green-700 transition-colors ml-1">
+                                        Create Account
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+
+                        <!-- Footer links -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <p class="text-center text-xs text-gray-500">
+                                By signing in, you agree to our
+                                <a href="#" class="text-green-600 hover:underline">Terms of Service</a> and
+                                <a href="#" class="text-green-600 hover:underline">Privacy Policy</a>
+                            </p>
                         </div>
-
-                        <!-- Submit button -->
-                        <button type="submit"
-                                class="w-full mt-8 inline-flex items-center justify-center rounded-xl
-                                       bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600
-                                       px-4 py-3.5 font-bold text-white shadow-lg
-                                       hover:from-emerald-700 hover:via-emerald-600 hover:to-teal-700
-                                       focus:outline-none focus:ring-4 focus:ring-emerald-300
-                                       active:scale-95 transition-all duration-200
-                                       hover:shadow-xl">
-                            <i class="fas fa-sign-in-alt mr-2.5"></i> Sign In
-                        </button>
-
-
-                    </form>
-
-                    <!-- Mobile signup link and footer -->
-                    <div class="pt-6 border-t border-gray-200 mt-6">
-                        <p class="text-center text-sm text-gray-600">
-                            Don't have an account?
-                            <a asp-controller="Account" asp-action="Register" class="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Sign up free</a>
-                        </p>
-                        <p class="text-center text-xs text-gray-500 mt-4">
-                            By signing in, you agree to our
-                            <a href="#" class="text-emerald-600 hover:underline">Terms of Service</a> and
-                            <a href="#" class="text-emerald-600 hover:underline">Privacy Policy</a>
-                        </p>
                     </div>
+
                 </div>
             </div>
-
         </div>
     </div>
 </div>

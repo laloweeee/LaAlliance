@@ -1,47 +1,167 @@
 ﻿@using Microsoft.AspNetCore.Http
 <!-- Navbar -->
-<div id="navbar" class="bg-transparent fixed top-0 left-0 z-50 w-full transition-colors duration-300 ease-in-out">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
-        <!-- Logo -->
-        <h1 class="text-white text-2xl font-black">
-            LaAlliancé
-        </h1>
+<div id="navbar" class="bg-transparent fixed top-0 left-0 z-50 w-full transition-all duration-300 ease-in-out">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <!-- Logo with Image -->
+        <div class="flex items-center gap-3">
+            <img src="@Url.Content("~/img/laAlliance Logo 2.png")" alt="LaAlliance Logo 2" class="h-12 w-12 object-contain" />
+            <h1 class="text-white text-2xl font-black tracking-tight">
+                LaAlliancé
+            </h1>
+        </div>
 
         <!-- Nav + Login Container -->
         <div class="flex items-center gap-7">
             <!-- Navigation Links (hidden on mobile) -->
-            <div class="hidden md:flex items-center gap-7">
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                    Home
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                    About
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                    Services
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                    Contact
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                </a>
             </div>
 
-            <!-- Login Button (always visible) -->
-            <a asp-controller="Account" asp-action="Login" id="loginButton" class="text-white bg-green-600 font-bold rounded-md px-6 py-2 transition duration-300 ease-in-out hover:bg-green-200 hover:text-green-600 hover:scale-105 hover:shadow-lg">
+            <!-- Login Button -->
+            <a asp-controller="Account" asp-action="Login" id="loginButton" 
+               class="bg-green-600 text-white font-bold rounded-xl px-6 py-3 
+                      transition-all duration-300 ease-in-out hover:bg-green-700 
+                      hover:shadow-lg border border-green-500">
+                Login
+            </a>
+
+            <!-- Mobile menu button -->
+            <button id="mobileMenuButton" class="md:hidden text-white text-2xl">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden bg-green-600/95 backdrop-blur-lg border-t border-white/20 hidden">
+        <div class="px-4 py-6 space-y-4">
+            <a href="#" class="block text-white/90 hover:text-white font-semibold py-2 transition-colors duration-300 border-b border-white/10">
+                Home
+            </a>
+            <a href="#" class="block text-white/90 hover:text-white font-semibold py-2 transition-colors duration-300 border-b border-white/10">
+                About
+            </a>
+            <a href="#" class="block text-white/90 hover:text-white font-semibold py-2 transition-colors duration-300 border-b border-white/10">
+                Services
+            </a>
+            <a href="#" class="block text-white/90 hover:text-white font-semibold py-2 transition-colors duration-300 border-b border-white/10">
+                Contact
+            </a>
+            <a asp-controller="Account" asp-action="Login" class="block bg-white text-green-600 font-bold rounded-lg px-4 py-3 text-center mt-4 transition-colors duration-300 hover:bg-gray-100">
                 Login
             </a>
         </div>
     </div>
 </div>
 
-
-<!-- JS to toggle background color on scroll -->
+<!-- JS to toggle background color on scroll and mobile menu -->
 <script>
     const navbar = document.getElementById('navbar');
     const loginButton = document.getElementById('loginButton');
+    const mobileMenuButton = document.getElementById('mobileMenuButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const logoText = document.querySelector('h1');
+
+    // Scroll effect
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 200) {
-            navbar.classList.add('bg-green-600');
+        if (window.scrollY > 50) {
+            // When scrolled - white background
+            navbar.classList.add('bg-white', 'shadow-lg');
             navbar.classList.remove('bg-transparent');
-            loginButton.classList.remove('bg-green-600');
-            loginButton.classList.add('text-green-600');
-            loginButton.classList.add('bg-white');
-            loginButton.classList.remove('text-white');
+            
+            // Change logo text color to green
+            logoText.classList.remove('text-white');
+            logoText.classList.add('text-green-600');
+            
+            // Change login button to green text on white background
+            loginButton.classList.remove('bg-green-600', 'text-white', 'border-green-500');
+            loginButton.classList.add('bg-white', 'text-green-600', 'border-green-600', 'hover:bg-green-50');
+            
+            // Change nav links to green
+            document.querySelectorAll('.hidden.md\\:flex a').forEach(link => {
+                link.classList.remove('text-white/90', 'hover:text-white');
+                link.classList.add('text-gray-700', 'hover:text-green-600');
+                
+                // Change underline color
+                const underline = link.querySelector('span');
+                if (underline) {
+                    underline.classList.remove('bg-white');
+                    underline.classList.add('bg-green-600');
+                }
+            });
+            
         } else {
+            // When at top - transparent background
+            navbar.classList.remove('bg-white', 'shadow-lg');
             navbar.classList.add('bg-transparent');
-            navbar.classList.remove('bg-green-600');
-            login-button.classList.remove('text-green-600');
-            login-button.classList.remove('bg-white');
-            login-button.classList.add('bg-green-600');
-            login-button.classList.add('text-white');
+            
+            // Change logo text color back to white
+            logoText.classList.remove('text-green-600');
+            logoText.classList.add('text-white');
+            
+            // Change login button back to white text on green background
+            loginButton.classList.remove('bg-white', 'text-green-600', 'border-green-600', 'hover:bg-green-50');
+            loginButton.classList.add('bg-green-600', 'text-white', 'border-green-500', 'hover:bg-green-700');
+            
+            // Change nav links back to white
+            document.querySelectorAll('.hidden.md\\:flex a').forEach(link => {
+                link.classList.remove('text-gray-700', 'hover:text-green-600');
+                link.classList.add('text-white/90', 'hover:text-white');
+                
+                // Change underline color back to white
+                const underline = link.querySelector('span');
+                if (underline) {
+                    underline.classList.remove('bg-green-600');
+                    underline.classList.add('bg-white');
+                }
+            });
+        }
+    });
+
+    // Mobile menu toggle
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        // Toggle between menu and close icon
+        const icon = mobileMenuButton.querySelector('i');
+        if (mobileMenu.classList.contains('hidden')) {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        } else {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        }
+    });
+
+    // Close mobile menu when clicking on a link
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            mobileMenuButton.querySelector('i').classList.remove('fa-times');
+            mobileMenuButton.querySelector('i').classList.add('fa-bars');
+        });
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!navbar.contains(e.target) && !mobileMenu.classList.contains('hidden')) {
+            mobileMenu.classList.add('hidden');
+            mobileMenuButton.querySelector('i').classList.remove('fa-times');
+            mobileMenuButton.querySelector('i').classList.add('fa-bars');
         }
     });
 </script>
-
