@@ -14,6 +14,6 @@ namespace ASI.Basecode.Services.Interfaces
         ProductCategory GetCategoryByID(int categoryID);
         void AddCategory(CategoryViewModel category);
         void UpdateCategory(CategoryViewModel category);
-        void DeleteCategory(int categoryID);
+        void DeleteCategory(int categoryID, string deletedBy);
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -19,26 +20,29 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private readonly IAddressService _addressService;
 
         public CartController(
-            IHttpContextAccessor httpContextAccessor,
-            ILoggerFactory loggerFactory,
-            IConfiguration configuration,
-            ICartService cartService,
-            IUserProfileService userProfileService,  // Keep this if needed
-            IAddressService addressService  // Add this parameter
-        ) : base(httpContextAccessor, loggerFactory, configuration, null, cartService)
+                                IHttpContextAccessor httpContextAccessor,
+                                ILoggerFactory loggerFactory,
+                                IConfiguration configuration,
+                                ICartService cartService,
+                                IUserProfileService userProfileService,
+                                IAddressService addressService
+                            ) : base(httpContextAccessor, loggerFactory, configuration, null, cartService)
         {
-            _userProfileService = userProfileService;  // Existing line
-            _addressService = addressService;  // Add this line
+            _userProfileService = userProfileService;
+            _addressService = addressService;
         }
 
-        // GET: /Customer/Cart
+        [HttpGet]
         public IActionResult Index()
         {
+            ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            // Get or create cart for the user
             var cart = _cartService.GetOrCreateCart(UserId);
-            
+
             // Get customer profile using UserProfileService
             var customerProfile = GetCustomerProfile();
-            
+
             ViewData["CustomerProfile"] = customerProfile;
             return View(cart);
         }

@@ -30,16 +30,6 @@ namespace ASI.Basecode.Data.Configuration
             builder.Property(u => u.IsEmailVerified)
                 .HasDefaultValue(false);
 
-            builder.Property(u => u.EmailHashToken)
-                .HasMaxLength(500)
-                .IsRequired(false)
-                .HasDefaultValue(null);
-
-            builder.Property(u => u.ResetPasswordHashToken)
-                .HasMaxLength(500)
-                .IsRequired(false)
-                .HasDefaultValue(null);
-
             builder.Property(u => u.AccountStatus)
                 .IsRequired()
                 .HasConversion<string>()
@@ -74,6 +64,16 @@ namespace ASI.Basecode.Data.Configuration
             builder.HasMany(u => u.Order)
                 .WithOne(o => o.User)
                 .HasForeignKey(o => o.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(u => u.EmailVerificationTokens)
+                .WithOne(evt => evt.User)
+                .HasForeignKey(evt => evt.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(u => u.PasswordResetTokens)
+                .WithOne(prt => prt.User)
+                .HasForeignKey(prt => prt.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Table Name

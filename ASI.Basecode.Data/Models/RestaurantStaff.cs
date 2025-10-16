@@ -7,7 +7,10 @@ using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class RestaurantStaff
+    /// <summary>
+    /// Restaurant Staff entity with soft delete support
+    /// </summary>
+    public partial class RestaurantStaff : BaseEntity
     {
         public int StaffID { get; set; }
         public int UserID  { get; set; }

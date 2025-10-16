@@ -8,7 +8,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
     public class HomeViewModel
     {
         public IEnumerable<ProductCategory> Categories { get; set; } = new List<ProductCategory>();
-        public IEnumerable<Product> Products { get; set; } = new List<Product>();
+        public IEnumerable<ProductViewModel> Products { get; set; } = new List<ProductViewModel>();
         public CartViewModel Carts { get; set; } = new CartViewModel();
     }
 }

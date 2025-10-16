@@ -100,6 +100,7 @@ namespace ASI.Basecode.WebApp.Controllers
                 {
                     user = _userService.GetUserByID(user.UserID);
                 }
+
                 await this._signInManager.SignInAsync(user);
                 this._session.SetString("UserEmail", model.Email);
 

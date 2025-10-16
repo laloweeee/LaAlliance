@@ -27,16 +27,27 @@ namespace ASI.Basecode.Services.Services
         private readonly IFileHandlingService _fileHandlingService;
         private readonly IMapper _mapper;
         private readonly ICategoryService _categoryService;
-        private readonly BlobContainerClient _blobContainerClient;
 
-        public ProductService(IProductRepository productRepository, IUserRepository userRepository, IFileHandlingService fileHandlingService, IMapper mapper, ICategoryService categoryService, BlobContainerClient blobContainerClient)
+        /// <summary>
+        /// Constructor for ProductService.
+        /// </summary>
+        /// <param name="productRepository"></param>
+        /// <param name="userRepository"></param>
+        /// <param name="fileHandlingService"></param>
+        /// <param name="mapper"></param>
+        /// <param name="categoryService"></param>
+        public ProductService(
+            IProductRepository productRepository,
+            IUserRepository userRepository,
+            IFileHandlingService fileHandlingService,
+            IMapper mapper,
+            ICategoryService categoryService)
         {
             _productRepository = productRepository;
             _userRepository = userRepository;
             _fileHandlingService = fileHandlingService;
             _mapper = mapper;
             _categoryService = categoryService;
-            _blobContainerClient = blobContainerClient;
         }
 
         /// <summary>
@@ -53,9 +64,19 @@ namespace ASI.Basecode.Services.Services
         /// </summary>
         /// <param name="productID"></param>
         /// <returns></returns>
-        public IQueryable<Product> GetProductByID(int productID)
+        public ProductViewModel GetProductByID(int productID)
         {
-            return _productRepository.GetProductByID(productID);
+            var product = _productRepository.GetProducts().Where(p => p.ProductID == productID);
+
+            if (product == null || !product.Any())
+            {
+                throw new ArgumentException("The product does not exist.");
+            }
+
+            var model = _mapper.Map<ProductViewModel>(product.First());
+            model.CategoryName = product.First().ProductCategory?.CategoryName;
+
+            return model;
         }
 
         /// <summary>
@@ -65,16 +86,26 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public IQueryable<Product> GetProductsByCategoryID(int categoryID)
         {
-            return _productRepository.GetProductsByCategoryID(categoryID);
+            return _productRepository.GetProducts().Where(p => p.CategoryID == categoryID);
         }
 
         /// <summary>
         /// Retrieve all active products.
         /// </summary>
         /// <returns></returns>
-        public IQueryable<Product> GetActiveProducts()
+        public List<ProductViewModel> GetActiveProducts()
         {
-            return _productRepository.GetActiveProducts();
+            var products = _productRepository.GetProducts().Where(p => p.IsActive);
+
+            var model = new List<ProductViewModel>();
+            foreach (var product in products)
+            {
+                var productViewModel = _mapper.Map<ProductViewModel>(product);
+                productViewModel.CategoryName = product.ProductCategory?.CategoryName;
+                model.Add(productViewModel);
+            }
+
+            return model;
         }
 
         /// <summary>
@@ -137,7 +168,7 @@ namespace ASI.Basecode.Services.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task EditProduct(ProductViewModel model)
         {
-            var product = _productRepository.GetProductByID(model.ProductID).FirstOrDefault()
+            var product = _productRepository.GetProducts().FirstOrDefault(p => p.ProductID == model.ProductID)
                 ?? throw new ArgumentException("The product does not exist.");
 
             var categoryExists = _categoryService.GetCategoryByID(model.CategoryID)
@@ -246,6 +277,12 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
+        /// <summary>
+        /// Check if customization groups have changed.
+        /// </summary>
+        /// <param name="existingGroups"></param>
+        /// <param name="newGroups"></param>
+        /// <returns></returns>
         private static bool HasCustomizationGroupsChanged(List<ProductOptionGroup> existingGroups, List<ProductOptionGroupViewModel> newGroups)
         {
             if (existingGroups.Count != newGroups.Count)

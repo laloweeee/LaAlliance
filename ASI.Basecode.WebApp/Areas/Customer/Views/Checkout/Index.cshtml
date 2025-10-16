@@ -24,6 +24,14 @@
             </div>
         }
 
+        @if (TempData["WarningMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-yellow-100 border border-yellow-200 text-yellow-800 rounded-xl flex items-center gap-3 animate-fade-in">
+                <i class="fas fa-exclamation-circle text-yellow-600"></i>
+                <span>@TempData["WarningMessage"]</span>
+            </div>
+        }
+
         <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
             @Html.AntiForgeryToken()
 
