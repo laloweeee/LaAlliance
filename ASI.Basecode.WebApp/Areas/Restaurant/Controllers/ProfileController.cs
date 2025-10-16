@@ -13,7 +13,7 @@ using System;
 
 namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
-    [Authorize(Policy = "Restaurant")]
+    [Authorize(Policy = "RestaurantAdmin")]
     [Area("Restaurant")]
     public class ProfileController : ControllerBase<ProfileController>
     {
@@ -62,9 +62,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             {
                 try
                 {
-                    var restaurant = _mapper.Map<Data.Models.Restaurant>(model);
-
-                    _restaurantProfileService.EditRestaurantInformation(restaurant);
+                    _restaurantProfileService.EditRestaurantInformation(model);
                     TempData["SuccessMessage"] = "Restaurant information updated successfully.";
                     return RedirectToAction("RestaurantProfileForm");
                 }

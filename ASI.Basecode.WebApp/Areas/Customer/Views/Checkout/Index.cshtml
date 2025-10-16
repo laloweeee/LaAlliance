@@ -1,0 +1,464 @@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout - LaAlliancé";
+    var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
+    var deliveryFee = 50.00m;
+    var total = subtotal + deliveryFee;
+    var defaultAddress = Model.Addresses?.FirstOrDefault(a => a.IsDefault);
+}
+
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Review and Place Your Order</h1>
+            <p class="text-gray-600">Complete your purchase with confidence</p>
+        </div>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-800 rounded-xl flex items-center gap-3 animate-fade-in">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                <span>@TempData["ErrorMessage"]</span>
+            </div>
+        }
+
+        @if (TempData["WarningMessage"] != null)
+        {
+            <div class="mb-6 p-4 bg-yellow-100 border border-yellow-200 text-yellow-800 rounded-xl flex items-center gap-3 animate-fade-in">
+                <i class="fas fa-exclamation-circle text-yellow-600"></i>
+                <span>@TempData["WarningMessage"]</span>
+            </div>
+        }
+
+        <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
+            @Html.AntiForgeryToken()
+
+            <!-- Left Column: Delivery Address and Personal Details -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Section 1: Delivery Address -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-map-marker-alt text-green-600"></i>
+                        Delivery Address
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Address Form -->
+                        <div class="space-y-4">
+                            <p class="text-gray-600 text-sm">Your address details will be used to pinpoint your location on the map.</p>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
+                                <input asp-for="DeliveryAddress" 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                       placeholder="Enter street address" 
+                                       value="@defaultAddress?.Street" />
+                                <span asp-validation-for="DeliveryAddress" class="text-red-500 text-sm mt-1"></span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Barangay</label>
+                                    <input asp-for="Addresses[0].Barangay" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.Barangay" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                    <input asp-for="Addresses[0].City" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.City" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Province</label>
+                                    <input asp-for="Addresses[0].Province" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.Province" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
+                                    <input asp-for="Addresses[0].ZipCode" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                           value="@defaultAddress?.ZipCode" />
+                                </div>
+                            </div>
+                            
+                            <!-- Map Controls - Moved below province and zip code -->
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-xl shadow-lg p-3 flex gap-2">
+                                    <button type="button" 
+                                            id="currentLocationBtn"
+                                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-location-crosshairs"></i>
+                                        <span class="hidden sm:inline">Use Current Location</span>
+                                        <span class="sm:hidden">Current</span>
+                                    </button>
+                                    <button type="button" 
+                                            id="searchAddressBtn"
+                                            class="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-search"></i>
+                                        <span class="hidden sm:inline">Search on Map</span>
+                                        <span class="sm:hidden">Search</span>
+                                    </button>
+                                </div>
+                                
+                                <!-- New Edit Address Details Button -->
+                                <button type="button" 
+                                        id="editAddressBtn"
+                                        class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit Address Details</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Hidden coordinates fields -->
+                            <input type="hidden" asp-for="Addresses[0].Latitude" id="latitudeInput" value="@defaultAddress?.Latitude" />
+                            <input type="hidden" asp-for="Addresses[0].Longitude" id="longitudeInput" value="@defaultAddress?.Longitude" />
+                        </div>
+                        
+                        <!-- Interactive Map -->
+                        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-fit">
+                            <!-- Map Header -->
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
+                                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <i class="fas fa-map"></i>
+                                    Pin Your Location
+                                </h3>
+                                <p class="text-blue-100 text-sm mt-1">Drag the marker to adjust</p>
+                            </div>
+
+                            <!-- Map Container -->
+                            <div class="relative">
+                                <div id="addressMap" class="w-full h-[300px] lg:h-[350px]"></div>
+                            </div>
+
+                            <!-- Map Instructions -->
+                            <div class="p-4 bg-gray-50 border-t border-gray-200">
+                                <!-- Coordinates Display -->
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <div class="flex items-center justify-center gap-4 text-xs text-gray-600">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-location-dot text-blue-600"></i>
+                                            <span class="font-semibold">Lat:</span>
+                                            <span id="displayLat" class="font-mono">@(defaultAddress?.Latitude.ToString("F6") ?? "10.315700")</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-location-dot text-teal-600"></i>
+                                            <span class="font-semibold">Lng:</span>
+                                            <span id="displayLng" class="font-mono">@(defaultAddress?.Longitude.ToString("F6") ?? "123.885400")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Personal Details -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-user text-green-600"></i>
+                        Personal Details
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input asp-for="FullName" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                   value="@Model.FullName" />
+                            <span asp-validation-for="FullName" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                            <input asp-for="ContactNumber" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                   value="@Model.ContactNumber" />
+                            <span asp-validation-for="ContactNumber" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Payment Method -->
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-credit-card text-green-600"></i>
+                    Payment Method
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium">Select Payment Method</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
+                                <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
+                                <span>Cash on Delivery</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
+                                <input type="radio" name="PaymentMethod" value="GCash" class="radio-input" />
+                                <span>GCash</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
+                                <input type="radio" name="PaymentMethod" value="Card" class="radio-input" />
+                                <span>Credit/Debit Card</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div id="gcashFields" class="hidden space-y-4">
+                        <label class="block text-gray-700 font-medium">GCash Number</label>
+                        <input type="text" name="GcashNumber" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Enter GCash number" />
+                    </div>
+                    <div id="cardFields" class="hidden space-y-4">
+                        <label class="block text-gray-700 font-medium">Card Number</label>
+                        <input type="text" name="CardNumber" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="1234 5678 9012 3456" />
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-medium">Expiry (MM/YY)</label>
+                                <input type="text" name="CardExpiry" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="MM/YY" />
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium">CVV</label>
+                                <input type="text" name="CardCVV" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="123" />
+                            </div>
+                        </div>
+                        <label class="block text-gray-700 font-medium">Cardholder Name</label>
+                        <input type="text" name="CardholderName" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="John Doe" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+            <!-- Right Column: Order Summary -->
+            <div class="lg:col-span-1">
+                <!-- Order Summary -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sticky top-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-receipt text-green-600"></i>
+                        Order Summary
+                    </h2>
+                    
+                    <!-- Order Items -->
+                    <div class="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                        @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                        {
+                            foreach (var item in Model.Cart.CartItems)
+                            {
+                                var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+                                
+                                <div class="flex gap-3 py-3 border-b border-gray-100 last:border-b-0">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-green-600 font-bold text-sm">@item.Quantity</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-semibold text-gray-900 text-sm">@item.ProductName</h4>
+                                        @if (item.Options != null && item.Options.Any())
+                                        {
+                                            <div class="mt-1 text-xs text-gray-600">
+                                                @foreach (var opt in item.Options)
+                                                {
+                                                    <div>
+                                                        + @opt.OptionName
+                                                        @if (opt.AdditionalPrice > 0)
+                                                        {
+                                                            <span class="text-green-600">(+₱@opt.AdditionalPrice.ToString("F2"))</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold text-gray-900 text-sm">₱@itemTotalPrice.ToString("F2")</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-gray-500 text-center py-4">Your cart is empty</p>
+                        }
+                    </div>
+
+                    <!-- Order Totals -->
+                    <div class="space-y-3 pt-4 border-t border-gray-200">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-gray-900">₱@subtotal.ToString("F2")</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Delivery Fee</span>
+                            <span class="text-gray-900">₱@deliveryFee.ToString("F2")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.VoucherCode))
+                        {
+                            <div class="flex justify-between text-sm text-green-600">
+                                <span>Voucher Discount</span>
+                                <span>-₱0.00</span>
+                            </div>
+                        }
+                        <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
+                            <span class="text-gray-900">Total Amount</span>
+                            <span class="text-green-600">₱@total.ToString("F2")</span>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <button type="submit" 
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 mt-6 shadow-lg shadow-green-200">
+                        <span>Place Order</span>
+                    </button>
+
+                    <!-- Security Badge -->
+                    <div class="text-center mt-4">
+                        <p class="text-xs text-gray-500 flex items-center justify-center gap-1">
+                            <i class="fas fa-shield-alt text-green-500"></i>
+                            Your payment information is secure and encrypted
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
+    <script src="~/js/maps.js"></script>
+    <script>
+        // Address selection handler
+        const addressSelect = document.getElementById('addressSelect');
+        if (addressSelect) {
+            addressSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                document.querySelector('input[name="DeliveryAddress"]').value = selectedOption.dataset.street || '';
+                document.getElementById('barangayInput').value = selectedOption.dataset.barangay || '';
+                document.getElementById('cityInput').value = selectedOption.dataset.city || '';
+                document.getElementById('provinceInput').value = selectedOption.dataset.province || '';
+                document.getElementById('zipInput').value = selectedOption.dataset.zip || '';
+                document.getElementById('latitudeInput').value = selectedOption.dataset.lat || '';
+                document.getElementById('longitudeInput').value = selectedOption.dataset.lng || '';
+                
+                // Update map
+                if (window.map && window.marker) {
+                    const lat = parseFloat(selectedOption.dataset.lat) || 10.315700;
+                    const lng = parseFloat(selectedOption.dataset.lng) || 123.885400;
+                    const newLocation = new google.maps.LatLng(lat, lng);
+                    window.map.setCenter(newLocation);
+                    window.placeMarker(newLocation, 'latitudeInput', 'longitudeInput');
+                }
+            });
+        }
+        // Payment method toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentMethods = document.querySelectorAll('input[name="PaymentMethod"]');
+            const gcashFields = document.getElementById('gcashFields');
+            const cardFields = document.getElementById('cardFields');
+
+            function togglePaymentFields() {
+                const selectedMethod = document.querySelector('input[name="PaymentMethod"]:checked');
+                
+                gcashFields.classList.add('hidden');
+                cardFields.classList.add('hidden');
+                
+                if (selectedMethod && selectedMethod.value === 'GCash') {
+                    gcashFields.classList.remove('hidden');
+                } else if (selectedMethod && selectedMethod.value === 'Card') {
+                    cardFields.classList.remove('hidden');
+                }
+            }
+
+            paymentMethods.forEach(method => {
+                method.addEventListener('change', togglePaymentFields);
+            });
+
+            // Edit Address Details Button - Focus on first address field
+            document.getElementById('editAddressBtn').addEventListener('click', function() {
+                const addressInput = document.querySelector('input[name="DeliveryAddress"]');
+                addressInput.focus();
+                addressInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            // Custom search functionality for the checkout page
+            // Setup search address button to use form fields
+        function setupSearchButton() {
+            const searchBtn = document.getElementById('searchAddressBtn');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    const streetInput = document.querySelector('input[name="Street"]');
+                    const barangayInput = document.querySelector('input[name="Barangay"]');
+                    const cityInput = document.querySelector('input[name="City"]');
+                    const provinceInput = document.querySelector('input[name="Province"]');
+                    
+                    const street = streetInput ? streetInput.value.trim() : '';
+                    const barangay = barangayInput ? barangayInput.value.trim() : '';
+                    const city = cityInput ? cityInput.value.trim() : '';
+                    const province = provinceInput ? provinceInput.value.trim() : '';
+                    
+                    if (!street && !city && !barangay) {
+                        alert('Please fill in at least Street, Barangay, or City fields to search.');
+                        return;
+                    }
+
+                    // Build address string
+                    const addressParts = [street, barangay, city, province, 'Philippines'].filter(part => part);
+                    const address = addressParts.join(', ');
+                    
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+                    this.disabled = true;
+
+                    // Use the global geocoder from maps.js
+                    if (typeof geocoder !== 'undefined') {
+                        geocoder.geocode({ address: address }, (results, status) => {
+                            if (status === 'OK' && results[0]) {
+                                const location = results[0].geometry.location;
+                                
+                                // Use the global map and placeMarker function from maps.js
+                                if (typeof map !== 'undefined' && typeof placeMarker === 'function') {
+                                    map.setCenter(location);
+                                    map.setZoom(17);
+                                    placeMarker(location);
+                                }
+                                
+                                this.innerHTML = '<i class="fas fa-check"></i> Found!';
+                            } else {
+                                alert('Address not found on map. Please click on the map to set location manually.');
+                                this.innerHTML = '<i class="fas fa-times"></i> Not Found';
+                            }
+                            
+                            setTimeout(() => {
+                                this.innerHTML = originalHTML;
+                                this.disabled = false;
+                            }, 2000);
+                        });
+                    } else {
+                        alert('Map is not ready yet. Please try again in a moment.');
+                        this.innerHTML = originalHTML;
+                        this.disabled = false;
+                    }
+                });
+            }
+        }
+
+            // Wait for maps.js to initialize, then setup our custom search
+            setTimeout(() => {
+            // Rename inputs to match what maps.js expects
+            const latInput = document.getElementById('latitudeInput');
+            const lngInput = document.getElementById('longitudeInput');
+            
+            if (latInput) latInput.id = 'latitude';
+            if (lngInput) lngInput.id = 'longitude';
+            
+            // Now initialize the map
+            if (typeof initAddressMap === 'function') {
+                initAddressMap('addressMap', 'latitude', 'longitude');
+                setupCurrentLocationButton();
+            }
+        }, 500);
+        });
+    </script>
+}

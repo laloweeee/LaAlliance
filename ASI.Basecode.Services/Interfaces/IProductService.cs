@@ -11,9 +11,9 @@ namespace ASI.Basecode.Services.Interfaces
     public interface IProductService
     {
         IQueryable<Product> GetAllProducts();
-        IQueryable<Product> GetProductByID(int productID);
+        ProductViewModel GetProductByID(int productID);
         IQueryable<Product> GetProductsByCategoryID(int categoryID);
-        IQueryable<Product> GetActiveProducts();
+        List<ProductViewModel> GetActiveProducts();
         Task AddProduct(ProductViewModel model);
         Task EditProduct(ProductViewModel model);
     }

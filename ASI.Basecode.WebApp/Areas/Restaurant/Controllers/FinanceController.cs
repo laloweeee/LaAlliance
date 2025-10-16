@@ -11,7 +11,7 @@ using ASI.Basecode.WebApp.Areas.Restaurant.Models;
 
 namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
-    [Authorize(Policy = "Restaurant")]
+    [Authorize(Policy = "RestaurantAdmin")]
     [Area("Restaurant")]
     public class FinanceController : Controller
     {

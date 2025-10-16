@@ -41,7 +41,7 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public ProductCategory GetCategoryByID(int categoryID)
         {
-            return _categoryRepository.GetCategoryByID(categoryID);
+            return _categoryRepository.GetAllCategories().FirstOrDefault(c => c.CategoryID == categoryID);
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace ASI.Basecode.Services.Services
         /// <exception cref="ArgumentException"></exception>
         public void UpdateCategory(CategoryViewModel model)
         {
-            var category = _categoryRepository.GetCategoryByID(model.CategoryID) ?? throw new ArgumentException("Category not found.");
+            var category = _categoryRepository.GetAllCategories().FirstOrDefault(c => c.CategoryID == model.CategoryID) ?? throw new ArgumentException("Category not found.");
 
             var existingCategory = _categoryRepository.GetAllCategories()
                 .FirstOrDefault(c => c.CategoryName.ToLower().Trim() == model.CategoryName.ToLower().Trim() && c.CategoryID != model.CategoryID);

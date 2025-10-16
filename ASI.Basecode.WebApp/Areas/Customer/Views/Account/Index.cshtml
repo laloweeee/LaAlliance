@@ -3,313 +3,313 @@
     ViewData["Title"] = "My Account - LaAlliancé";
 }
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-gray-50">
-    <div class="p-2 md:p-4 lg:p-6">
-        <div class="max-w-[1200px] mx-auto">
-            <!-- Page Header -->
-            <div class="mb-6">
-                <nav class="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                    <a asp-action="Index" asp-controller="Home" asp-area="Customer" class="hover:text-emerald-600 transition-colors">
-                        <i class="fas fa-home"></i> Home
-                    </a>
-                    <i class="fas fa-chevron-right text-xs"></i>
-                    <span class="text-emerald-600 font-medium">My Account</span>
-                </nav>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-user-circle text-white text-xl"></i>
-                    </div>
-                    My Account
-                </h1>
-                <p class="text-gray-600 mt-2">Manage your profile, addresses, and preferences</p>
+<div class="min-h-screen bg-gray-50">
+    <div class="p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Page Header - Updated to match cart style -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">My Account</h1>
+                <p class="text-gray-600">Manage your profile, addresses, and preferences</p>
             </div>
 
+            <!-- Toast Notifications - Matching cart style -->
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="mb-6 p-4 bg-green-100 border border-green-200 text-green-800 rounded-lg flex items-center gap-3">
-                    <i class="fas fa-check-circle text-green-600"></i>
-                    <span>@TempData["SuccessMessage"]</span>
+                <div class="fixed top-4 right-4 z-50 animate-fade-in">
+                    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl shadow-sm flex items-center gap-3">
+                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check text-white text-xs"></i>
+                        </div>
+                        <span class="font-medium">@TempData["SuccessMessage"]</span>
+                    </div>
                 </div>
             }
 
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-800 rounded-lg flex items-center gap-3">
-                    <i class="fas fa-exclamation-triangle text-red-600"></i>
-                    <span>@TempData["ErrorMessage"]</span>
+                <div class="fixed top-4 right-4 z-50 animate-fade-in">
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl shadow-sm flex items-center gap-3">
+                        <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-white text-xs"></i>
+                        </div>
+                        <span class="font-medium">@TempData["ErrorMessage"]</span>
+                    </div>
                 </div>
             }
 
-            <div class="flex flex-col gap-6">
-                <!-- PROFILE INFORMATION CARD -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-6">
-                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                            <i class="fas fa-user"></i> Profile Information
-                        </h2>
-                        <p class="text-emerald-100 text-sm mt-1">Your personal details and credentials</p>
-                    </div>
-
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Email -->
-                            <div class="md:col-span-2">
-                                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                                    <i class="fas fa-envelope text-emerald-600"></i>
-                                    Email Address
-                                </label>
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <input type="email" 
-                                           class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium" 
-                                           value="@Model.Email" 
-                                           readonly />
-                                    <a asp-action="EmailForm" asp-controller="Account" asp-area="Customer"
-                                       class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md whitespace-nowrap">
-                                        <i class="fas fa-edit"></i>
-                                        <span>Change Email</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Password -->
-                            <div class="md:col-span-2">
-                                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                                    <i class="fas fa-lock text-emerald-600"></i>
-                                    Password
-                                </label>
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <input type="password" 
-                                           class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium" 
-                                           value="••••••••••••" 
-                                           readonly />
-                                    <a asp-action="PasswordForm" asp-controller="Account" asp-area="Customer"
-                                       class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md whitespace-nowrap">
-                                        <i class="fas fa-key"></i>
-                                        <span>Change Password</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- First Name -->
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">First Name</label>
-                                <input type="text" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700" 
-                                       value="@Model.FirstName" 
-                                       readonly />
-                            </div>
-
-                            <!-- Last Name -->
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Last Name</label>
-                                <input type="text" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700" 
-                                       value="@Model.LastName" 
-                                       readonly />
-                            </div>
-
-                            <!-- Contact Number -->
-                            <div class="md:col-span-2">
-                                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                                    <i class="fas fa-phone text-emerald-600"></i>
-                                    Contact Number
-                                </label>
-                                <input type="text" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700" 
-                                       value="@Model.ContactNumber" 
-                                       readonly />
-                            </div>
+            <!-- Delete Confirmation Modal - Matching cart style -->
+            <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm mx-4">
+                    <div class="text-center">
+                        <!-- Warning Icon -->
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                         </div>
-
-                        <!-- Edit Profile Button -->
-                        <div class="mt-6 pt-6 border-t border-gray-100">
-                            <a asp-action="ProfileForm" asp-controller="Account" asp-area="Customer"
-                               class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all">
-                                <i class="fas fa-user-edit"></i>
-                                <span>Edit Name & Contact</span>
-                            </a>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Address</h3>
+                        <p class="text-gray-600 mb-6" id="modalMessage">Are you sure you want to delete this address? This action cannot be undone.</p>
+                        
+                        <div class="flex gap-3">
+                            <button type="button" 
+                                    id="cancelDelete" 
+                                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-lg transition-colors">
+                                Cancel
+                            </button>
+                            <form id="deleteForm" method="post" style="display: inline; flex: 1;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" id="modalAddressId" />
+                                <button type="submit" 
+                                        class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-trash"></i>
+                                    Delete
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- ADDRESSES CARD -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                                    <i class="fas fa-map-marker-alt"></i> Delivery Addresses
-                                </h2>
-                                <p class="text-blue-100 text-sm mt-1">Manage your delivery locations</p>
+            <!-- Main Content Container - Matching cart layout -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Left Column - Profile Information -->
+                    <div class="flex-1">
+                        <!-- PROFILE INFORMATION CARD -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden mb-6">
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-6">
+                                    <div>
+                                        <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                            Profile Information
+                                        </h2>
+                                        <p class="text-gray-600">Your personal details and credentials</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-6">
+                                    <!-- Email -->
+                                    <div>
+                                        <label class="block text-gray-700 font-semibold mb-3 flex items-center gap-2">
+                                            <i class="fas fa-envelope text-green-600"></i>
+                                            Email Address
+                                        </label>
+                                        <div class="flex flex-col sm:flex-row gap-4">
+                                            <div class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium">
+                                                @Model.Email
+                                            </div>
+                                            <a asp-action="EmailForm" asp-controller="Account" asp-area="Customer"
+                                               class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm hover:shadow-md whitespace-nowrap">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Change</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Password -->
+                                    <div>
+                                        <label class="block text-gray-700 font-semibold mb-3 flex items-center gap-2">
+                                            <i class="fas fa-lock text-green-600"></i>
+                                            Password
+                                        </label>
+                                        <div class="flex flex-col sm:flex-row gap-4">
+                                            <div class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium">
+                                                ••••••••••••
+                                            </div>
+                                            <a asp-action="PasswordForm" asp-controller="Account" asp-area="Customer"
+                                               class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm hover:shadow-md whitespace-nowrap">
+                                                <i class="fas fa-key"></i>
+                                                <span>Change</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Name and Contact -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-gray-700 font-semibold mb-3">First Name</label>
+                                            <div class="px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700">
+                                                @Model.FirstName
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 font-semibold mb-3">Last Name</label>
+                                            <div class="px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700">
+                                                @Model.LastName
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Contact Number -->
+                                    <div>
+                                        <label class="block text-gray-700 font-semibold mb-3 flex items-center gap-2">
+                                            <i class="fas fa-phone text-green-600"></i>
+                                            Contact Number
+                                        </label>
+                                        <div class="px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700">
+                                            @Model.ContactNumber
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Profile Button -->
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <a asp-action="ProfileForm" asp-controller="Account" asp-area="Customer"
+                                       class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm hover:shadow-md w-full sm:w-auto">
+                                        <i class="fas fa-user-edit"></i>
+                                        <span>Edit Name & Contact</span>
+                                    </a>
+                                </div>
                             </div>
-                            <a asp-action="AddressForm" asp-controller="Account" asp-area="Customer"
-                               class="bg-white hover:bg-blue-50 text-blue-700 px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-md">
-                                <i class="fas fa-plus"></i>
-                                <span class="hidden sm:inline">Add Address</span>
-                            </a>
+                        </div>
+
+                        <!-- PAYMENT METHODS CARD -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden">
+                            <div class="p-6">
+                                <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-credit-card text-white"></i>
+                                    </div>
+                                    Payment Methods
+                                </h2>
+                                <p class="text-gray-600 mb-6">Available payment options</p>
+
+                                <div class="space-y-4">
+                                    <!-- Cash on Delivery -->
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-hand-holding-dollar text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-gray-900">Cash on Delivery</h3>
+                                                <p class="text-sm text-gray-600">Pay when you receive</p>
+                                            </div>
+                                        </div>
+                                        <span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                            AVAILABLE
+                                        </span>
+                                    </div>
+
+                                    <!-- Credit/Debit Card -->
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-credit-card text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-gray-600">Credit/Debit Card</h3>
+                                                <p class="text-sm text-gray-500">Visa, Mastercard, Amex</p>
+                                            </div>
+                                        </div>
+                                        <span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                            AVAILABLE
+                                        </span>
+                                    </div>
+
+                                    <!-- E-Wallet -->
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-wallet text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-gray-600">E-Wallet</h3>
+                                                <p class="text-sm text-gray-500">GCash, PayMaya, etc.</p>
+                                            </div>
+                                        </div>
+                                        <span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                            AVAILABLE
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="p-6">
-                        @if (Model.Addresses.Any())
-                        {
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                                @foreach (var address in Model.Addresses)
-                                {
-                                    <div class="group relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md">
-                                        <!-- Address Header -->
-                                        <div class="p-5 pb-3">
-                                            <div class="flex items-start justify-between mb-3">
-                                                <div class="flex items-center gap-2">
-                                                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                                                        <i class="fas fa-home text-white"></i>
-                                                    </div>
-                                                    <div>
-                                                        <span class="font-bold text-gray-900 text-lg">@address.AddressType</span>
-                                                        @if (address.IsDefault)
-                                                        {
-                                                            <span class="ml-2 px-2 py-1 bg-emerald-600 text-white text-xs rounded-full font-semibold">
-                                                                <i class="fas fa-check-circle"></i> Default
-                                                            </span>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Address Details -->
-                                            <div class="space-y-2 mb-3">
-                                                <div class="flex items-start gap-2">
-                                                    <i class="fas fa-location-dot text-blue-600 mt-1"></i>
-                                                    <p class="text-gray-700 font-medium leading-relaxed">
-                                                        @address.FullAddress
-                                                    </p>
-                                                </div>
-                                                @if (!string.IsNullOrEmpty(address.AddressNote))
-                                                {
-                                                    <div class="flex items-start gap-2">
-                                                        <i class="fas fa-sticky-note text-amber-500 mt-1"></i>
-                                                        <p class="text-gray-600 text-sm">@address.AddressNote</p>
-                                                    </div>
-                                                }
-                                                <div class="flex items-center gap-2 text-xs text-gray-500">
-                                                    <i class="fas fa-map-pin"></i>
-                                                    <span>@address.Latitude.ToString("F6"), @address.Longitude.ToString("F6")</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- Action Buttons -->
-                                        <div class="p-4 bg-white border-t-2 border-blue-100 flex gap-2">
-                                            <a asp-action="AddressForm" asp-controller="Account" asp-area="Customer" 
-                                               asp-route-id="@address.UserAddressID"
-                                               class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
-                                                <i class="fas fa-edit"></i>
-                                                <span>Edit</span>
-                                            </a>
-                                            <form method="post" asp-action="DeleteAddress" asp-controller="Account" asp-area="Customer" asp-route-id="@address.UserAddressID">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" id="deleteBtn" onclick="return confirmDelete(@address.UserAddressID)"
-                                                    class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
-                                                    <span class="btn-text">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="text-center py-12">
-                                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-map-marked-alt text-gray-400 text-4xl"></i>
+                    <!-- Right Column - Addresses -->
+                    <div class="lg:w-96">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 top-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-800 mb-1">Delivery Addresses</h2>
+                                    <p class="text-gray-600 text-sm">Manage your delivery locations</p>
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">No addresses yet</h3>
-                                <p class="text-gray-600 mb-6">Add your first delivery address to get started</p>
                                 <a asp-action="AddressForm" asp-controller="Account" asp-area="Customer"
-                                   class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all">
+                                   class="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors flex items-center justify-center shadow-sm hover:shadow-md">
                                     <i class="fas fa-plus"></i>
-                                    <span>Add Your First Address</span>
                                 </a>
                             </div>
-                        }
-                    </div>
-                </div>
 
-                <!-- PAYMENT METHODS CARD -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
-                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                            <i class="fas fa-credit-card"></i> Payment Methods
-                        </h2>
-                        <p class="text-purple-100 text-sm mt-1">Available payment options</p>
-                    </div>
+                            @if (Model.Addresses.Any())
+                            {
+                                <div class="space-y-4 max-h-[600px] overflow-y-auto">
+                                    @foreach (var address in Model.Addresses)
+                                    {
+                                        <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
+                                            <div class="flex items-start justify-between mb-3">
+                                                <div class="flex items-center gap-2">
+                                                    <i class="fas fa-home text-green-600"></i>
+                                                    <span class="font-bold text-gray-900">@address.AddressType</span>
+                                                    @if (address.IsDefault)
+                                                    {
+                                                        <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                                                            Default
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </div>
 
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Cash on Delivery -->
-                            <div class="relative bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border-2 border-emerald-200 p-5 hover:shadow-md transition-all">
-                                <div class="absolute top-3 right-3">
-                                    <span class="bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                        AVAILABLE
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-4 mb-3">
-                                    <div class="w-14 h-14 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md">
-                                        <i class="fas fa-hand-holding-dollar text-white text-2xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-gray-900 text-lg">Cash on Delivery</h3>
-                                        <p class="text-sm text-gray-600">Pay when you receive</p>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-600 leading-relaxed">
-                                    Pay with cash when your order arrives at your doorstep. No prepayment needed.
-                                </p>
-                            </div>
+                                            <div class="space-y-2 mb-4">
+                                                <p class="text-gray-700 text-sm leading-relaxed">
+                                                    <i class="fas fa-location-dot text-green-600 mr-2"></i>
+                                                    @address.FullAddress
+                                                </p>
+                                                @if (!string.IsNullOrEmpty(address.AddressNote))
+                                                {
+                                                    <p class="text-gray-600 text-sm">
+                                                        <i class="fas fa-sticky-note text-amber-500 mr-2"></i>
+                                                        @address.AddressNote
+                                                    </p>
+                                                }
+                                            </div>
 
-                            <!-- Credit/Debit Card (Coming Soon) -->
-                            <div class="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 p-5 opacity-70">
-                                <div class="absolute top-3 right-3">
-                                    <span class="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                        COMING SOON
-                                    </span>
+                                            <div class="flex gap-2">
+                                                <a asp-action="AddressForm" asp-controller="Account" asp-area="Customer" 
+                                                   asp-route-id="@address.UserAddressID"
+                                                   class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                    <span>Edit</span>
+                                                </a>
+                                                <button type="button" 
+                                                        class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm delete-address-btn"
+                                                        data-address-id="@address.UserAddressID"
+                                                        data-address-type="@address.AddressType">
+                                                    <i class="fas fa-trash"></i>
+                                                    <span>Delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
-                                <div class="flex items-center gap-4 mb-3">
-                                    <div class="w-14 h-14 bg-gray-300 rounded-xl flex items-center justify-center shadow-md">
-                                        <i class="fas fa-credit-card text-white text-2xl"></i>
+                            }
+                            else
+                            {
+                                <div class="text-center py-8">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-map-marked-alt text-gray-400 text-2xl"></i>
                                     </div>
-                                    <div>
-                                        <h3 class="font-bold text-gray-600 text-lg">Credit/Debit Card</h3>
-                                        <p class="text-sm text-gray-500">Visa, Mastercard, Amex</p>
-                                    </div>
+                                    <h3 class="text-lg font-bold text-gray-900 mb-2">No addresses yet</h3>
+                                    <p class="text-gray-600 mb-4">Add your first delivery address</p>
+                                    <a asp-action="AddressForm" asp-controller="Account" asp-area="Customer"
+                                       class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Add Address</span>
+                                    </a>
                                 </div>
-                                <p class="text-xs text-gray-500 leading-relaxed">
-                                    Secure online payment with your credit or debit card.
-                                </p>
-                            </div>
-
-                            <!-- E-Wallet (Coming Soon) -->
-                            <div class="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 p-5 opacity-70">
-                                <div class="absolute top-3 right-3">
-                                    <span class="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                        COMING SOON
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-4 mb-3">
-                                    <div class="w-14 h-14 bg-gray-300 rounded-xl flex items-center justify-center shadow-md">
-                                        <i class="fas fa-wallet text-white text-2xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-gray-600 text-lg">E-Wallet</h3>
-                                        <p class="text-sm text-gray-500">GCash, PayMaya, etc.</p>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-500 leading-relaxed">
-                                    Pay instantly using your favorite e-wallet service.
-                                </p>
-                            </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -318,8 +318,100 @@
     </div>
 </div>
 
-<script>
-    function confirmDelete(id) {
-        return confirm('Are you sure you want to delete this address? This action cannot be undone.');
+@section Scripts {
+<style>
+    /* Reusing cart animations */
+    @@keyframes fade-in {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
+
+    .animate-fade-in {
+        animation: fade-in 0.3s ease-out;
+    }
+
+    @@keyframes modal-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes modal-slide-in {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-fade-in {
+        animation: modal-fade-in 0.2s ease-out;
+    }
+
+    .modal-slide-in {
+        animation: modal-slide-in 0.2s ease-out;
+    }
+</style>
+
+<script>
+    // Auto-hide toast after 3 seconds (same as cart)
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.querySelector('.animate-fade-in');
+        if (toast) {
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Delete modal functionality (same pattern as cart)
+        const deleteModal = document.getElementById('deleteModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalAddressId = document.getElementById('modalAddressId');
+        const deleteForm = document.getElementById('deleteForm');
+        const cancelDelete = document.getElementById('cancelDelete');
+
+        // Add click event to all delete buttons
+        document.querySelectorAll('.delete-address-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const addressId = this.getAttribute('data-address-id');
+                const addressType = this.getAttribute('data-address-type');
+                
+                // Set modal content
+                modalMessage.textContent = `Are you sure you want to delete the "${addressType}" address? This action cannot be undone.`;
+                modalAddressId.value = addressId;
+                
+                // Set form action
+                deleteForm.action = '/Customer/Account/DeleteAddress';
+                
+                // Show modal
+                deleteModal.classList.remove('hidden');
+                deleteModal.classList.add('modal-fade-in');
+                deleteModal.querySelector('.bg-white').classList.add('modal-slide-in');
+            });
+        });
+
+        // Cancel delete
+        cancelDelete.addEventListener('click', function() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('modal-fade-in');
+            deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+        });
+
+        // Close modal when clicking outside
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('modal-fade-in');
+                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !deleteModal.classList.contains('hidden')) {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('modal-fade-in');
+                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+            }
+        });
+    });
 </script>
+}
