@@ -15,26 +15,12 @@
             <!-- Toast Notifications - Matching cart style -->
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="fixed top-4 right-4 z-50 animate-fade-in">
-                    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl shadow-sm flex items-center gap-3">
-                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-check text-white text-xs"></i>
-                        </div>
-                        <span class="font-medium">@TempData["SuccessMessage"]</span>
-                    </div>
-                </div>
+                <partial name="~/Views/Shared/_ToastNotificationViewModel.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["SuccessMessage"]?.ToString(),})" />
             }
 
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="fixed top-4 right-4 z-50 animate-fade-in">
-                    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl shadow-sm flex items-center gap-3">
-                        <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-white text-xs"></i>
-                        </div>
-                        <span class="font-medium">@TempData["ErrorMessage"]</span>
-                    </div>
-                </div>
+                <partial name="~/Views/Shared/_ToastNotificationViewModel.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["ErrorMessage"]?.ToString(),})" />
             }
 
             <!-- Delete Confirmation Modal - Matching cart style -->
@@ -350,18 +336,10 @@
 </style>
 
 <script>
-    // Auto-hide toast after 3 seconds (same as cart)
+    // Auto-hide toast after 3 seconds
     document.addEventListener('DOMContentLoaded', function() {
-        const toast = document.querySelector('.animate-fade-in');
-        if (toast) {
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-10px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
 
-        // Delete modal functionality (same pattern as cart)
+        // Delete modal functionality
         const deleteModal = document.getElementById('deleteModal');
         const modalMessage = document.getElementById('modalMessage');
         const modalAddressId = document.getElementById('modalAddressId');

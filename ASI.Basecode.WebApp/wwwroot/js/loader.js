@@ -10,6 +10,7 @@ function initFormLoader(formId, buttonId, buttonTextId, buttonLoaderId) {
 
         if (button && buttonText && buttonLoader) {
             button.disabled = true;
+            button.classList.add('bg-gray-400', 'cursor-not-allowed');
             buttonText.classList.add('hidden');
             buttonLoader.classList.remove('hidden');
         }

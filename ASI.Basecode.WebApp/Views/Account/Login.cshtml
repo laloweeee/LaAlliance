@@ -152,9 +152,12 @@
                             </div>
 
                             <!-- Login button -->
-                            <button type="submit" id="loginButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-500/30">
-                                <span id="loginButtonText">LOGIN</span>
-                                <i id="loginButtonLoader" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                            <button type="submit" id="loginButton"
+                                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors ">
+                                <span id="buttonText">Sign In</span>
+                                <span id="buttonLoader" class="hidden">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                </span>
                             </button>
 
                             <!-- Create account link -->
@@ -186,6 +189,6 @@
 @section scripts {
     <script src="~/js/loader.js"></script>
     <script>
-        initFormLoader('loginForm', 'loginButton', 'loginButtonText', 'loginButtonLoader');
+        initFormLoader('loginForm', 'loginButton', 'buttonText', 'buttonLoader');
     </script>
 }
