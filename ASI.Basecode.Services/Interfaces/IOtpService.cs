@@ -14,7 +14,7 @@ namespace ASI.Basecode.Services.Interfaces
         public bool VerifyOTP(string email, int otpCode);
         public void StoreOtpForUser(string email, int otp, DateTime timestamp);
         public OtpModel GetOtpDetailsForUser(string email);
-        public void MarkVerified(string email);
+        public Task MarkVerified(string email);
         
         // Password reset methods
         public Task<bool> CreatePasswordResetOtp(string email);

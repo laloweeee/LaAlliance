@@ -17,8 +17,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
     public class CartItemViewModel
     {
         public int CartItemID { get; set; }
-        public int CartID { get; set; }
         public int ProductID { get; set; }
+        public string ProductImage { get; set; }
         public string ProductName { get; set; }
         public decimal UnitPrice { get; set; } 
         public int Quantity { get; set; }

@@ -263,7 +263,7 @@ namespace ASI.Basecode.Services.Services
         /// </summary>
         /// <param name="email"></param>
         /// <exception cref="InvalidDataException"></exception>
-        public async void MarkVerified(string email)
+        public async Task MarkVerified(string email)
         {
             var user = _userRepository.GetUsers().First(u => u.Email == email) 
                 ?? throw new InvalidDataException(Resources.Messages.Errors.UserExists);

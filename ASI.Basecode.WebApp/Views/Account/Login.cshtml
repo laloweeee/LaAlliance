@@ -2,7 +2,7 @@
 @using static ASI.Basecode.Resources.Views.Screen
 @{
     ViewBag.LoginView = true;
-    ViewData["Title"] = "Login Page";
+    ViewData["Title"] = "LaAlliance";
 }
 
 <style>
@@ -60,16 +60,13 @@
                         <div class="absolute top-50 left-10 w-16 h-16 bg-white/10 rounded-full transform -rotate-12"></div>
                         
                         <div class="relative z-10 flex flex-col justify-center h-full">
-
-                    <div class="mb-4"> 
-                        <div class="flex items-center justify-center p-1"> 
-                            <div class="text-center">
-                                <img src="@Url.Content("~/img/laAllianceLogo.png")" alt="LaAlliance Logo" class="max-h-60 max-w-60" />
+                            <div class="mb-4"> 
+                                <div class="flex items-center justify-center p-1"> 
+                                    <div class="text-center">
+                                        <img src="@Url.Content("~/img/laAllianceLogo.png")" alt="LaAlliance Logo" class="max-h-60 max-w-60" />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                            
-                            <!-- Welcome text -->
                             <div>
                                 <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
                                     Welcome Back!
@@ -90,6 +87,20 @@
                                 Enter your credentials to access your account
                             </p>
                         </div>
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
+                            </div>
+                        }
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+                                <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
+                            </div>
+                        }
 
                         <!-- Form -->
                         <form method="post" action="/Account/Login" id="loginForm" class="space-y-6">
@@ -119,22 +130,12 @@
 
                             <!-- Password input -->
                             <div>
-                                <label for="form2Example22" class="block text-sm font-semibold text-gray-700 mb-2">
-                                    PASSWORD
-                                </label>
+                                <label for="form2Example22" class="block text-sm font-semibold text-gray-700 mb-2">PASSWORD</label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                                         <i class="fas fa-lock"></i>
                                     </span>
-                                    <input
-                                        type="password"
-                                        asp-for="Password"
-                                        id="form2Example22"
-                                        placeholder="••••••••••"
-                                        class="w-full rounded-xl border-0 bg-gray-50 pl-12 pr-4 py-4 text-gray-900 placeholder-gray-400
-                                               focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white
-                                               transition-all duration-200"
-                                        required />
+                                    <input type="password" asp-for="Password" id="form2Example22" placeholder="••••••••••" class="w-full rounded-xl border-0 bg-gray-50 pl-12 pr-4 py-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all duration-200" required />
                                 </div>
                                 <span asp-validation-for="Password" class="text-red-500 text-sm mt-1 block"></span>
                             </div>
@@ -145,19 +146,15 @@
                                     <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer">
                                     <span class="ml-2 text-sm text-gray-700">Remember Me</span>
                                 </label>
-                                <button type="button"
-                                        onclick="showForgotPassword()"
-                                        class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-colors">
+                                <button type="button" onclick="showForgotPassword()" class="text-sm font-semibold text-gray-600 hover:text-green-600 transition-colors">
                                     Forgot Password?
                                 </button>
                             </div>
 
                             <!-- Login button -->
-                            <button type="submit"
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl
-                                           transition-all duration-200 shadow-lg hover:shadow-xl
-                                           focus:outline-none focus:ring-4 focus:ring-green-500/30">
-                                LOGIN
+                            <button type="submit" id="loginButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-500/30">
+                                <span id="loginButtonText">LOGIN</span>
+                                <i id="loginButtonLoader" class="fas fa-spinner fa-spin ml-2 hidden"></i>
                             </button>
 
                             <!-- Create account link -->
@@ -180,17 +177,15 @@
                             </p>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script src="~/js/form-loader.js"></script>
+@section scripts {
+    <script src="~/js/loader.js"></script>
     <script>
-        var errorMessage = '@TempData["ErrorMessage"]';
-        if (errorMessage) { toastr.error(errorMessage); }
+        initFormLoader('loginForm', 'loginButton', 'loginButtonText', 'loginButtonLoader');
     </script>
 }

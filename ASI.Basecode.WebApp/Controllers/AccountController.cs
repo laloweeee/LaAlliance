@@ -180,7 +180,7 @@ namespace ASI.Basecode.WebApp.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult VerifyOtp(EmailVerificationModel model)
+        public async Task<IActionResult> VerifyOtp(EmailVerificationModel model)
         {
             try
             {
@@ -191,7 +191,7 @@ namespace ASI.Basecode.WebApp.Controllers
 
                 if (_otpService.VerifyOTP(model.Email, int.Parse(model.OtpCode)))
                 {
-                    _otpService.MarkVerified(model.Email);
+                    await _otpService.MarkVerified(model.Email);
                     TempData["SuccessMessage"] = "Email verified successfully.";
                     return RedirectToAction("Login", "Account");
                 }
