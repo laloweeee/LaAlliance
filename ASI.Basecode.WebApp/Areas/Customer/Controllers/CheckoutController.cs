@@ -65,7 +65,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Index(CheckoutViewModel model)
+        public IActionResult PlaceOrder(CheckoutViewModel model)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
             model.Cart = _cartService.GetOrCreateCart(userId);
@@ -83,6 +83,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 return View(model);
             }
 
+            _cartService.ClearCart(userId);
             TempData["SuccessMessage"] = "Order placed successfully!";
             return RedirectToAction("Receipt");
         }

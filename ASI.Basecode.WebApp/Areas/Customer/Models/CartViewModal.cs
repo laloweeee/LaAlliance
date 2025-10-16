@@ -25,6 +25,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         public decimal ItemAddOnsTotal => CartItemOptions.Sum(opt => opt.AdditionalPrice);
         public decimal TotalPrice => Quantity * (UnitPrice + ItemAddOnsTotal);
         public List<CartItemOptionViewModel> CartItemOptions { get; set; } = new List<CartItemOptionViewModel>();
+        public List<CartItemOptionViewModel> SelectedOptions { get; set; }
     }
 
     public class CartItemOptionViewModel
@@ -36,5 +37,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         public int ProductOptionItemID { get; set; }
         public string OptionName { get; set; }
         public decimal AdditionalPrice { get; set; }
+        
     }
 }

@@ -90,6 +90,18 @@
                                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden" id="cart-item-@item.CartItemID">
                                     <div class="p-6">
                                         <div class="flex gap-4">
+                                            <!-- Add the product image here-->
+                                            @if (!string.IsNullOrEmpty(item.ProductImage))
+                                            {
+                                                <img src="@item.ProductImage" alt="@item.ProductName" class="w-24 h-24 object-cover rounded-lg shadow-sm" loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <div class="w-25 h-25 bg-gray-200 flex items-center justify-center rounded-lg">
+                                                    <i class="fas fa-image text-gray-400 text-lg"></i>  <!-- Fallback placeholder -->
+                                                </div>
+                                            }
+                                            
                                             <!-- Product Details -->
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex justify-between items-start mb-2">
@@ -127,10 +139,10 @@
                                                     <div class="flex flex-col items-end gap-4">
                                                         <!-- Action Buttons -->
                                                         <div class="flex gap-2">
-                                                            <!-- Edit Button - Fixed URL to point to ProductToCart -->
-                                                            <a href="@Url.Action("ProductToCart", "Home", new { area = "Customer", productId = item.ProductID, cartItemId = item.CartItemID })" 
-                                                               class="text-blue-600 hover:text-blue-800 p-2 transition-colors"
-                                                               title="Edit customizations">
+                                                            <!-- Edit Button - Should point to EditCartItem -->
+                                                            <a href="@Url.Action("EditCartItem", "Home", new { area = "Customer", cartItemID = item.CartItemID })" 
+                                                            class="text-blue-600 hover:text-blue-800 p-2 transition-colors"
+                                                            title="Edit customizations">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
                                                             <!-- Delete Button -->
