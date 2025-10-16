@@ -8,8 +8,29 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
     {
         public ASI.Basecode.Services.ServiceModels.CartViewModel Cart { get; set; }
 
-        [Required(ErrorMessage = "Delivery address is required.")]
-        public string DeliveryAddress { get; set; }
+        [Required(ErrorMessage = "Street address is required.")]
+        public string Street { get; set; }
+
+        [Required(ErrorMessage = "Barangay is required.")]
+        public string Barangay { get; set; }
+
+        [Required(ErrorMessage = "City is required.")]
+        public string City { get; set; }
+
+        [Required(ErrorMessage = "Province is required.")]
+        public string Province { get; set; }
+
+        [Required(ErrorMessage = "Zip code is required.")]
+        public string ZipCode { get; set; }
+
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+
+        // Computed property for full delivery address
+        public string DeliveryAddress => $"{Street}, {Barangay}, {City}, {Province} {ZipCode}";
+
+        [Required(ErrorMessage = "Order type is required.")]
+        public string OrderType { get; set; } // "Delivery" or "Pickup"
 
         [Required(ErrorMessage = "Delivery option is required.")]
         public string DeliveryOption { get; set; }
@@ -22,11 +43,11 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email format.")]
-        public string Email { get; set; }  // User's email from profile
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "Contact number is required.")]
         [Phone(ErrorMessage = "Invalid phone number format.")]
-        public string ContactNumber { get; set; }  // User's contact number from profile
+        public string ContactNumber { get; set; }
 
         [Required(ErrorMessage = "Payment method is required.")]
         public string PaymentMethod { get; set; }
