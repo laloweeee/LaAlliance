@@ -89,12 +89,6 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                     ContactNumber = staff.User?.UserProfile?.ContactNumber ?? string.Empty,
                     Role = staff.Role.ToString(),
                     Status = staff.Status.ToString(),
-
-                    // Load suspension data with default values if not set
-                    SuspensionEndDate = staff.User?.SuspensionEndDate,
-                    SuspensionDays = staff.User?.SuspensionEndDate != null 
-                    ? (int?)Math.Ceiling((staff.User.SuspensionEndDate.Value - DateTime.Now).TotalDays)
-                    : null,
                     // We don't retrieve password for security reasons
                 };
 

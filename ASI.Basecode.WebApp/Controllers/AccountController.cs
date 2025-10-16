@@ -242,43 +242,23 @@ namespace ASI.Basecode.WebApp.Controllers
 
             if (loginResult == LoginResult.Success && user != null)
             {
-                // To check account status before allowing login
+                // Check account status before allowing login
                 
-                // To heck if account is terminated
-                if (user.AccountStatus == AccountStatus.Terminated)
+                // Check if account is disabled
+                if (user.AccountStatus == AccountStatus.Disabled)
                 {
-                    TempData["ErrorMessage"] = "This account has been terminated. Please contact support for assistance.";
+                    TempData["ErrorMessage"] = "This account has been disabled. Please contact support for assistance.";
                     return View();
                 }
                 
-                // To check if account is suspended
-                if (user.AccountStatus == AccountStatus.Suspended)
-                {
-                    // To check if suspension period has ended (auto-reactivate)
-                    _userService.CheckAndUpdateAccountStatus(user);
-                    
-                    // To re-check status after potential auto-reactivation
-                    if (user.AccountStatus == AccountStatus.Suspended)
-                    {
-                        var daysRemaining = user.SuspensionEndDate.HasValue 
-                            ? Math.Ceiling((user.SuspensionEndDate.Value - DateTime.Now).TotalDays)
-                            : 0;
-                            
-                        TempData["ErrorMessage"] = daysRemaining > 0 
-                            ? $"This account is suspended. You can login again in {daysRemaining} day(s)."
-                            : "This account is currently suspended. Please contact support.";
-                        return View();
-                    }
-                }
-                
-                // To check if email is verified
+                // Check if email is verified
                 if (!user.IsEmailVerified)
                 {
                     TempData["ErrorMessage"] = "Please verify your email before logging in.";
                     return View();
                 }
 
-                // To load RestaurantStaff if needed
+                // Load RestaurantStaff if needed
                 if (user.UserType == UserType.Restaurant && user.RestaurantStaff == null)
                 {
                     user = _userService.GetUserByID(user.UserID);

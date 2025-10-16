@@ -55,7 +55,7 @@ namespace ASI.Basecode.Services.Services
 
             Enums.StaffRole roleEnum;
             if (!Enum.TryParse(model.Role, ignoreCase: true, out roleEnum))
-                roleEnum = Enums.StaffRole.Staff;
+                roleEnum = Enums.StaffRole.Admin;
 
             Enums.AccountStatus statusEnum;
             if (!Enum.TryParse(model.Status, ignoreCase: true, out statusEnum))
@@ -115,7 +115,7 @@ namespace ASI.Basecode.Services.Services
             // Parse and update role
             Enums.StaffRole roleEnum;
             if (!Enum.TryParse(model.Role, ignoreCase: true, out roleEnum))
-                roleEnum = Enums.StaffRole.Staff;
+                roleEnum = Enums.StaffRole.Admin;
 
             // Parse and update status
             Enums.AccountStatus statusEnum;

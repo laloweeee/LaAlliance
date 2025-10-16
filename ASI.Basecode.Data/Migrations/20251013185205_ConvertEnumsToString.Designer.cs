@@ -710,7 +710,7 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("longtext")
-                        .HasDefaultValue("Staff");
+                        .HasDefaultValue("Admin");
 
                     b.Property<string>("Status")
                         .IsRequired()

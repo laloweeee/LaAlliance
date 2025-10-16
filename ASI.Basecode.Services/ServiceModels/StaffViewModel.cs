@@ -1,5 +1,4 @@
 using System;
-using Microsoft.VisualBasic;
 
 namespace ASI.Basecode.Services.ServiceModels
 {
@@ -10,7 +9,7 @@ namespace ASI.Basecode.Services.ServiceModels
         public string LastName      { get; set; }
         public string Email         { get; set; }
         public string ContactNumber { get; set; }
-        public string Role          { get; set; }   // "Admin" | "Staff"
+        public string Role { get; set; } = "Admin";   // "Admin" | "Staff"
 
         public string AddressStreet   { get; set; }
         public string AddressBarangay { get; set; }
@@ -19,10 +18,6 @@ namespace ASI.Basecode.Services.ServiceModels
         public string AddressZipCode  { get; set; }
 
         public string Status { get; set; } = "Active";
-
-        // Suspension-related properties
-        public DateTime? SuspensionEndDate { get; set; }
-        public int? SuspensionDays { get; set; }
 
         public string Password { get; set; }
     }
