@@ -1,9 +1,9 @@
 @model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
 
 @{
-    ViewData["Title"] = "Checkout - LaAlliancé";
+    ViewData["Title"] = "Checkout - LaAlliance";
     var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
-    var deliveryFee = 50.00m;
+    var deliveryFee = Model.OrderType == "Pickup" ? 0.00m : 50.00m;
     var total = subtotal + deliveryFee;
     var defaultAddress = Model.Addresses?.FirstOrDefault(a => a.IsDefault);
 }
@@ -27,10 +27,42 @@
         <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
             @Html.AntiForgeryToken()
 
-            <!-- Left Column: Delivery Address and Personal Details -->
+            <!-- Left Column: Order Type, Delivery Address and Personal Details -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Section 1: Delivery Address -->
+                
+                <!-- Section 0: Order Type Selection -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-shopping-bag text-green-600"></i>
+                        Order Type
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="OrderType" value="Delivery" class="peer sr-only" checked />
+                            <div class="p-4 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300">
+                                <div class="flex flex-col items-center gap-2">
+                                    <i class="fas fa-truck text-3xl text-gray-400 peer-checked:text-green-600"></i>
+                                    <span class="font-semibold text-gray-700">Delivery</span>
+                                    <span class="text-xs text-gray-500">We deliver to your door</span>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="OrderType" value="Pickup" class="peer sr-only" />
+                            <div class="p-4 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300">
+                                <div class="flex flex-col items-center gap-2">
+                                    <i class="fas fa-store text-3xl text-gray-400 peer-checked:text-green-600"></i>
+                                    <span class="font-semibold text-gray-700">Pickup</span>
+                                    <span class="text-xs text-gray-500">Pick up at our store</span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <span asp-validation-for="OrderType" class="text-red-500 text-sm mt-2"></span>
+                </div>
+
+                <!-- Section 1: Delivery Address (Hidden for Pickup) -->
+                <div id="deliveryAddressSection" class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <i class="fas fa-map-marker-alt text-green-600"></i>
                         Delivery Address
@@ -39,75 +71,157 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Address Form -->
                         <div class="space-y-4">
-                            <p class="text-gray-600 text-sm">Your address details will be used to pinpoint your location on the map.</p>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
-                                <input asp-for="DeliveryAddress" 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                       placeholder="Enter street address" 
-                                       value="@defaultAddress?.Street" />
-                                <span asp-validation-for="DeliveryAddress" class="text-red-500 text-sm mt-1"></span>
+                            <!-- Address Selection Options -->
+                            <div id="addressSelection" class="space-y-3">
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Choose Delivery Location:</h3>
+                                @if (Model.Addresses != null && Model.Addresses.Any())
+                                {
+                                    foreach (var address in Model.Addresses)
+                                    {
+                                        <label class="relative cursor-pointer">
+                                            <input type="radio" name="SelectedAddressId" value="@address.UserAddressID" 
+                                                class="peer sr-only address-radio" 
+                                                data-street="@address.Street"
+                                                data-barangay="@address.Barangay"
+                                                data-city="@address.City"
+                                                data-province="@address.Province"
+                                                data-zipcode="@address.ZipCode"
+                                                data-latitude="@address.Latitude"
+                                                data-longitude="@address.Longitude"
+                                                @(address.IsDefault ? "checked" : "") />
+                                            <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-green-600 peer-checked:bg-green-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                        <i class="fas fa-check text-white text-xs hidden peer-checked:block"></i>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center gap-2 mb-1">
+                                                            <span class="font-semibold text-gray-900 text-sm">@address.AddressType</span>
+                                                            @if (address.IsDefault)
+                                                            {
+                                                                <span class="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                                                                    Default
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                        <p class="text-xs text-gray-700">
+                                                            @address.Street, @address.Barangay, @address.City
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                }
                             </div>
-                            
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Barangay</label>
-                                    <input asp-for="Addresses[0].Barangay" 
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                           value="@defaultAddress?.Barangay" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
-                                    <input asp-for="Addresses[0].City" 
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                           value="@defaultAddress?.City" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Province</label>
-                                    <input asp-for="Addresses[0].Province" 
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                           value="@defaultAddress?.Province" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
-                                    <input asp-for="Addresses[0].ZipCode" 
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                           value="@defaultAddress?.ZipCode" />
+
+                            <!-- Address Display and Actions -->
+                            <div id="addressDisplay" class="space-y-3">
+                                <div class="grid-2 gap-3">
+                                    <button type="button" 
+                                            id="editAddressBtn"
+                                            class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit Address Details</span>
+                                    </button>
+                                    
                                 </div>
                             </div>
-                            
-                            <!-- Map Controls - Moved below province and zip code -->
-                            <div class="space-y-3">
-                                <div class="bg-white rounded-xl shadow-lg p-3 flex gap-2">
-                                    <button type="button" 
-                                            id="currentLocationBtn"
-                                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
-                                        <i class="fas fa-location-crosshairs"></i>
-                                        <span class="hidden sm:inline">Use Current Location</span>
-                                        <span class="sm:hidden">Current</span>
-                                    </button>
-                                    <button type="button" 
-                                            id="searchAddressBtn"
-                                            class="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
-                                        <i class="fas fa-search"></i>
-                                        <span class="hidden sm:inline">Search on Map</span>
-                                        <span class="sm:hidden">Search</span>
-                                    </button>
+
+                            <!-- Address Edit Form (hidden by default) -->
+                            <div id="addressEditForm" class="hidden space-y-4">
+                                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                                    <p class="text-sm text-blue-800 flex items-center gap-2">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Fill in your address details or use current location to auto-fill</span>
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Street Address <span class="text-red-500">*</span></label>
+                                    <input asp-for="Street" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                        placeholder="House/Unit No., Building, Street Name"
+                                        value="@defaultAddress?.Street" />
+                                    <span asp-validation-for="Street" class="text-red-500 text-sm mt-1"></span>
                                 </div>
                                 
-                                <!-- New Edit Address Details Button -->
-                                <button type="button" 
-                                        id="editAddressBtn"
-                                        class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
-                                    <i class="fas fa-edit"></i>
-                                    <span>Edit Address Details</span>
-                                </button>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Barangay <span class="text-red-500">*</span></label>
+                                        <input asp-for="Barangay" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                            placeholder="Barangay"
+                                            value="@defaultAddress?.Barangay" />
+                                        <span asp-validation-for="Barangay" class="text-red-500 text-sm mt-1"></span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
+                                        <input asp-for="City" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                            placeholder="City"
+                                            value="@defaultAddress?.City" />
+                                        <span asp-validation-for="City" class="text-red-500 text-sm mt-1"></span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
+                                        <input asp-for="Province" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                            placeholder="Province"
+                                            value="@defaultAddress?.Province" />
+                                        <span asp-validation-for="Province" class="text-red-500 text-sm mt-1"></span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code <span class="text-red-500">*</span></label>
+                                        <input asp-for="ZipCode" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                                            placeholder="Postal Code"
+                                            pattern="[0-9]{4}"
+                                            value="@defaultAddress?.ZipCode" />
+                                        <span asp-validation-for="ZipCode" class="text-red-500 text-sm mt-1"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Map Controls -->
+                                <div class="space-y-3">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button type="button" 
+                                                id="currentLocationBtn"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                            <i class="fas fa-location-crosshairs"></i>
+                                            <span>Current Location</span>
+                                        </button>
+                                        <button type="button" 
+                                                id="searchAddressBtn"
+                                                class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                                            <i class="fas fa-search"></i>
+                                            <span>Search on Map</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button type="button" 
+                                                id="useAddressBtn"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
+                                            <i class="fas fa-check"></i>
+                                            <span>Use Address</span>
+                                        </button>
+                                        <button type="button" 
+                                                id="cancelEditBtn"
+                                                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
+                                            <i class="fas fa-times"></i>
+                                            <span>Cancel</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden coordinates fields -->
+                                <input type="hidden" asp-for="Latitude" id="latitudeInput" value="@defaultAddress?.Latitude" />
+                                <input type="hidden" asp-for="Longitude" id="longitudeInput" value="@defaultAddress?.Longitude" />
                             </div>
-                            
-                            <!-- Hidden coordinates fields -->
-                            <input type="hidden" asp-for="Addresses[0].Latitude" id="latitudeInput" value="@defaultAddress?.Latitude" />
-                            <input type="hidden" asp-for="Addresses[0].Longitude" id="longitudeInput" value="@defaultAddress?.Longitude" />
                         </div>
                         
                         <!-- Interactive Map -->
@@ -116,9 +230,18 @@
                             <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
                                 <h3 class="text-lg font-bold text-white flex items-center gap-2">
                                     <i class="fas fa-map"></i>
-                                    Pin Your Location
+                                    Delivery Location
                                 </h3>
-                                <p class="text-blue-100 text-sm mt-1">Drag the marker to adjust</p>
+                                <p class="text-blue-100 text-sm mt-1" id="mapAddressText">
+                                    @if (defaultAddress != null)
+                                    {
+                                        <span>@defaultAddress.Street, @defaultAddress.Barangay, @defaultAddress.City</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Select an address to view location</span>
+                                    }
+                                </p>
                             </div>
 
                             <!-- Map Container -->
@@ -173,54 +296,113 @@
                 </div>
 
                 <!-- Section 3: Payment Method -->
-            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-credit-card text-green-600"></i>
-                    Payment Method
-                </h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-gray-700 font-medium">Select Payment Method</label>
-                        <div class="space-y-2">
-                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
-                                <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
-                                <span>Cash on Delivery</span>
-                            </label>
-                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
-                                <input type="radio" name="PaymentMethod" value="GCash" class="radio-input" />
-                                <span>GCash</span>
-                            </label>
-                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500">
-                                <input type="radio" name="PaymentMethod" value="Card" class="radio-input" />
-                                <span>Credit/Debit Card</span>
-                            </label>
-                        </div>
-                        <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm"></span>
-                    </div>
-                    <div id="gcashFields" class="hidden space-y-4">
-                        <label class="block text-gray-700 font-medium">GCash Number</label>
-                        <input type="text" name="GcashNumber" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Enter GCash number" />
-                    </div>
-                    <div id="cardFields" class="hidden space-y-4">
-                        <label class="block text-gray-700 font-medium">Card Number</label>
-                        <input type="text" name="CardNumber" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="1234 5678 9012 3456" />
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-gray-700 font-medium">Expiry (MM/YY)</label>
-                                <input type="text" name="CardExpiry" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="MM/YY" />
+                <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-credit-card text-green-600"></i>
+                        Payment Method
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium">Select Payment Method</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
+                                    <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
+                                    <span>Cash on Delivery</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
+                                    <input type="radio" name="PaymentMethod" value="GCash" class="radio-input" />
+                                    <span>GCash</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
+                                    <input type="radio" name="PaymentMethod" value="Card" class="radio-input" />
+                                    <span>Credit/Debit Card</span>
+                                </label>
                             </div>
+                            <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm"></span>
+                        </div>
+                        
+                        <!-- GCash Number Field -->
+                        <div id="gcashFields" class="hidden space-y-4">
                             <div>
-                                <label class="block text-gray-700 font-medium">CVV</label>
-                                <input type="text" name="CardCVV" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="123" />
+                                <label class="block text-gray-700 font-medium">GCash Number</label>
+                                <input type="text" 
+                                    name="GcashNumber" 
+                                    id="gcashNumberInput"
+                                    maxlength="11"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors"
+                                    placeholder="09XXXXXXXXX" 
+                                    autocomplete="off" 
+                                    inputmode="numeric" />
+                                <span class="text-xs text-gray-500 mt-1">Enter 11-digit mobile number (09XXXXXXXXX)</span>
+                                <span id="gcashError" class="text-red-500 text-xs hidden">Please enter exactly 11 digits</span>
                             </div>
                         </div>
-                        <label class="block text-gray-700 font-medium">Cardholder Name</label>
-                        <input type="text" name="CardholderName" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="John Doe" />
+                        
+                        <!-- Card Payment Fields -->
+                        <div id="cardFields" class="hidden space-y-4">
+                            <!-- Card Number -->
+                            <div>
+                                <label class="block text-gray-700 font-medium">Card Number</label>
+                                <input type="text" 
+                                    name="CardNumber" 
+                                    id="cardNumberInput"
+                                    maxlength="19"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
+                                    placeholder="1234 5678 9012 3456" 
+                                    autocomplete="cc-number"
+                                    inputmode="numeric" />
+                                <span class="text-xs text-gray-500 mt-1">Enter 16-digit card number</span>
+                                <span id="cardNumberError" class="text-red-500 text-xs hidden">Please enter exactly 16 digits</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Expiry Date -->
+                                <div>
+                                    <label class="block text-gray-700 font-medium">Expiry Date</label>
+                                    <input type="text" 
+                                        name="CardExpiry" 
+                                        id="cardExpiryInput"
+                                        maxlength="5"
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
+                                        placeholder="MM/YY" 
+                                        autocomplete="cc-exp"
+                                        inputmode="numeric" />
+                                    <span class="text-xs text-gray-500 mt-1">MM/YY format</span>
+                                    <span id="expiryError" class="text-red-500 text-xs hidden">Please enter valid expiry date</span>
+                                </div>
+                                
+                                <!-- CVV -->
+                                <div>
+                                    <label class="block text-gray-700 font-medium">CVV</label>
+                                    <input type="text" 
+                                        name="CardCVV" 
+                                        id="cardCvvInput"
+                                        maxlength="3"
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
+                                        placeholder="123" 
+                                        autocomplete="cc-csc"
+                                        inputmode="numeric" />
+                                    <span class="text-xs text-gray-500 mt-1">3-digit security code</span>
+                                    <span id="cvvError" class="text-red-500 text-xs hidden">Please enter exactly 3 digits</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Cardholder Name -->
+                            <div>
+                                <label class="block text-gray-700 font-medium">Cardholder Name</label>
+                                <input type="text" 
+                                    name="CardholderName" 
+                                    id="cardholderNameInput"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
+                                    placeholder="John Doe" 
+                                    autocomplete="cc-name" />
+                                <span class="text-xs text-gray-500 mt-1">Name as it appears on card</span>
+                                <span id="nameError" class="text-red-500 text-xs hidden">Please enter cardholder name</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
+            </div> 
 
             <!-- Right Column: Order Summary -->
             <div class="lg:col-span-1">
@@ -231,8 +413,34 @@
                         Order Summary
                     </h2>
                     
+                    <!-- Order Type Badge -->
+                    <div class="mb-4 p-3 bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">Order Type:</span>
+                            <span class="font-bold text-green-700" id="orderTypeBadge">Delivery</span>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address (for Delivery only) -->
+                    <div id="shippingAddressDisplay" class="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-map-marker-alt text-green-600"></i>
+                            Shipping Address
+                        </h3>
+                        <p class="text-xs text-gray-600" id="summaryAddress">
+                            @if (defaultAddress != null)
+                            {
+                                <span>@defaultAddress.Street, @defaultAddress.Barangay, @defaultAddress.City, @defaultAddress.Province @defaultAddress.ZipCode</span>
+                            }
+                            else
+                            {
+                                <span class="text-gray-400">Please enter your address</span>
+                            }
+                        </p>
+                    </div>
+                    
                     <!-- Order Items -->
-                    <div class="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                    <div class="space-y-4 mb-6 max-h-96 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
                         {
                             foreach (var item in Model.Cart.CartItems)
@@ -280,9 +488,9 @@
                             <span class="text-gray-600">Subtotal</span>
                             <span class="text-gray-900">₱@subtotal.ToString("F2")</span>
                         </div>
-                        <div class="flex justify-between text-sm">
+                        <div class="flex justify-between text-sm" id="deliveryFeeRow">
                             <span class="text-gray-600">Delivery Fee</span>
-                            <span class="text-gray-900">₱@deliveryFee.ToString("F2")</span>
+                            <span class="text-gray-900" id="deliveryFeeAmount">₱@deliveryFee.ToString("F2")</span>
                         </div>
                         @if (!string.IsNullOrEmpty(Model.VoucherCode))
                         {
@@ -293,7 +501,7 @@
                         }
                         <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
                             <span class="text-gray-900">Total Amount</span>
-                            <span class="text-green-600">₱@total.ToString("F2")</span>
+                            <span class="text-green-600" id="totalAmount">₱@total.ToString("F2")</span>
                         </div>
                     </div>
 
@@ -311,131 +519,18 @@
                         </p>
                     </div>
                 </div>
-            </div>
+            </div> <!-- Close right column (lg:col-span-1) -->
         </form>
     </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
     <script src="~/js/maps.js"></script>
     <script>
-        // Address selection handler
-        const addressSelect = document.getElementById('addressSelect');
-        if (addressSelect) {
-            addressSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                document.querySelector('input[name="DeliveryAddress"]').value = selectedOption.dataset.street || '';
-                document.getElementById('barangayInput').value = selectedOption.dataset.barangay || '';
-                document.getElementById('cityInput').value = selectedOption.dataset.city || '';
-                document.getElementById('provinceInput').value = selectedOption.dataset.province || '';
-                document.getElementById('zipInput').value = selectedOption.dataset.zip || '';
-                document.getElementById('latitudeInput').value = selectedOption.dataset.lat || '';
-                document.getElementById('longitudeInput').value = selectedOption.dataset.lng || '';
-                
-                // Update map
-                if (window.map && window.marker) {
-                    const lat = parseFloat(selectedOption.dataset.lat) || 10.315700;
-                    const lng = parseFloat(selectedOption.dataset.lng) || 123.885400;
-                    const newLocation = new google.maps.LatLng(lat, lng);
-                    window.map.setCenter(newLocation);
-                    window.placeMarker(newLocation, 'latitudeInput', 'longitudeInput');
-                }
-            });
-        }
-        // Payment method toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const paymentMethods = document.querySelectorAll('input[name="PaymentMethod"]');
-            const gcashFields = document.getElementById('gcashFields');
-            const cardFields = document.getElementById('cardFields');
-
-            function togglePaymentFields() {
-                const selectedMethod = document.querySelector('input[name="PaymentMethod"]:checked');
-                
-                gcashFields.classList.add('hidden');
-                cardFields.classList.add('hidden');
-                
-                if (selectedMethod && selectedMethod.value === 'GCash') {
-                    gcashFields.classList.remove('hidden');
-                } else if (selectedMethod && selectedMethod.value === 'Card') {
-                    cardFields.classList.remove('hidden');
-                }
-            }
-
-            paymentMethods.forEach(method => {
-                method.addEventListener('change', togglePaymentFields);
-            });
-
-            // Edit Address Details Button - Focus on first address field
-            document.getElementById('editAddressBtn').addEventListener('click', function() {
-                const addressInput = document.querySelector('input[name="DeliveryAddress"]');
-                addressInput.focus();
-                addressInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
-
-            // Custom search functionality for the checkout page
-            function setupSearchButton() {
-                const searchBtn = document.getElementById('searchAddressBtn');
-                if (searchBtn) {
-                    searchBtn.addEventListener('click', function() {
-                        const street = document.querySelector('input[name="DeliveryAddress"]').value;
-                        const barangay = document.querySelector('input[name="Addresses[0].Barangay"]').value;
-                        const city = document.querySelector('input[name="Addresses[0].City"]').value;
-                        const province = document.querySelector('input[name="Addresses[0].Province"]').value;
-                        
-                        const addressParts = [street, barangay, city, province, 'Philippines'].filter(part => part);
-                        const address = addressParts.join(', ');
-                        
-                        if (!address.trim()) {
-                            alert('Please fill in at least one address field to search.');
-                            return;
-                        }
-
-                        const originalHTML = this.innerHTML;
-                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-                        this.disabled = true;
-
-                        // Use the geocoder from maps.js
-                        if (window.geocoder) {
-                            window.geocoder.geocode({ address: address }, (results, status) => {
-                                if (status === 'OK' && results[0]) {
-                                    const location = results[0].geometry.location;
-                                    window.map.setCenter(location);
-                                    window.map.setZoom(17);
-                                    window.placeMarker(location, 'latitudeInput', 'longitudeInput');
-                                    
-                                    this.innerHTML = '<i class="fas fa-check"></i> Found!';
-                                } else {
-                                    alert('Address not found on map. Please click on the map to set location manually.');
-                                    this.innerHTML = '<i class="fas fa-times"></i> Not Found';
-                                }
-                                
-                                setTimeout(() => {
-                                    this.innerHTML = originalHTML;
-                                    this.disabled = false;
-                                }, 2000);
-                            });
-                        }
-                    });
-                }
-            }
-
-            // Wait for maps.js to initialize, then setup our custom search
-            setTimeout(() => {
-            // Rename inputs to match what maps.js expects
-            const latInput = document.getElementById('latitudeInput');
-            const lngInput = document.getElementById('longitudeInput');
-            
-            if (latInput) latInput.id = 'latitude';
-            if (lngInput) lngInput.id = 'longitude';
-            
-            // Now initialize the map
-            if (typeof initAddressMap === 'function') {
-                initAddressMap('addressMap', 'latitude', 'longitude');
-                setupCurrentLocationButton();
-            }
-        }, 500);
-        });
+        // Pass C# variables to JavaScript
+        window.checkoutSubtotal = @subtotal;
     </script>
+    <script src="~/js/place-order.js"></script>
 }

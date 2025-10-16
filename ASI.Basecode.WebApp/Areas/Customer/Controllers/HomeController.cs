@@ -83,11 +83,24 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         {
             try
             {
-                var cartItem = _cartService.GetCartItemForEdit(cartItemID, UserId);
-                var product = _productService.GetProductByID(cartItem.ProductID).FirstOrDefault();
+                _logger.LogInformation($"EditCartItem called with cartItemID: {cartItemID}, UserId: {UserId}");
 
+                var cartItem = _cartService.GetCartItemForEdit(cartItemID, UserId);
+                _logger.LogInformation($"CartItem found: {cartItem != null}, ProductID: {cartItem?.ProductID}");
+                
+                if (cartItem?.Options != null)
+                {
+                    _logger.LogInformation($"CartItem has {cartItem.Options.Count} options:");
+                    foreach (var option in cartItem.Options)
+                    {
+                        _logger.LogInformation($"- GroupID: {option.ProductOptionGroupID}, ItemID: {option.ProductOptionItemID}, Name: {option.OptionName}");
+                    }
+                }
+
+                var product = _productService.GetProductByID(cartItem.ProductID).FirstOrDefault();
                 if (product == null)
                 {
+                    _logger.LogWarning($"Product not found for ID: {cartItem.ProductID}");
                     return NotFound();
                 }
 
@@ -98,9 +111,18 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 ViewBag.IsEdit = true;
                 ViewBag.CartItemID = cartItemID;
                 ViewBag.ExistingQuantity = cartItem.Quantity;
-                ViewBag.SelectedOptions = cartItem.Options
+                
+                var selectedOptions = cartItem.Options
                     .GroupBy(o => o.ProductOptionGroupID)
                     .ToDictionary(g => g.Key, g => g.Select(o => o.ProductOptionItemID).ToList());
+                
+                ViewBag.SelectedOptions = selectedOptions;
+                
+                _logger.LogInformation($"Selected options prepared: {selectedOptions.Count} groups");
+                foreach (var optionGroup in selectedOptions)
+                {
+                    _logger.LogInformation($"- Group {optionGroup.Key}: {string.Join(", ", optionGroup.Value)}");
+                }
 
                 return View("ProductToCart", productViewModel);
             }

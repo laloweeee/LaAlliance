@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 {
-    [Authorize(Policy = "Restaurant")]
+    [Authorize(Policy = "RestaurantAdmin")]
     [Area("Restaurant")]
     public class PromotionsController : ControllerBase<PromotionsController>
     {

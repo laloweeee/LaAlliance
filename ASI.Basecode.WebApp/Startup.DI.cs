@@ -42,6 +42,8 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IFileHandlingService, FileHandlingService>();
             this._services.AddScoped<IProductService, ProductService>();
             this._services.AddScoped<IRestaurantProfileService, RestaurantProfileService>();
+            this._services.AddScoped<IStaffService, StaffService>();
+
             this._services.AddScoped<ICartService, CartService>();
             this._services.AddScoped<IUserProfileService, UserProfileService>();
             this._services.AddScoped<IAddressService, AddressService>();
