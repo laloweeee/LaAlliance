@@ -14,19 +14,19 @@
         <div class="flex items-center gap-7">
             <!-- Navigation Links (hidden on mobile) -->
             <div class="hidden md:flex items-center gap-8">
-                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                <a asp-controller="Home" asp-action="Index" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
                     Home
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
                 </a>
-                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                <a href="#about" data-section="about" class="nav-link text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
                     About
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
                 </a>
-                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                <a href="#services" data-section="services" class="nav-link text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
                     Services
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
                 </a>
-                <a href="#" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                <a href="#contact" data-section="contact" class="nav-link text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
                     Contact
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
                 </a>
@@ -50,9 +50,10 @@
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="md:hidden bg-green-600/95 backdrop-blur-lg border-t border-white/20 hidden">
         <div class="px-4 py-6 space-y-4">
-            <a href="#" class="block text-white/90 hover:text-white font-semibold py-2 transition-colors duration-300 border-b border-white/10">
-                Home
-            </a>
+             <a asp-controller="Home" asp-action="Index" class="text-white/90 hover:text-white font-semibold transition-colors duration-300 relative group">
+                    Home
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                </a>
             <a href="#" class="block text-white/90 hover:text-white font-semibold py-2 transition-colors duration-300 border-b border-white/10">
                 About
             </a>
