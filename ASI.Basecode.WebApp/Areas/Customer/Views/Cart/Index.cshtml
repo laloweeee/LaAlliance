@@ -223,7 +223,7 @@
         </div>
     </div>
 </div>
-@section Scripts {
+
 <style>
     /* Animations */
     @@keyframes fade-in {
@@ -255,69 +255,69 @@
     }
 </style>
 
-<script>
-    // Auto-hide toast after 3 seconds
-    document.addEventListener('DOMContentLoaded', function() {
-        const toast = document.querySelector('.animate-fade-in');
-        if (toast) {
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-10px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.querySelector('.animate-fade-in');
+            if (toast) {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
 
-        // Delete modal functionality
-        const deleteModal = document.getElementById('deleteModal');
-        const modalMessage = document.getElementById('modalMessage');
-        const modalCartItemId = document.getElementById('modalCartItemId');
-        const deleteForm = document.getElementById('deleteForm');
-        const cancelDelete = document.getElementById('cancelDelete');
+            // Delete modal functionality
+            const deleteModal = document.getElementById('deleteModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalCartItemId = document.getElementById('modalCartItemId');
+            const deleteForm = document.getElementById('deleteForm');
+            const cancelDelete = document.getElementById('cancelDelete');
 
-        // Add click event to all delete buttons
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const cartItemId = this.getAttribute('data-cart-item-id');
-                const productName = this.getAttribute('data-product-name');
-                
-                // Set modal content
-                modalMessage.textContent = `Are you sure you want to remove "${productName}" from your cart?`;
-                modalCartItemId.value = cartItemId;
-                
-                // Set form action
-                deleteForm.action = '/Customer/Cart/Remove';
-                
-                // Show modal
-                deleteModal.classList.remove('hidden');
-                deleteModal.classList.add('modal-fade-in');
-                deleteModal.querySelector('.bg-white').classList.add('modal-slide-in');
+            // Add click event to all delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const cartItemId = this.getAttribute('data-cart-item-id');
+                    const productName = this.getAttribute('data-product-name');
+                    
+                    // Set modal content
+                    modalMessage.textContent = `Are you sure you want to remove "${productName}" from your cart?`;
+                    modalCartItemId.value = cartItemId;
+                    
+                    // Set form action
+                    deleteForm.action = '/Customer/Cart/Remove';
+                    
+                    // Show modal
+                    deleteModal.classList.remove('hidden');
+                    deleteModal.classList.add('modal-fade-in');
+                    deleteModal.querySelector('.bg-white').classList.add('modal-slide-in');
+                });
+            });
+
+            // Cancel delete
+            cancelDelete.addEventListener('click', function() {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('modal-fade-in');
+                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+            });
+
+            // Close modal when clicking outside
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    deleteModal.classList.add('hidden');
+                    deleteModal.classList.remove('modal-fade-in');
+                    deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !deleteModal.classList.contains('hidden')) {
+                    deleteModal.classList.add('hidden');
+                    deleteModal.classList.remove('modal-fade-in');
+                    deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
+                }
             });
         });
-
-        // Cancel delete
-        cancelDelete.addEventListener('click', function() {
-            deleteModal.classList.add('hidden');
-            deleteModal.classList.remove('modal-fade-in');
-            deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
-        });
-
-        // Close modal when clicking outside
-        deleteModal.addEventListener('click', function(e) {
-            if (e.target === deleteModal) {
-                deleteModal.classList.add('hidden');
-                deleteModal.classList.remove('modal-fade-in');
-                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
-            }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !deleteModal.classList.contains('hidden')) {
-                deleteModal.classList.add('hidden');
-                deleteModal.classList.remove('modal-fade-in');
-                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
-            }
-        });
-    });
-</script>
+    </script>
 }

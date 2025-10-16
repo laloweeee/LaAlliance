@@ -44,7 +44,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             var model = new Models.HomeViewModel
             {
                 Categories = _categoryService.GetAllCategories().ToList().AsQueryable(),
-                Products = _productService.GetActiveProducts().ToList().AsQueryable()
+                Products = _productService.GetActiveProducts()
             };
 
             ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -59,18 +59,14 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         [HttpGet]
         public IActionResult ProductToCart(int productID)
         {
-            var product = _productService.GetProductByID(productID).FirstOrDefault();
+            var product = _productService.GetProductByID(productID);
+            
             if (product == null)
             {
                 return NotFound();
             }
 
-            var productViewModel = MapProductToViewModel(product);
-            ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
-            ViewBag.IsEdit = false;
-            ViewBag.CartItemID = 0;
-
-            return View(productViewModel);
+            return View(product);
         }
 
         /// <summary>
@@ -84,14 +80,12 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             try
             {
                 var cartItem = _cartService.GetCartItemForEdit(cartItemID, UserId);
-                var product = _productService.GetProductByID(cartItem.ProductID).FirstOrDefault();
+                var product = _productService.GetProductByID(cartItem.ProductID);
 
                 if (product == null)
                 {
                     return NotFound();
                 }
-
-                var productViewModel = MapProductToViewModel(product);
 
                 // Pre-select existing options and quantity
                 ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -102,7 +96,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     .GroupBy(o => o.ProductOptionGroupID)
                     .ToDictionary(g => g.Key, g => g.Select(o => o.ProductOptionItemID).ToList());
 
-                return View("ProductToCart", productViewModel);
+                return View("ProductToCart", product);
             }
             catch (Exception ex)
             {

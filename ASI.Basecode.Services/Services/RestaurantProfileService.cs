@@ -15,18 +15,24 @@ namespace ASI.Basecode.Services.Services
     public class RestaurantProfileService : IRestaurantProfileService
     {
         private readonly IRestaurantProfileRepository _repository;
+        private readonly IMapper _mapper;
 
-        public RestaurantProfileService(IRestaurantProfileRepository repository)
+        public RestaurantProfileService(IRestaurantProfileRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
-        public Restaurant GetRestaurantProfile()
+        public RestaurantViewModel GetRestaurantProfile()
         {
-            return _repository.GetRestaurantProfile();
+            var restaurant = _repository.GetRestaurantProfile();
+
+            var model = _mapper.Map<RestaurantViewModel>(restaurant);
+
+            return model;
         }
 
-        public void EditRestaurantInformation(Restaurant model)
+        public void EditRestaurantInformation(RestaurantViewModel model)
         {
             // Validate the model
             ValidateRestaurantProfile(model);
@@ -34,15 +40,15 @@ namespace ASI.Basecode.Services.Services
             ValidateContactInformation(model.Email, model.ContactNumber);
 
             // Update the profile
-            _repository.EditRestaurantProfile(model);
+            _repository.EditRestaurantProfile(_mapper.Map<Restaurant>(model));
         }
 
-        public void EditRestaurantAddress(Address address)
+        public void EditRestaurantAddress(AddressViewModel address)
         {
             
         }
 
-        private void ValidateRestaurantProfile(Restaurant model)
+        private void ValidateRestaurantProfile(RestaurantViewModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Name))
             {

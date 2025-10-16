@@ -215,16 +215,15 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 
             try
             {
-                var product = _productService.GetProductByID(productID.Value).FirstOrDefault();
+                var product = _productService.GetProductByID(productID.Value);
                 
                 if (product == null)
                 {
                     TempData["ToastrError"] = "Product not found.";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
-
-                var model = _mapper.Map<ProductViewModel>(product);                
-                return View(model);
+             
+                return View(product);
             }
             catch (Exception ex)
             {

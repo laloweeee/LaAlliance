@@ -15,6 +15,13 @@ namespace ASI.Basecode.Services.Services
         private readonly ICartRepository _cartRepository;
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
+        
+        /// <summary>
+        /// Constructor for CartService
+        /// </summary>
+        /// <param name="cartRepository"></param>
+        /// <param name="productService"></param>
+        /// <param name="mapper"></param>
         public CartService(ICartRepository cartRepository, IProductService productService, IMapper mapper)
         {
             _cartRepository = cartRepository;
@@ -22,6 +29,11 @@ namespace ASI.Basecode.Services.Services
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Creates a new cart for the specified user.
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
         private Cart CreateCart(int userID)
         {
             var newCart = new Cart
@@ -34,6 +46,11 @@ namespace ASI.Basecode.Services.Services
             return newCart;
         }
 
+        /// <summary>
+        /// Retrieves the user's cart, creating a new one if it doesn't exist.
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
         public CartViewModel GetOrCreateCart(int userID)
         {
             var cart = _cartRepository.GetCartByUserID(userID);
@@ -45,18 +62,24 @@ namespace ASI.Basecode.Services.Services
             return MapCartToViewModel(cart);
         }
 
+        /// <summary>
+        /// Adds an item to the user's cart, creating the cart if it doesn't exist.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="userID"></param>
+        /// <exception cref="Exception"></exception>
         public void AddItemToCart(AddToCartRequest request, int userID)
         {
             var cart = _cartRepository.GetCartByUserID(userID);
+
             if (cart == null)
             {
                 cart = CreateCart(userID);
-                // Refresh to get the cart with all relationships
                 cart = _cartRepository.GetCartByUserID(userID);
             }
 
             // Get product details (without tracking)
-            var product = _productService.GetProductByID(request.ProductID).FirstOrDefault();
+            var product = _productService.GetProductByID(request.ProductID);
             if (product == null) throw new Exception("Product not found");
 
             // Check if item with same options exists
@@ -90,6 +113,13 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
+        /// <summary>
+        /// Updates the quantity of a specific cart item. If quantity is set to 0 or less, the item is removed.
+        /// </summary>
+        /// <param name="cartItemID"></param>
+        /// <param name="quantity"></param>
+        /// <param name="userID"></param>
+        /// <exception cref="Exception"></exception>
         public void UpdateCartItemQuantity(int cartItemID, int quantity, int userID)
         {
             var cartItem = _cartRepository.GetCartItemByID(cartItemID);
@@ -109,6 +139,12 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
+        /// <summary>
+        /// Removes a specific item from the user's cart.
+        /// </summary>
+        /// <param name="cartItemID"></param>
+        /// <param name="userID"></param>
+        /// <exception cref="Exception"></exception>
         public void RemoveCartItem(int cartItemID, int userID)
         {
             var cartItem = _cartRepository.GetCartItemByID(cartItemID);
@@ -120,11 +156,22 @@ namespace ASI.Basecode.Services.Services
             _cartRepository.RemoveCartItem(cartItem);
         }
 
+        /// <summary>
+        /// Clears all items from the user's cart.
+        /// </summary>
+        /// <param name="userID"></param>
         public void ClearCart(int userID)
         {
             _cartRepository.ClearCart(userID);
         }
 
+        /// <summary>
+        /// Retrieves a CartItem for editing, ensuring it belongs to the specified user.
+        /// </summary>
+        /// <param name="cartItemID"></param>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public CartItemViewModel GetCartItemForEdit(int cartItemID, int userID)
         {
             var cartItem = _cartRepository.GetCartItemByID(cartItemID);
@@ -136,6 +183,13 @@ namespace ASI.Basecode.Services.Services
             return MapCartItemToViewModel(cartItem);
         }
 
+        /// <summary>
+        /// Finds an existing CartItem in the cart that matches the given productID and selected options exactly.
+        /// </summary>
+        /// <param name="cartID"></param>
+        /// <param name="productID"></param>
+        /// <param name="selectedOptions"></param>
+        /// <returns></returns>
         private CartItem FindMatchingCartItem(int cartID, int productID, Dictionary<int, List<int>> selectedOptions)
         {
             // Get all cart items for this product in this cart WITH OPTIONS LOADED
@@ -165,6 +219,12 @@ namespace ASI.Basecode.Services.Services
             return null;
         }
 
+        /// <summary>
+        /// Compares existing CartItemOptions with new selected options to determine if they match exactly.
+        /// </summary>
+        /// <param name="existingOptions"></param>
+        /// <param name="newOptions"></param>
+        /// <returns></returns>
         private bool OptionsMatch(ICollection<CartItemOption> existingOptions, Dictionary<int, List<int>> newOptions)
         {
             // If existing options is null or empty, they don't match unless newOptions is also empty
@@ -198,6 +258,11 @@ namespace ASI.Basecode.Services.Services
             return true;
         }
 
+        /// <summary>
+        /// Maps a Cart entity to a CartViewModel, including its items and options.
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <returns></returns>
         private CartViewModel MapCartToViewModel(Cart cart)
         {
             return new CartViewModel
@@ -208,6 +273,11 @@ namespace ASI.Basecode.Services.Services
             };
         }
 
+        /// <summary>
+        /// Maps a CartItem entity to a CartItemViewModel, including its options.
+        /// </summary>
+        /// <param name="cartItem"></param>
+        /// <returns></returns>
         private CartItemViewModel MapCartItemToViewModel(CartItem cartItem)
         {
             return new CartItemViewModel

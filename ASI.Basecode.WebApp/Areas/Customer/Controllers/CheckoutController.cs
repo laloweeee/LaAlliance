@@ -1,43 +1,38 @@
 using ASI.Basecode.Services.Interfaces;
-using ASI.Basecode.Services.ServiceModels;
-using ASI.Basecode.WebApp.Areas.Customer.Models;
-using AutoMapper; 
+using ASI.Basecode.WebApp.Mvc;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
+using ASI.Basecode.WebApp.Areas.Customer.Models;
+using System.Security.Claims;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    public class CheckoutController : Controller
+    public class CheckoutController : ControllerBase<CheckoutController>
     {
-        private readonly ICartService _cartService;
-        private readonly ILogger<CheckoutController> _logger;
         private readonly IUserProfileService _userProfileService;
-        private readonly IAddressService _addressService; // <-- add this
-        private readonly IMapper _mapper;
-        private readonly IConfiguration _configuration;
+        private readonly IAddressService _addressService;
 
-        public CheckoutController(
-            ICartService cartService,
-            ILogger<CheckoutController> logger,
-            IUserProfileService userProfileService,
-            IAddressService addressService, // <-- add this
-            IConfiguration configuration,
-            IMapper mapper = null)
+        public CheckoutController(  IHttpContextAccessor httpContextAccessor,
+                                    ILoggerFactory loggerFactory,
+                                    IConfiguration configuration,
+                                    IAddressService addressService,
+                                    ICartService cartService,
+                                    IUserProfileService userProfileService,
+                                    IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper, cartService)
         {
-            _cartService = cartService;
-            _logger = logger;
+            _addressService = addressService;
             _userProfileService = userProfileService;
-            _addressService = addressService; // <-- assign here
-            _mapper = mapper;
-            _configuration = configuration;
         }
 
         public IActionResult Index()
         {
+            ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
 
             var cart = _cartService.GetOrCreateCart(userId);
@@ -49,7 +44,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             }
 
             var userProfile = _userProfileService.GetUserProfile(userId);
-            var addresses = _addressService.GetUserAddresses(userId); // <-- use address service
+            var addresses = _addressService.GetUserAddresses(userId);
 
             var model = new CheckoutViewModel
             {
@@ -60,7 +55,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 ContactNumber = userProfile?.ContactNumber,
                 Addresses = _mapper != null
                     ? _mapper.Map<List<UserAddressViewModel>>(addresses)
-                    : addresses.Select(a => new UserAddressViewModel { /* manual mapping if needed */ }).ToList()
+                    : addresses.Select(a => new UserAddressViewModel()).ToList()
             };
 
             var googleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
