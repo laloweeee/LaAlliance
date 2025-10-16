@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class Restaurant
+    /// <summary>
+    /// Restaurant entity with soft delete support
+    /// </summary>
+    public partial class Restaurant : BaseEntity
     {
         public int RestaurantID { get; set; }
         public string Name { get; set; }

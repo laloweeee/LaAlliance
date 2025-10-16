@@ -7,7 +7,10 @@ using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class RestaurantPromotions
+    /// <summary>
+    /// Restaurant Promotions entity with soft delete support
+    /// </summary>
+    public partial class RestaurantPromotions : BaseEntity
     {
         public int PromotionID { get; set; }
         public string PromotionName { get; set; }

@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class PromotionCodes
+    /// <summary>
+    /// Promotion Codes entity with soft delete support
+    /// </summary>
+    public partial class PromotionCodes : BaseEntity
     {
         public int PromotionCodeID { get; set; }
         public int PromotionID { get; set; }

@@ -1,36 +1,26 @@
-@model ASI.Basecode.Services.ServiceModels.CartViewModel
+@using ASI.Basecode.WebApp.Models
+@model ASI.Basecode.WebApp.Areas.Customer.Models.CartViewModel
 @{
     ViewData["Title"] = "LaAlliancé";
     
-    // Calculate totals - using the actual property names from your service model
-    var totalItems = Model?.CartItems?.Sum(item => item.Quantity) ?? 0;
-    var subtotal = Model?.CartItems?.Sum(item => {
-        var itemPrice = item.UnitPrice;
-        var optionsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0;
-        return item.Quantity * (itemPrice + optionsTotal);
-    }) ?? 0;
-    var deliveryFee = 50.00m;
-    var total = subtotal + deliveryFee;
-    
     // Check for success messages (only for delete)
     var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
 }
 
 <div class="p-6 bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto">
-        <!-- Toast Notification - Only show for delete actions -->
-        @if (!string.IsNullOrEmpty(successMessage))
-        {
-            <div class="fixed top-4 right-4 z-50 animate-fade-in">
-                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl shadow-sm flex items-center gap-3">
-                    <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-trash text-white text-xs"></i>
-                    </div>
-                    <span class="font-medium">@successMessage</span>
-                </div>
-            </div>
-        }
+    
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
+    }
+    
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
+    }
 
+    <div class="max-w-7xl mx-auto">
         <!-- Delete Confirmation Modal -->
         <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm mx-4">
@@ -94,7 +84,7 @@
                         <div class="space-y-4">
                             @foreach (var item in Model.CartItems)
                             {
-                                var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
                                 var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
                                 
                                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden" id="cart-item-@item.CartItemID">
@@ -107,10 +97,10 @@
                                                         <h3 class="text-lg font-bold text-gray-900 mb-1">@item.ProductName</h3>
                                                         
                                                         <!-- Display Customized Orders -->
-                                                        @if (item.Options != null && item.Options.Any())
+                                                        @if (item.CartItemOptions != null && item.CartItemOptions.Any())
                                                         {
                                                             <div class="mb-3 p-3 rounded-lg">
-                                                                @foreach (var option in item.Options)
+                                                                @foreach (var option in item.CartItemOptions)
                                                                 {
                                                                     <div class="text-sm text-gray-600 ml-2">
                                                                         <span class="font-medium">@option.OptionGroupName:</span>
@@ -129,10 +119,10 @@
                                                                 <span class="text-sm text-gray-500">No customizations</span>
                                                             </div>
                                                         }
-                                                        
-                                                        <p class="text-sm text-gray-500 font-semibold">Base Price: ₱@item.UnitPrice.ToString("F2")</p>
+
+                                                        <p class="text-sm text-gray-500 font-semibold">Base Price: ₱@Model.CartItems.FirstOrDefault(ci => ci.CartItemID == item.CartItemID)?.UnitPrice.ToString("F2")</p>
                                                         <!-- Item Total -->
-                                                        <p class="text-green-600 font-semibold">Total Price: ₱@itemTotalPrice.ToString("F2")</p>
+                                                        <p class="text-green-600 font-semibold">Total Price: ₱@Model.CartItems.FirstOrDefault(ci => ci.CartItemID == item.CartItemID)?.TotalPrice.ToString("F2")</p>
                                                     </div>
                                                     <div class="flex flex-col items-end gap-4">
                                                         <!-- Action Buttons -->
@@ -174,9 +164,7 @@
                                                                         <i class="fas fa-plus text-xs"></i>
                                                                     </button>
                                                                 </div>
-                                                            </form>
-                                                        
-                                                            
+                                                            </form>                                        
                                                         </div>
                                                     </div>
                                                 </div>
@@ -197,17 +185,17 @@
                             <h3 class="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
                             <div class="space-y-3 mb-4">
                                 <div class="flex justify-between text-sm">
-                                    <span>Subtotal (@totalItems items)</span>
-                                    <span>₱@subtotal.ToString("F2")</span>
+                                    <span>Subtotal (@Model.TotalItems items)</span>
+                                    <span>₱@Model.SubTotal.ToString("F2")</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span>Delivery Fee</span>
-                                    <span>₱@deliveryFee.ToString("F2")</span>
+                                    <span>₱@Model.DeliveryFee.ToString("F2")</span>
                                 </div>
                                 <div class="border-t border-gray-200 pt-2">
                                     <div class="flex justify-between text-base font-bold">
                                         <span>Total</span>
-                                        <span>₱@total.ToString("F2")</span>
+                                        <span>₱@Model.Total.ToString("F2")</span>
                                     </div>
                                 </div>
                             </div>

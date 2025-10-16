@@ -20,7 +20,7 @@ namespace ASI.Basecode.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql("Server=laalliance-giepoint.c.aivencloud.com;Port=21352;Database=laalliance;User=avnadmin;Password=AVNS_0AHFUgbnghTBf4VkfTZ;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21)));
+                optionsBuilder.UseMySql("Server=laalliance-giepoint.c.aivencloud.com;Port=21352;Database=development_laalliance;User=avnadmin;Password=AVNS_0AHFUgbnghTBf4VkfTZ;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21)));
             }
         }
 
@@ -61,6 +61,8 @@ namespace ASI.Basecode.Data
         public virtual DbSet<DeliveryPolicy> DeliveryPolicies { get; set; }
         public virtual DbSet<PaymentLog> PaymentLogs { get; set; }
         public virtual DbSet<CustomerProductFavorites> CustomerProductFavorites { get; set; }
+        public virtual DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
+        public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -95,7 +97,34 @@ namespace ASI.Basecode.Data
             modelBuilder.ApplyConfiguration(new PaymentLogConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerProductFavoritesConfiguration());
 
+            modelBuilder.ApplyConfiguration(new EmailTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new PasswordTokenConfiguration());
+
+            // Apply global query filter for soft delete
+            ApplySoftDeleteQueryFilter(modelBuilder);
+
             OnModelCreatingPartial(modelBuilder);
+        }
+
+        /// <summary>
+        /// Applies global query filter to automatically exclude soft-deleted entities
+        /// </summary>
+        private void ApplySoftDeleteQueryFilter(ModelBuilder modelBuilder)
+        {
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
+                {
+                    var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
+                    var property = System.Linq.Expressions.Expression.Property(parameter, nameof(ISoftDeletable.IsDeleted));
+                    var filterExpression = System.Linq.Expressions.Expression.Lambda(
+                        System.Linq.Expressions.Expression.Equal(property, System.Linq.Expressions.Expression.Constant(false)),
+                        parameter
+                    );
+                    
+                    entityType.SetQueryFilter(filterExpression);
+                }
+            }
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

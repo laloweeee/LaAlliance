@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Interfaces
 {
-    public interface ICategoryRepository
+    public interface ICategoryRepository : IBaseRepository
     {
         IQueryable<ProductCategory> GetAllCategories();
         void AddCategory(ProductCategory category);
         void UpdateCategory(ProductCategory category);
-        void DeleteCategory(int categoryID);
     }
 }

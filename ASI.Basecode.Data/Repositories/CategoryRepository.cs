@@ -40,16 +40,5 @@ namespace ASI.Basecode.Data.Repositories
             _dbContext.ProductCategories.Update(category);
             _dbContext.SaveChanges();
         }
-
-        /// <summary>
-        /// Delete a product category by its ID.
-        /// </summary>
-        /// <param name="categoryID"></param>
-        public void DeleteCategory(int categoryID)
-        {
-            var category = _dbContext.ProductCategories.FirstOrDefault(c => c.CategoryID == categoryID);
-            _dbContext.ProductCategories.Remove(category);
-            _dbContext.SaveChanges();
-        }
     }
 }

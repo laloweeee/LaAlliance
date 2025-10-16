@@ -7,7 +7,10 @@ using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class Address
+    /// <summary>
+    /// Address entity with soft delete support
+    /// </summary>
+    public partial class Address : BaseEntity
     {
         public int AddressID { get; set; }
         public double Longitude { get; set; }

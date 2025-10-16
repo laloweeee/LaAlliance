@@ -48,6 +48,10 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IUserProfileService, UserProfileService>();
             this._services.AddScoped<IAddressService, AddressService>();
 
+            this._services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+            this._services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+            this._services.AddHostedService<TokenCleanupService>();
+            
             // Notification Service
             this._services.AddScoped<IOrderNotificationService, OrderNotificationService>();
 

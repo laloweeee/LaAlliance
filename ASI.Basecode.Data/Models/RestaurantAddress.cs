@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class RestaurantAddress
+    /// <summary>
+    /// Restaurant Address entity with soft delete support
+    /// </summary>
+    public partial class RestaurantAddress : BaseEntity
     {
         public int RestaurantAddressID { get; set; }
         public int RestaurantID { get; set; }

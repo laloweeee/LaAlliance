@@ -18,11 +18,12 @@ namespace ASI.Basecode.Services.Services
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IUserRepository _userRepository;
 
-
-        public CategoryService(ICategoryRepository categoryRepository)
+        public CategoryService(ICategoryRepository categoryRepository, IUserRepository userRepository)
         {
             _categoryRepository = categoryRepository;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -94,9 +95,26 @@ namespace ASI.Basecode.Services.Services
         /// Delete a category
         /// </summary>
         /// <param name="categoryID"></param>
-        public void DeleteCategory(int categoryID)
+        public void DeleteCategory(int categoryID, string deletedBy)
         {
-            _categoryRepository.DeleteCategory(categoryID);
+            var category = _categoryRepository.GetAllCategories().FirstOrDefault(c => c.CategoryID == categoryID);
+
+            if (category == null)
+            {
+                throw new ArgumentException("Category not found.");
+            }
+
+            if (category.Products.Any())
+            {
+                throw new InvalidOperationException("Cannot delete category with associated products.");
+            }
+
+            if (category.IsActive)
+            {
+                throw new InvalidOperationException("Cannot delete an active category. Please deactivate it first.");
+            }
+            
+            _categoryRepository.SoftDelete(category, deletedBy);
         }
     }
 }

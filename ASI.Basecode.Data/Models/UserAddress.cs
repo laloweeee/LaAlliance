@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class UserAddress
+    /// <summary>
+    /// User Address entity with soft delete support
+    /// </summary>
+    public partial class UserAddress : BaseEntity
     {
         public int UserAddressID { get; set; }
         public int UserID { get; set; }
