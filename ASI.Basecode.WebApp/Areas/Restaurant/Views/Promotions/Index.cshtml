@@ -8,18 +8,18 @@
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
     <h2 class="text-2xl font-bold text-gray-800">Promotions</h2>
     <div class="flex items-center gap-2">
-        <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700" onclick="openModal('createCampaignModal')">
+@*         <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700" onclick="openModal('createCampaignModal')">
             <i class="fas fa-bullhorn mr-2"></i>Create Campaign
+        </button> *@
+        <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" onclick="openModal('createPromotionModal')">
+            <i class="fas fa-calendar-plus mr-2"></i>Create Promotion
         </button>
-        <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" onclick="openModal('createEventModal')">
-            <i class="fas fa-calendar-plus mr-2"></i>Create Event
-        </button>
-        <button type="button" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700" onclick="openModal('createDiscountModal')">
+@*         <button type="button" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700" onclick="openModal('createDiscountModal')">
             <i class="fas fa-tags mr-2"></i>Create Discount
         </button>
         <button type="button" class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-black" onclick="openModal('manageTrendingModal')">
             <i class="fas fa-fire mr-2"></i>Manage Trending
-        </button>
+        </button> *@
     </div>
 </div>
 
@@ -27,7 +27,7 @@
 <div class="border-b mb-6">
     <nav class="flex flex-wrap gap-2" id="promoTabs">
 @*         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="campaigns">Campaigns</button> *@
-        <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="events">Events</button>
+        <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="promotions">Promotions</button>
 @*         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="discounts">Discounts</button>
         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="trending">Trending</button> *@
         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="analytics">Analytics</button>
@@ -66,8 +66,8 @@
     </div>
 </div> *@
 
-<!-- Events -->
-<div id="tab-events" class="promo-tab section hidden">
+<!-- Promotions -->
+<div id="tab-promotions" class="promo-tab section hidden">
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="w-full h-40 bg-black"></div>
@@ -192,12 +192,12 @@
           const buttons = document.querySelectorAll('.promo-tab-btn');
           const sections = {
             campaigns: document.getElementById('tab-campaigns'),
-            events:    document.getElementById('tab-events'),
+            promotions:    document.getElementById('tab-promotions'),
             discounts: document.getElementById('tab-discounts'),
             trending:  document.getElementById('tab-trending'),
             analytics: document.getElementById('tab-analytics')
           };
-          let active = 'campaigns';
+          let active = 'promotions';
           function activate(name){
             active = name;
             Object.entries(sections).forEach(([k, el]) => {
