@@ -96,6 +96,23 @@ namespace ASI.Basecode.WebApp.Controllers
 
             if (loginResult == LoginResult.Success && user != null)
             {
+                // Check account status before allowing login
+
+                // Check if account is disabled
+                if (user.AccountStatus == AccountStatus.Disabled)
+                {
+                    TempData["ErrorMessage"] = "This account has been disabled. Please contact support for assistance.";
+                    return View();
+                }
+
+                // Check if email is verified
+                if (!user.IsEmailVerified)
+                {
+                    TempData["ErrorMessage"] = "Please verify your email before logging in.";
+                    return View();
+                }
+
+                // Load RestaurantStaff if needed
                 if (user.UserType == UserType.Restaurant && user.RestaurantStaff == null)
                 {
                     user = _userService.GetUserByID(user.UserID);

@@ -1,5 +1,5 @@
 @using ASI.Basecode.WebApp.Models
-@model ASI.Basecode.WebApp.Areas.Customer.Models.CartViewModel
+@model ASI.Basecode.Services.ServiceModels.CartViewModel
 @{
     ViewData["Title"] = "LaAlliancé";
     
@@ -34,9 +34,7 @@
                     <p class="text-gray-600 mb-6" id="modalMessage">Are you sure you want to remove this item from your cart?</p>
                     
                     <div class="flex gap-3">
-                        <button type="button" 
-                                id="cancelDelete" 
-                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-lg transition-colors">
+                        <button type="button" id="cancelDelete" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-lg transition-colors">
                             Cancel
                         </button>
                         <form id="deleteForm" method="post" style="display: inline; flex: 1;">
