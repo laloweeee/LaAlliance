@@ -1,0 +1,135 @@
+@model ASI.Basecode.Services.ServiceModels.OrderViewModel
+
+@{
+    ViewData["Title"] = $"Order Details - #{Model.OrderID}";
+}
+
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8 mt-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Order #@Model.OrderID</h2>
+    <div class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="font-semibold text-gray-700">Customer:</p>
+                <p class="text-lg">@Model.FirstName @Model.LastName</p>
+                <p class="text-sm text-gray-500">Contact: @Model.ContactNumber</p>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-700">Order Date:</p>
+                <p>@Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</p>
+                <p class="font-semibold text-gray-700 mt-2">Status:</p>
+                <span class="px-2 py-1 rounded-full text-xs font-medium @GetStatusClass(Model.OrderStatus)">@Model.OrderStatus</span>
+            </div>
+        </div>
+    </div>
+    <div class="mb-6">
+        <p class="font-semibold text-gray-700 mb-2">Delivery Address:</p>
+        @if (Model.DeliveryAddress != null)
+        {
+            <p>@Model.DeliveryAddress.FullAddress</p>
+        }
+        else
+        {
+            <p class="text-gray-500">Pickup order</p>
+        }
+    </div>
+    <div class="mb-6">
+        <p class="font-semibold text-gray-700 mb-2">Products:</p>
+        <table class="min-w-full bg-white border rounded-lg">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b text-left">Product</th>
+                    <th class="py-2 px-4 border-b text-left">Options</th>
+                    <th class="py-2 px-4 border-b text-right">Qty</th>
+                    <th class="py-2 px-4 border-b text-right">Unit Price</th>
+                    <th class="py-2 px-4 border-b text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderItems)
+                {
+                    <tr>
+                        <td class="py-2 px-4 border-b">
+                            <span class="font-medium">@item.ProductName</span>
+                            @if (!string.IsNullOrEmpty(item.ProductImage))
+                            {
+                                <img src="@item.ProductImage" alt="@item.ProductName" class="inline-block h-8 w-8 ml-2 rounded" />
+                            }
+                        </td>
+                        <td class="py-2 px-4 border-b">
+                            @if (item.OrderItemOptions != null && item.OrderItemOptions.Any())
+                            {
+                                <ul class="list-disc ml-4">
+                                    @foreach (var opt in item.OrderItemOptions)
+                                    {
+                                        <li>@opt.OptionGroupName: @opt.OptionName (+@opt.AdditionalPrice.ToString("C"))</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <span class="text-gray-500">None</span>
+                            }
+                        </td>
+                        <td class="py-2 px-4 border-b text-right">@item.Quantity</td>
+                        <td class="py-2 px-4 border-b text-right">@item.UnitPrice.ToString("C")</td>
+                        <td class="py-2 px-4 border-b text-right">@item.TotalPrice.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="font-semibold text-gray-700">Payment Method:</p>
+                <p>@Model.PaymentMethod</p>
+                <p class="font-semibold text-gray-700 mt-2">Voucher Code:</p>
+                <p>@Model.VoucherCode ?? "None"</p>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-700">Order Type:</p>
+                <p>@Model.OrderType</p>
+                <p class="font-semibold text-gray-700 mt-2">Delivery Notes:</p>
+                <p>@Model.DeliveryNotes</p>
+            </div>
+        </div>
+    </div>
+    <div class="border-t pt-4 mt-6">
+        <div class="flex justify-end gap-8">
+            <div>
+                <p class="text-gray-700">Subtotal:</p>
+                <p class="text-gray-700">Discount:</p>
+                <p class="text-gray-700">Delivery Fee:</p>
+                <p class="font-bold text-lg mt-2">Total:</p>
+            </div>
+            <div class="text-right">
+                <p>@Model.SubTotal.ToString("C")</p>
+                <p>-@Model.DiscountAmount.ToString("C")</p>
+                <p>@Model.DeliveryFee.ToString("C")</p>
+                <p class="font-bold text-lg mt-2">@Model.TotalAmount.ToString("C")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using ASI.Basecode.Resources.Constants
+@functions {
+    private string GetStatusClass(Enums.OrderStatus status)
+    {
+        switch (status)
+        {
+            case Enums.OrderStatus.Pending:
+                return "bg-green-100 text-green-800";
+            case Enums.OrderStatus.Processing:
+                return "bg-orange-100 text-orange-800";
+            case Enums.OrderStatus.Ready:
+                return "bg-blue-100 text-blue-800";
+            case Enums.OrderStatus.Completed:
+                return "bg-gray-100 text-gray-800";
+            case Enums.OrderStatus.Cancelled:
+                return "bg-red-100 text-red-800";
+            default:
+                return "bg-gray-100 text-gray-800";
+        }
+    }
+}

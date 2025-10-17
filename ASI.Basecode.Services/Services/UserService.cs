@@ -82,7 +82,7 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public User GetUserByID(int userID)
         {
-            return _repository.GetUserByID(userID).FirstOrDefault();
+            return _repository.GetUserByID(userID);
         }
 
         /// <summary>

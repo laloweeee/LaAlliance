@@ -33,12 +33,12 @@ namespace ASI.Basecode.Data.Repositories
         /// </summary>
         /// <param name="userID"></param>
         /// <returns></returns>
-        public IQueryable<User> GetUserByID(int userID)
+        public User GetUserByID(int userID)
         {
             return _dbContext.Users
                 .Include(u => u.UserProfile)
                 .Include(u => u.RestaurantStaff)
-                .Where(x => x.UserID == userID);
+                .FirstOrDefault(u => u.UserID == userID);
         }
 
         /// <summary>

@@ -16,21 +16,16 @@
             <p class="text-gray-600">Complete your purchase with confidence</p>
         </div>
 
-        @if (TempData["ErrorMessage"] != null)
+        @if (TempData["SuccessMessage"] != null)
         {
-            <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-800 rounded-xl flex items-center gap-3 animate-fade-in">
-                <i class="fas fa-exclamation-triangle text-red-600"></i>
-                <span>@TempData["ErrorMessage"]</span>
-            </div>
+            <partial name="~/Views/Shared/_ToastNotification.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["SuccessMessage"]?.ToString(),})" />
         }
 
-        @if (TempData["WarningMessage"] != null)
+        @if (TempData["ErrorMessage"] != null)
         {
-            <div class="mb-6 p-4 bg-yellow-100 border border-yellow-200 text-yellow-800 rounded-xl flex items-center gap-3 animate-fade-in">
-                <i class="fas fa-exclamation-circle text-yellow-600"></i>
-                <span>@TempData["WarningMessage"]</span>
-            </div>
+            <partial name="~/Views/Shared/_ToastNotification.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["ErrorMessage"]?.ToString(),})" />
         }
+
 
         <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
             @Html.AntiForgeryToken()
@@ -106,7 +101,7 @@
                                                 data-latitude="@address.Latitude"
                                                 data-longitude="@address.Longitude"
                                                 @(address.IsDefault ? "checked" : "") />
-                                            <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300">
+                                            <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300 mb-2">
                                                 <div class="flex items-start gap-3">
                                                     <div class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-green-600 peer-checked:bg-green-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                                                         <i class="fas fa-check text-white text-xs hidden peer-checked:block"></i>
@@ -134,8 +129,8 @@
                         </div>
                         
                         <!-- Hidden coordinates fields -->
-                        <input type="hidden" asp-for="Latitude" id="latitudeInput" value="@defaultAddress?.Latitude" />
-                        <input type="hidden" asp-for="Longitude" id="longitudeInput" value="@defaultAddress?.Longitude" />
+                        <input type="hidden" id="latitudeInput" value="@defaultAddress?.Latitude" />
+                        <input type="hidden" id="longitudeInput" value="@defaultAddress?.Longitude" />
 
                         <!-- Interactive Map -->
                         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-fit">
@@ -190,20 +185,9 @@
                         <i class="fas fa-truck text-green-600"></i>
                         Delivery Notes
                     </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                            <input asp-for="FullName" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                   value="@Model.FullName" />
-                            <span asp-validation-for="FullName" class="text-red-500 text-sm mt-1"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-                            <input asp-for="ContactNumber" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                   value="@Model.ContactNumber" />
-                            <span asp-validation-for="ContactNumber" class="text-red-500 text-sm mt-1"></span>
+                            <input asp-for="DeliveryNotes" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" />
                         </div>
                     </div>
                 </div>
@@ -219,7 +203,7 @@
                             <label class="block text-gray-700 font-medium">Select Payment Method</label>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
-                                    <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
+                                    <input type="radio" name="PaymentMethod" value="CashOnDelivery" class="radio-input" />
                                     <span>Cash on Delivery</span>
                                 </label>
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
