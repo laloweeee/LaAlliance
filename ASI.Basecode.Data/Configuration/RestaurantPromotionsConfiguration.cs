@@ -11,6 +11,10 @@ namespace ASI.Basecode.Data.Configuration
         {
             // Primary Key
             builder.HasKey(rp => rp.PromotionID);
+            
+            // Configure PromotionID as auto-generated identity
+            builder.Property(rp => rp.PromotionID)
+                .ValueGeneratedOnAdd();
 
             // Properties
             builder.Property(rp => rp.PromotionName)
@@ -25,7 +29,9 @@ namespace ASI.Basecode.Data.Configuration
 
             builder.Property(rp => rp.DiscountType)
                 .IsRequired()
-                .HasConversion<string>()
+                .HasConversion(
+                    v => v.ToString(),
+                    v => ConvertStringToDiscountType(v))
                 .HasDefaultValue(DiscountType.Percentage);
 
             builder.Property(rp => rp.DiscountValue)
@@ -61,6 +67,17 @@ namespace ASI.Basecode.Data.Configuration
 
             // Table Name
             builder.ToTable("RestaurantPromotions");
+        }
+
+        private static DiscountType ConvertStringToDiscountType(string value)
+        {
+            return value switch
+            {
+                "Percentage" => DiscountType.Percentage,
+                "Fixed Amount" => DiscountType.FixedAmount,
+                "FixedAmount" => DiscountType.FixedAmount,
+                _ => DiscountType.Percentage
+            };
         }
     }
 }
