@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -49,13 +50,47 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
         // POST: /Customer/Cart/UpdateQuantity
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateQuantity(int cartItemID, int quantity)
         {
-            if (quantity < 1) quantity = 1;
+            try
+            {
+                if (quantity < 1) quantity = 1;
 
-            _cartService.UpdateCartItemQuantity(cartItemID, quantity, UserId);
+                _cartService.UpdateCartItemQuantity(cartItemID, quantity, UserId);
 
-            return RedirectToAction(nameof(Index));
+                // Get updated cart data
+                var cart = _cartService.GetOrCreateCart(UserId);
+
+                // Find the specific item that was updated
+                var updatedItem = cart.CartItems.FirstOrDefault(x => x.CartItemID == cartItemID);
+
+                if (updatedItem == null)
+                {
+                    return Json(new { success = false, message = "Cart item not found" });
+                }
+
+                // Calculate totals
+                var totalItems = cart.CartItems.Sum(x => x.Quantity);
+                var subTotal = cart.CartItems.Sum(x => x.TotalPrice);
+                var deliveryFee = cart.DeliveryFee; // Adjust this based on your business logic
+                var total = subTotal + deliveryFee;
+
+                return Json(new
+                {
+                    success = true,
+                    newQuantity = updatedItem.Quantity,
+                    itemTotalPrice = updatedItem.TotalPrice,
+                    totalItems = totalItems,
+                    subTotal = subTotal,
+                    deliveryFee = deliveryFee,
+                    total = total
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Failed to update quantity: " + ex.Message });
+            }
         }
 
         // POST: /Customer/Cart/Remove

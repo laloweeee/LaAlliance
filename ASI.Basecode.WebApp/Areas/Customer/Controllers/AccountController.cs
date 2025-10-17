@@ -148,7 +148,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IActionResult AddressForm(int? id)
+        public IActionResult AddressForm(int? id, string returnUrl)
         {
             /// Load Google Maps API key from configuration
             var googleApiKey = _configuration["GoogleMaps:ApiKey"];
@@ -174,6 +174,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 }
             }
 
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
@@ -184,8 +185,13 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult SaveAddress(UserAddressViewModel model)
+        public IActionResult SaveAddress(UserAddressViewModel model, string returnUrl)
         {
+            if (!ModelState.IsValid)
+            {
+                return View("AddressForm", model);
+            }
+
             try
             {
                 var userAddress = new UserAddressServiceModel
@@ -217,6 +223,12 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     TempData["SuccessMessage"] = "Address added successfully.";
                 }
 
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                
                 return RedirectToAction("Index");
             }
             catch (Exception ex)

@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = Model?.UserAddressID > 0 ? "Edit Address - LaAlliancé" : "Add Address - LaAlliancé";
     var isEdit = Model?.UserAddressID > 0;
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
 }
 
 <div class="min-h-screen bg-gray-50">
@@ -32,8 +33,8 @@
                                         <p class="text-gray-600">@(isEdit ? "Update your delivery location" : "Add a new delivery location")</p>
                                     </div>
                                     <!-- Back Button -->
-                                    <a asp-action="Index" asp-controller="Account" asp-area="Customer"
-                                       class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2">
+                                    <a href="@(string.IsNullOrEmpty(returnUrl) ? Url.Action("Index", "Account", new { area = "Customer" }) : returnUrl)"
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2">
                                         <i class="fas fa-arrow-left"></i>
                                         <span>Back</span>
                                     </a>
@@ -45,6 +46,7 @@
                                     <input type="hidden" asp-for="AddressID" />
                                     <input type="hidden" asp-for="Latitude" id="latitude" />
                                     <input type="hidden" asp-for="Longitude" id="longitude" />
+                                    <input type="hidden" name="returnUrl" value="@returnUrl" />
                                     
                                     <div class="space-y-6">
                                         <!-- Address Type & Default -->
@@ -156,7 +158,7 @@
                                                 <i class="fas fa-save"></i>
                                                 <span>@(isEdit ? "Update Address" : "Save Address")</span>
                                             </button>
-                                            <a asp-action="Index" asp-controller="Account" asp-area="Customer"
+                                            <a href="@(string.IsNullOrEmpty(returnUrl) ? Url.Action("Index", "Account", new { area = "Customer" }) : returnUrl)"
                                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
                                                 <i class="fas fa-times"></i>
                                                 <span>Cancel</span>
