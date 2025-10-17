@@ -8,9 +8,11 @@ namespace ASI.Basecode.Services.ServiceModels
     {
         public int CartID { get; set; }
         public int UserID { get; set; }
+        public int TotalItems => CartItems.Sum(ci => ci.Quantity);
+        public decimal SubTotal => CartItems.Sum(ci => ci.Quantity * (ci.UnitPrice + ci.CartItemOptions.Sum(opt => opt.AdditionalPrice)));
+        public decimal DeliveryFee { get; set; } = 50.00m;
+        public decimal Total => SubTotal + DeliveryFee;
         public List<CartItemViewModel> CartItems { get; set; } = new List<CartItemViewModel>();
-        public decimal TotalAmount => CartItems?.Sum(item => item.TotalPrice) ?? 0;
-        public int TotalItems => CartItems?.Sum(item => item.Quantity) ?? 0;
     }
 
     public class CartItemViewModel
@@ -21,8 +23,9 @@ namespace ASI.Basecode.Services.ServiceModels
         public string ProductName { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
-        public decimal TotalPrice => (UnitPrice + Options.Sum(o => o.AdditionalPrice)) * Quantity;
-        public List<CartItemOptionViewModel> Options { get; set; } = new List<CartItemOptionViewModel>();
+        public decimal ItemAddOnsTotal => CartItemOptions.Sum(opt => opt.AdditionalPrice);
+        public decimal TotalPrice => Quantity * (UnitPrice + ItemAddOnsTotal);
+        public List<CartItemOptionViewModel> CartItemOptions { get; set; } = new List<CartItemOptionViewModel>();
     }
 
     public class CartItemOptionViewModel

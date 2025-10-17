@@ -52,7 +52,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         public IActionResult UpdateQuantity(int cartItemID, int quantity)
         {
             if (quantity < 1) quantity = 1;
-            
+
             _cartService.UpdateCartItemQuantity(cartItemID, quantity, UserId);
 
             return RedirectToAction(nameof(Index));
@@ -75,7 +75,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private AccountViewModel GetCustomerProfile()
         {
             try
-{
+            {
                 var userProfile = _userProfileService.GetUserProfile(UserId);  // Keep this if it exists
                 if (userProfile == null) return null;
 

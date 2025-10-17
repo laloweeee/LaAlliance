@@ -6,7 +6,6 @@ using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 
 namespace ASI.Basecode.Services.Services
 {
@@ -288,7 +287,7 @@ namespace ASI.Basecode.Services.Services
                 ProductImage = cartItem.Product.ProductImage,
                 Quantity = cartItem.Quantity,
                 UnitPrice = cartItem.UnitPrice,
-                Options = cartItem.CartItemOption?.Select(o => new CartItemOptionViewModel
+                CartItemOptions = cartItem.CartItemOption?.Select(o => new CartItemOptionViewModel
                 {
                     CartItemOptionID = o.CartItemOptionID,
                     ProductOptionGroupID = o.ProductOptionGroupID,
