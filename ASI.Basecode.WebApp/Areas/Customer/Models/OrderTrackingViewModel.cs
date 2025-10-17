@@ -29,7 +29,6 @@ namespace ASI.Basecode.WebApp.Models
         public string StepName { get; set; }
         public bool IsCompleted { get; set; }
         public bool IsCurrent { get; set; }
-        public string Timestamp { get; set; }
         public string IconClass { get; set; }
     }
 

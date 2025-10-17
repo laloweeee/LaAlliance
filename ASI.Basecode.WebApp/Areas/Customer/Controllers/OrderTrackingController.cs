@@ -14,40 +14,35 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             ViewBag.GoogleMapsApiKey = "AIzaSyCJ5dBVFR0g-nYJwXv04NYuqoZLu37WqRw";
             
             // Create sample data for testing
-            //NOTE i connect pani sa admin so i dont know unsaon pag call
             var viewModel = new OrderTrackingViewModel
             {
                 CurrentOrder = new CurrentOrderViewModel
                 {
                     OrderNumber = "FF2024001",
-                    Status = "In Progress",
-                    ProgressPercentage = 60,
+                    Status = "Out for Delivery",
+                    ProgressPercentage = 75,
                     ETA = "18 mins",
                     OrderSteps = new List<OrderStepViewModel>
                     {
                         new OrderStepViewModel { 
                             StepName = "Order Confirmed", 
-                            IsCompleted = true, 
-                            Timestamp = "2:30 PM",
+                            IsCompleted = true,
                             IconClass = "fas fa-check"
                         },
                         new OrderStepViewModel { 
                             StepName = "Preparing Your Order", 
-                            IsCompleted = false, 
-                            IsCurrent = true,
-                            Timestamp = "Pending",
+                            IsCompleted = true,
                             IconClass = "fas fa-utensils"
                         },
                         new OrderStepViewModel { 
                             StepName = "Out for Delivery", 
-                            IsCompleted = false, 
-                            Timestamp = "Pending",
+                            IsCompleted = true,
+                            IsCurrent = true,
                             IconClass = "fas fa-motorcycle"
                         },
                         new OrderStepViewModel { 
                             StepName = "Delivered", 
-                            IsCompleted = false, 
-                            Timestamp = "Pending",
+                            IsCompleted = false,
                             IconClass = "fas fa-home"
                         }
                     },
