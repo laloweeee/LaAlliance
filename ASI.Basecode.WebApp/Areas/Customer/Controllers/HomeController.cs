@@ -19,6 +19,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private new readonly ICartService _cartService;
+        private readonly IFavoriteService _favoriteService; // ADDED
 
         public HomeController(
             IHttpContextAccessor httpContextAccessor,
@@ -27,12 +28,14 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             IProductService productService,
             ICategoryService categoryService,
             ICartService cartService,
+            IFavoriteService favoriteService, // ADDED THIS PARAMETER
             IMapper mapper = null)
             : base(httpContextAccessor, loggerFactory, configuration, mapper, cartService)
         {
             _productService = productService;
             _categoryService = categoryService;
             _cartService = cartService;
+            _favoriteService = favoriteService; // ADDED THIS ASSIGNMENT
         }
 
         /// <summary>
@@ -46,6 +49,20 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 Categories = _categoryService.GetAllCategories().ToList().AsQueryable(),
                 Products = _productService.GetActiveProducts()
             };
+
+            // ADDED: Safely load favorites with null check
+            if (_favoriteService != null)
+            {
+                try
+                {
+                    model.Favorites = _favoriteService.GetOrCreateFavorites(UserId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error loading favorites for user {UserId}", UserId);
+                    // Continue without favorites - don't break the page
+                }
+            }
 
             ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
             return View(model);
@@ -126,8 +143,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 return RedirectToAction("Index", "Cart");
             }
         }
-
-        
 
         /// <summary>
         /// Add or update item in cart
