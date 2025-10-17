@@ -83,10 +83,10 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 
                 _logger.LogInformation($"CartItem found: {cartItem != null}, ProductID: {cartItem?.ProductID}");
                 
-                if (cartItem?.Options != null)
+                if (cartItem?.CartItemOptions != null)
                 {
-                    _logger.LogInformation($"CartItem has {cartItem.Options.Count} options:");
-                    foreach (var option in cartItem.Options)
+                    _logger.LogInformation($"CartItem has {cartItem.CartItemOptions.Count} options:");
+                    foreach (var option in cartItem.CartItemOptions)
                     {
                         _logger.LogInformation($"- GroupID: {option.ProductOptionGroupID}, ItemID: {option.ProductOptionItemID}, Name: {option.OptionName}");
                     }
@@ -105,7 +105,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 ViewBag.CartItemID = cartItemID;
                 ViewBag.ExistingQuantity = cartItem.Quantity;
                 
-                var selectedOptions = cartItem.Options
+                var selectedOptions = cartItem.CartItemOptions
                     .GroupBy(o => o.ProductOptionGroupID)
                     .ToDictionary(g => g.Key, g => g.Select(o => o.ProductOptionItemID).ToList());
                 
@@ -234,7 +234,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 CustomizationGroups = product.ProductOptionGroup.Select(g => new ProductOptionGroupViewModel
                 {
                     ProductOptionGroupID = g.ProductOptionGroupID,
-                    ProductID = g.ProductID,
+                    ProductID = g.ProductID ?? 0,
                     OptionGroupName = g.OptionGroupName,
                     IsRequired = g.IsRequired,
                     NumberOfChoice = g.NumberOfChoice,

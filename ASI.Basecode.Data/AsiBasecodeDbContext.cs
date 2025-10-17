@@ -20,7 +20,7 @@ namespace ASI.Basecode.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql("Server=laalliance-giepoint.c.aivencloud.com;Port=21352;Database=development_laalliance;User=avnadmin;Password=AVNS_0AHFUgbnghTBf4VkfTZ;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21)));
+                optionsBuilder.UseMySql("Server=laalliance-giepoint.c.aivencloud.com;Port=21352;Database=laalliance;User=avnadmin;Password=AVNS_0AHFUgbnghTBf4VkfTZ;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21)));
             }
         }
 
@@ -49,7 +49,7 @@ namespace ASI.Basecode.Data
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderItems> OrderItems { get; set; }
         public virtual DbSet<OrderItemOption> OrderItemOptions { get; set; }
-        public virtual DbSet<OrderProcessed> OrderProcessed { get; set; }
+        public virtual DbSet<OrderProcessed> OrderProcesseds { get; set; }
 
         // Promotion related
         public virtual DbSet<RestaurantPromotions> RestaurantPromotions { get; set; }

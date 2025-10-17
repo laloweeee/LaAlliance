@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Order Confirmation - LaAlliancé";
-    var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
+    var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
     var deliveryFee = 50.00m;
     var total = subtotal + deliveryFee;
     var orderId = DateTime.Now.ToString("yyyyMMddHHmmss");
@@ -89,7 +89,7 @@
                         {
                             foreach (var item in Model.Cart.CartItems)
                             {
-                                var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
                                 var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
                                 
                                 <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
@@ -108,10 +108,10 @@
                                     <div class="flex-1">
                                         <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
                                         
-                                        @if (item.Options != null && item.Options.Any())
+                                        @if (item.CartItemOptions != null && item.CartItemOptions.Any())
                                         {
                                             <div class="text-sm text-gray-600 space-y-1 mb-2">
-                                                @foreach (var opt in item.Options)
+                                                @foreach (var opt in item.CartItemOptions)
                                                 {
                                                     <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
                                                 }
@@ -131,9 +131,6 @@
                             <div>
                                 <h3 class="font-semibold text-gray-900 mb-3">Shipping address</h3>
                                 <div class="text-sm text-gray-600 space-y-1">
-                                    <p>@Model.FullName</p>
-                                    <p>@Model.DeliveryAddress</p>
-                                    <p>@Model.ContactNumber</p>
                                 </div>
                             </div>
                             
@@ -189,7 +186,7 @@
                             {
                                 foreach (var item in Model.Cart.CartItems)
                                 {
-                                    var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                    var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
                                     var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
                                     
                                     <div class="text-sm">
@@ -200,10 +197,10 @@
                                             <span>Qty: @item.Quantity × ₱@((item.UnitPrice + itemAddOnsTotal).ToString("F2"))</span>
                                             <span class="font-semibold text-gray-900">₱@itemTotalPrice.ToString("F2")</span>
                                         </div>
-                                        @if (item.Options != null && item.Options.Any())
+                                        @if (item.CartItemOptions != null && item.CartItemOptions.Any())
                                         {
                                             <div class="text-xs text-gray-500 ml-2 space-y-0.5">
-                                                @foreach (var opt in item.Options)
+                                                @foreach (var opt in item.CartItemOptions)
                                                 {
                                                     <p>+ @opt.OptionName @(opt.AdditionalPrice > 0 ? $"(₱{opt.AdditionalPrice:F2})" : "")</p>
                                                 }

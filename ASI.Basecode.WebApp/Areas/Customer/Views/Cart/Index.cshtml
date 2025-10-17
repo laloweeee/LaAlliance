@@ -1,5 +1,5 @@
 @using ASI.Basecode.WebApp.Models
-@model ASI.Basecode.WebApp.Areas.Customer.Models.CartViewModel
+@model ASI.Basecode.Services.ServiceModels.CartViewModel
 @{
     ViewData["Title"] = "LaAlliancé";
     
@@ -9,7 +9,7 @@
 }
 
 <div class="p-6 bg-gray-50 min-h-screen">
-    
+    @Html.AntiForgeryToken()
     @if (!string.IsNullOrEmpty(successMessage))
     {
         <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
@@ -20,39 +20,9 @@
         <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
     }
 
-    <div class="max-w-7xl mx-auto">
-        <!-- Delete Confirmation Modal -->
-        <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm mx-4">
-                <div class="text-center">
-                    <!-- Warning Icon -->
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
-                    </div>
-                    
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Remove Item</h3>
-                    <p class="text-gray-600 mb-6" id="modalMessage">Are you sure you want to remove this item from your cart?</p>
-                    
-                    <div class="flex gap-3">
-                        <button type="button" 
-                                id="cancelDelete" 
-                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-lg transition-colors">
-                            Cancel
-                        </button>
-                        <form id="deleteForm" method="post" style="display: inline; flex: 1;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="cartItemID" id="modalCartItemId" />
-                            <button type="submit" 
-                                    class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                                <i class="fas fa-trash"></i>
-                                Remove
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <partial name="_ConfirmModal" />
 
+    <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Your Cart</h1>
@@ -60,7 +30,7 @@
         </div>
 
         <!-- Main Content Container -->
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 min-h-[calc(100vh-24rem)]">
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Cart Items Section -->
                 <div class="flex-1">
@@ -87,7 +57,7 @@
                                 var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
                                 var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
                                 
-                                <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden" id="cart-item-@item.CartItemID">
+                                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" id="cart-item-@item.CartItemID">
                                     <div class="p-6">
                                         <div class="flex gap-4">
                                             <!-- Add the product image here-->
@@ -132,9 +102,9 @@
                                                             </div>
                                                         }
 
-                                                        <p class="text-sm text-gray-500 font-semibold">Base Price: ₱@Model.CartItems.FirstOrDefault(ci => ci.CartItemID == item.CartItemID)?.UnitPrice.ToString("F2")</p>
-                                                        <!-- Item Total -->
-                                                        <p class="text-green-600 font-semibold">Total Price: ₱@Model.CartItems.FirstOrDefault(ci => ci.CartItemID == item.CartItemID)?.TotalPrice.ToString("F2")</p>
+                                                        <p class="text-sm text-gray-500 font-semibold">Base Price: ₱@item.UnitPrice.ToString("F2")</p>
+                                                        <!-- Item Total - Fixed selector -->
+                                                        <p class="text-green-600 font-semibold item-total-price" data-cart-item-id="@item.CartItemID">Total Price: ₱@item.TotalPrice.ToString("F2")</p>
                                                     </div>
                                                     <div class="flex flex-col items-end gap-4">
                                                         <!-- Action Buttons -->
@@ -147,36 +117,38 @@
                                                             </a>
                                                             <!-- Delete Button -->
                                                             <button type="button" 
-                                                                    class="text-red-600 hover:text-red-800 p-2 transition-colors delete-btn"
-                                                                    title="Remove from cart"
-                                                                    data-cart-item-id="@item.CartItemID"
-                                                                    data-product-name="@item.ProductName">
+                                                                    class="confirm-btn text-red-600 hover:text-red-800"
+                                                                    data-item-id="@item.CartItemID"
+                                                                    data-item-name="@item.ProductName"
+                                                                    data-url="@Url.Action("Remove", "Cart", new { area = "Customer" })"
+                                                                    data-hidden-name="cartItemID">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         </div>
 
                                                         <!-- Quantity Selector -->
                                                         <div class="flex flex-col items-end gap-2">
-                                                            <form asp-action="UpdateQuantity" asp-controller="Cart" asp-area="Customer" method="post" class="quantity-form">
-                                                                <input type="hidden" name="cartItemID" value="@item.CartItemID" />
-                                                                @Html.AntiForgeryToken()
-                                                                <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                                                                    <button type="submit" 
-                                                                            name="quantity" 
-                                                                            value="@(item.Quantity - 1)"
-                                                                            class="w-8 h-8 flex items-center justify-center bg-white hover:bg-gray-200 rounded transition-colors"
-                                                                            @(item.Quantity <= 1 ? "disabled" : "")>
+                                                            <div class="quantity-selector flex items-center gap-2">
+                                                                <span class="quantity-loading ml-2 hidden" aria-hidden="true">
+                                                                    <i class="fas fa-spinner fa-pulse text-gray-500"></i>
+                                                                </span>
+                                                                <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1" data-cart-item-id="@item.CartItemID">
+                                                                    <button type="button"
+                                                                        class="quantity-btn-decrease w-8 h-8 flex items-center justify-center bg-white hover:bg-gray-200 rounded transition-colors"
+                                                                        data-cart-item-id="@item.CartItemID"
+                                                                        data-action="decrease"
+                                                                        @(item.Quantity <= 1 ? "disabled" : "")>
                                                                         <i class="fas fa-minus text-gray-600 text-xs"></i>
                                                                     </button>
-                                                                    <span class="w-8 text-center font-bold text-gray-900">@item.Quantity</span>
-                                                                    <button type="submit" 
-                                                                            name="quantity" 
-                                                                            value="@(item.Quantity + 1)"
-                                                                            class="w-8 h-8 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded transition-colors">
+                                                                    <span class="quantity-display w-8 text-center font-bold text-gray-900">@item.Quantity</span>
+                                                                    <button type="button"
+                                                                        class="quantity-btn-increase w-8 h-8 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded transition-colors"
+                                                                        data-cart-item-id="@item.CartItemID"
+                                                                        data-action="increase">
                                                                         <i class="fas fa-plus text-xs"></i>
                                                                     </button>
                                                                 </div>
-                                                            </form>                                        
+                                                            </div>                                 
                                                         </div>
                                                     </div>
                                                 </div>
@@ -197,17 +169,17 @@
                             <h3 class="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
                             <div class="space-y-3 mb-4">
                                 <div class="flex justify-between text-sm">
-                                    <span>Subtotal (@Model.TotalItems items)</span>
-                                    <span>₱@Model.SubTotal.ToString("F2")</span>
+                                    <span>Subtotal (<span id="total-items">@Model.TotalItems</span> items)</span>
+                                    <span id="subtotal">₱@Model.SubTotal.ToString("F2")</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span>Delivery Fee</span>
-                                    <span>₱@Model.DeliveryFee.ToString("F2")</span>
+                                    <span id="delivery-fee">₱@Model.DeliveryFee.ToString("F2")</span>
                                 </div>
                                 <div class="border-t border-gray-200 pt-2">
                                     <div class="flex justify-between text-base font-bold">
                                         <span>Total</span>
-                                        <span>₱@Model.Total.ToString("F2")</span>
+                                        <span id="item-total-price">₱@Model.Total.ToString("F2")</span>
                                     </div>
                                 </div>
                             </div>
@@ -224,99 +196,114 @@
     </div>
 </div>
 
-<style>
-    /* Animations */
-    @@keyframes fade-in {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .animate-fade-in {
-        animation: fade-in 0.3s ease-out;
-    }
-
-    /* Modal animations */
-    @@keyframes modal-fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @@keyframes modal-slide-in {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-
-    .modal-fade-in {
-        animation: modal-fade-in 0.2s ease-out;
-    }
-
-    .modal-slide-in {
-        animation: modal-slide-in 0.2s ease-out;
-    }
-</style>
-
 @section Scripts {
+    <script src="~/js/confirmModal.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toast = document.querySelector('.animate-fade-in');
-            if (toast) {
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateY(-10px)';
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
+        document.addEventListener('DOMContentLoaded', function () {
+            function getAntiForgeryToken() {
+                return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
             }
 
-            // Delete modal functionality
-            const deleteModal = document.getElementById('deleteModal');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalCartItemId = document.getElementById('modalCartItemId');
-            const deleteForm = document.getElementById('deleteForm');
-            const cancelDelete = document.getElementById('cancelDelete');
+            function updateQuantity(cartItemId, action, selector) {
+                const display = selector.querySelector('.quantity-display');
+                const loading = selector.querySelector('.quantity-loading');
+                const decreaseBtn = selector.querySelector('.quantity-btn-decrease');
+                const increaseBtn = selector.querySelector('.quantity-btn-increase');
+                const currentQty = parseInt(display.textContent);
+                const newQty = action === 'increase' ? currentQty + 1 : currentQty - 1;
+                
+                if (newQty < 1) return;
 
-            // Add click event to all delete buttons
-            document.querySelectorAll('.delete-btn').forEach(button => {
+                // Show loading state
+                loading.classList.remove('hidden');
+                decreaseBtn.disabled = true;
+                increaseBtn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('cartItemID', cartItemId);
+                formData.append('quantity', newQty);
+                formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+                fetch('@Url.Action("UpdateQuantity", "Cart", new { area = "Customer" })', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(async response => {
+                    const contentType = response.headers.get('content-type') || '';
+                    
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                    
+                    if (contentType.includes('application/json')) {
+                        return response.json();
+                    }
+                    
+                    const text = await response.text();
+                    throw new Error('Unexpected response format from server');
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Update quantity display
+                        display.textContent = data.newQuantity;
+                        
+                        // Update item total price with correct selector
+                        const itemTotalPrice = document.querySelector(`.item-total-price[data-cart-item-id="${cartItemId}"]`);
+                        if (itemTotalPrice) {
+                            itemTotalPrice.textContent = `Total Price: ₱${data.itemTotalPrice.toFixed(2)}`;
+                        }
+                        
+                        // Update order summary
+                        const totalItemsEl = document.getElementById('total-items');
+                        if (totalItemsEl) totalItemsEl.textContent = data.totalItems;
+                        
+                        const subtotalEl = document.getElementById('subtotal');
+                        if (subtotalEl) subtotalEl.textContent = `₱${data.subTotal.toFixed(2)}`;
+                        
+                        const deliveryFeeEl = document.getElementById('delivery-fee');
+                        if (deliveryFeeEl) deliveryFeeEl.textContent = `₱${data.deliveryFee.toFixed(2)}`;
+                        
+                        // Fixed: Changed from 'grand-total' to 'item-total-price' to match your HTML
+                        const grandTotalEl = document.getElementById('item-total-price');
+                        if (grandTotalEl) grandTotalEl.textContent = `₱${data.total.toFixed(2)}`;
+                        
+                        // Enable/disable decrease button based on quantity
+                        decreaseBtn.disabled = data.newQuantity <= 1;
+                    } else {
+                        alert(data.message || 'Failed to update quantity');
+                        // Revert display on failure
+                        display.textContent = currentQty;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating quantity:', error);
+                    alert('An error occurred while updating the quantity. Please refresh and try again.');
+                    // Revert display on error
+                    display.textContent = currentQty;
+                })
+                .finally(() => {
+                    // Hide loading and re-enable buttons
+                    loading.classList.add('hidden');
+                    const finalQty = parseInt(display.textContent);
+                    decreaseBtn.disabled = finalQty <= 1;
+                    increaseBtn.disabled = false;
+                });
+            }
+
+            // Attach event listeners to quantity buttons
+            document.querySelectorAll('.quantity-btn-decrease, .quantity-btn-increase').forEach(button => {
                 button.addEventListener('click', function() {
                     const cartItemId = this.getAttribute('data-cart-item-id');
-                    const productName = this.getAttribute('data-product-name');
+                    const action = this.getAttribute('data-action');
+                    const selector = this.closest('.quantity-selector');
                     
-                    // Set modal content
-                    modalMessage.textContent = `Are you sure you want to remove "${productName}" from your cart?`;
-                    modalCartItemId.value = cartItemId;
+                    if (!cartItemId || !action || !selector) {
+                        console.error('Missing required attributes');
+                        return;
+                    }
                     
-                    // Set form action
-                    deleteForm.action = '/Customer/Cart/Remove';
-                    
-                    // Show modal
-                    deleteModal.classList.remove('hidden');
-                    deleteModal.classList.add('modal-fade-in');
-                    deleteModal.querySelector('.bg-white').classList.add('modal-slide-in');
+                    updateQuantity(cartItemId, action, selector);
                 });
-            });
-
-            // Cancel delete
-            cancelDelete.addEventListener('click', function() {
-                deleteModal.classList.add('hidden');
-                deleteModal.classList.remove('modal-fade-in');
-                deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
-            });
-
-            // Close modal when clicking outside
-            deleteModal.addEventListener('click', function(e) {
-                if (e.target === deleteModal) {
-                    deleteModal.classList.add('hidden');
-                    deleteModal.classList.remove('modal-fade-in');
-                    deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
-                }
-            });
-
-            // Close modal with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !deleteModal.classList.contains('hidden')) {
-                    deleteModal.classList.add('hidden');
-                    deleteModal.classList.remove('modal-fade-in');
-                    deleteModal.querySelector('.bg-white').classList.remove('modal-slide-in');
-                }
             });
         });
     </script>

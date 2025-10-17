@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Checkout - LaAlliance";
-    var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
+    var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
     var deliveryFee = Model.OrderType == "Pickup" ? 0.00m : 50.00m;
     var total = subtotal + deliveryFee;
     var defaultAddress = Model.Addresses?.FirstOrDefault(a => a.IsDefault);
@@ -16,21 +16,16 @@
             <p class="text-gray-600">Complete your purchase with confidence</p>
         </div>
 
-        @if (TempData["ErrorMessage"] != null)
+        @if (TempData["SuccessMessage"] != null)
         {
-            <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-800 rounded-xl flex items-center gap-3 animate-fade-in">
-                <i class="fas fa-exclamation-triangle text-red-600"></i>
-                <span>@TempData["ErrorMessage"]</span>
-            </div>
+            <partial name="~/Views/Shared/_ToastNotification.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["SuccessMessage"]?.ToString(),})" />
         }
 
-        @if (TempData["WarningMessage"] != null)
+        @if (TempData["ErrorMessage"] != null)
         {
-            <div class="mb-6 p-4 bg-yellow-100 border border-yellow-200 text-yellow-800 rounded-xl flex items-center gap-3 animate-fade-in">
-                <i class="fas fa-exclamation-circle text-yellow-600"></i>
-                <span>@TempData["WarningMessage"]</span>
-            </div>
+            <partial name="~/Views/Shared/_ToastNotification.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["ErrorMessage"]?.ToString(),})" />
         }
+
 
         <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
             @Html.AntiForgeryToken()
@@ -79,6 +74,15 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Address Form -->
                         <div class="space-y-4">
+                        <!-- Address Display and Actions -->
+                            <div id="addressDisplay" class="space-y-3">
+                                <div class="grid-2 gap-3">
+                                    <a asp-area="Customer" asp-action="AddressForm" asp-controller="Account" asp-route-returnUrl="@Url.Action("Index", "Checkout", new { area = "Customer" })" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Add New Address</span>
+                                    </a>
+                                </div>
+                            </div>
                             <!-- Address Selection Options -->
                             <div id="addressSelection" class="space-y-3">
                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Choose Delivery Location:</h3>
@@ -97,7 +101,7 @@
                                                 data-latitude="@address.Latitude"
                                                 data-longitude="@address.Longitude"
                                                 @(address.IsDefault ? "checked" : "") />
-                                            <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300">
+                                            <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300 mb-2">
                                                 <div class="flex items-start gap-3">
                                                     <div class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-green-600 peer-checked:bg-green-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                                                         <i class="fas fa-check text-white text-xs hidden peer-checked:block"></i>
@@ -122,116 +126,12 @@
                                     }
                                 }
                             </div>
-
-                            <!-- Address Display and Actions -->
-                            <div id="addressDisplay" class="space-y-3">
-                                <div class="grid-2 gap-3">
-                                    <button type="button" 
-                                            id="editAddressBtn"
-                                            class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
-                                        <i class="fas fa-edit"></i>
-                                        <span>Edit Address Details</span>
-                                    </button>
-                                    
-                                </div>
-                            </div>
-
-                            <!-- Address Edit Form (hidden by default) -->
-                            <div id="addressEditForm" class="hidden space-y-4">
-                                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-                                    <p class="text-sm text-blue-800 flex items-center gap-2">
-                                        <i class="fas fa-info-circle"></i>
-                                        <span>Fill in your address details or use current location to auto-fill</span>
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Street Address <span class="text-red-500">*</span></label>
-                                    <input asp-for="Street" 
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                        placeholder="House/Unit No., Building, Street Name"
-                                        value="@defaultAddress?.Street" />
-                                    <span asp-validation-for="Street" class="text-red-500 text-sm mt-1"></span>
-                                </div>
-                                
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Barangay <span class="text-red-500">*</span></label>
-                                        <input asp-for="Barangay" 
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                            placeholder="Barangay"
-                                            value="@defaultAddress?.Barangay" />
-                                        <span asp-validation-for="Barangay" class="text-red-500 text-sm mt-1"></span>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
-                                        <input asp-for="City" 
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                            placeholder="City"
-                                            value="@defaultAddress?.City" />
-                                        <span asp-validation-for="City" class="text-red-500 text-sm mt-1"></span>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
-                                        <input asp-for="Province" 
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                            placeholder="Province"
-                                            value="@defaultAddress?.Province" />
-                                        <span asp-validation-for="Province" class="text-red-500 text-sm mt-1"></span>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code <span class="text-red-500">*</span></label>
-                                        <input asp-for="ZipCode" 
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                            placeholder="Postal Code"
-                                            pattern="[0-9]{4}"
-                                            value="@defaultAddress?.ZipCode" />
-                                        <span asp-validation-for="ZipCode" class="text-red-500 text-sm mt-1"></span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Map Controls -->
-                                <div class="space-y-3">
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button type="button" 
-                                                id="currentLocationBtn"
-                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
-                                            <i class="fas fa-location-crosshairs"></i>
-                                            <span>Current Location</span>
-                                        </button>
-                                        <button type="button" 
-                                                id="searchAddressBtn"
-                                                class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
-                                            <i class="fas fa-search"></i>
-                                            <span>Search on Map</span>
-                                        </button>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button type="button" 
-                                                id="useAddressBtn"
-                                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
-                                            <i class="fas fa-check"></i>
-                                            <span>Use Address</span>
-                                        </button>
-                                        <button type="button" 
-                                                id="cancelEditBtn"
-                                                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2">
-                                            <i class="fas fa-times"></i>
-                                            <span>Cancel</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <!-- Hidden coordinates fields -->
-                                <input type="hidden" asp-for="Latitude" id="latitudeInput" value="@defaultAddress?.Latitude" />
-                                <input type="hidden" asp-for="Longitude" id="longitudeInput" value="@defaultAddress?.Longitude" />
-                            </div>
                         </div>
                         
+                        <!-- Hidden coordinates fields -->
+                        <input type="hidden" id="latitudeInput" value="@defaultAddress?.Latitude" />
+                        <input type="hidden" id="longitudeInput" value="@defaultAddress?.Longitude" />
+
                         <!-- Interactive Map -->
                         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-fit">
                             <!-- Map Header -->
@@ -282,23 +182,12 @@
                 <!-- Section 2: Personal Details -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-user text-green-600"></i>
-                        Personal Details
+                        <i class="fas fa-truck text-green-600"></i>
+                        Delivery Notes
                     </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                            <input asp-for="FullName" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                   value="@Model.FullName" />
-                            <span asp-validation-for="FullName" class="text-red-500 text-sm mt-1"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-                            <input asp-for="ContactNumber" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
-                                   value="@Model.ContactNumber" />
-                            <span asp-validation-for="ContactNumber" class="text-red-500 text-sm mt-1"></span>
+                            <input asp-for="DeliveryNotes" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" />
                         </div>
                     </div>
                 </div>
@@ -314,7 +203,7 @@
                             <label class="block text-gray-700 font-medium">Select Payment Method</label>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
-                                    <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
+                                    <input type="radio" name="PaymentMethod" value="CashOnDelivery" class="radio-input" />
                                     <span>Cash on Delivery</span>
                                 </label>
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
@@ -453,7 +342,7 @@
                         {
                             foreach (var item in Model.Cart.CartItems)
                             {
-                                var itemAddOnsTotal = item.Options?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
                                 var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
                                 
                                 <div class="flex gap-3 py-3 border-b border-gray-100 last:border-b-0">
@@ -462,10 +351,10 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-gray-900 text-sm">@item.ProductName</h4>
-                                        @if (item.Options != null && item.Options.Any())
+                                        @if (item.CartItemOptions != null && item.CartItemOptions.Any())
                                         {
                                             <div class="mt-1 text-xs text-gray-600">
-                                                @foreach (var opt in item.Options)
+                                                @foreach (var opt in item.CartItemOptions)
                                                 {
                                                     <div>
                                                         + @opt.OptionName
@@ -537,7 +426,6 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
     <script src="~/js/maps.js"></script>
     <script>
-        // Pass C# variables to JavaScript
         window.checkoutSubtotal = @subtotal;
     </script>
     <script src="~/js/place-order.js"></script>
