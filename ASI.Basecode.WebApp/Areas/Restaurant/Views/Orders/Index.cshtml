@@ -4,6 +4,8 @@
     ViewData["Title"] = "Order List";
 }
 
+@Html.AntiForgeryToken()
+
 <div id="orders" class="section active">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -183,6 +185,57 @@
             updateOrderCounts();
         });
 
+        // Listen for order status changes from other restaurant staff
+        connection.on("OrderStatusChanged", (data) => {
+            console.log("Order status changed:", data);
+            
+            const orderCard = document.getElementById(`order-${data.orderId}`);
+            if (!orderCard) return;
+            
+            // Update the order card based on new status
+            orderCard.setAttribute('data-status', data.newStatus);
+            
+            // Update border colors
+            const borderEl = orderCard.querySelector('.border-l-4');
+            borderEl.classList.remove('border-green-500', 'border-yellow-500', 'border-blue-500');
+            
+            let badgeClass = '';
+            let borderClass = '';
+            
+            switch(data.newStatus) {
+                case 'Processing':
+                    badgeClass = 'bg-yellow-100 text-yellow-800';
+                    borderClass = 'border-yellow-500';
+                    break;
+                case 'ReadyForPickup':
+                    badgeClass = 'bg-blue-100 text-blue-800';
+                    borderClass = 'border-blue-500';
+                    break;
+                case 'Completed':
+                    badgeClass = 'bg-gray-100 text-gray-800';
+                    borderClass = 'border-gray-500';
+                    break;
+                default:
+                    badgeClass = 'bg-green-100 text-green-800';
+                    borderClass = 'border-green-500';
+            }
+            
+            borderEl.classList.add(borderClass);
+            
+            // Update status badge
+            const badge = orderCard.querySelector('span.px-2');
+            badge.className = `px-2 py-1 ${badgeClass} text-xs font-medium rounded-full`;
+            badge.textContent = data.newStatus;
+            
+            // Update counts
+            updateOrderCounts();
+            
+            // Hide card if it doesn't match current filter
+            if (currentFilter !== 'all' && currentFilter !== data.newStatus) {
+                orderCard.style.display = 'none';
+            }
+        });
+
         // Start connection and join restaurant group
         connection.start()
             .then(() => {
@@ -305,10 +358,14 @@
             if (!confirm('Accept this order?')) return;
             
             try {
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
                 const response = await fetch(`/Restaurant/Orders/AcceptOrder?orderId=${orderId}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
                     }
                 });
                 
@@ -316,29 +373,72 @@
                 
                 if (result.success) {
                     const orderCard = document.getElementById(`order-${orderId}`);
-                    orderCard.style.opacity = '0.5';
-                    orderCard.querySelector('[data-status]').setAttribute('data-status', 'Processing');
+                    
+                    // Update data-status attribute
+                    orderCard.setAttribute('data-status', 'Processing');
+                    
+                    // Update border color
                     orderCard.querySelector('.border-l-4').classList.remove('border-green-500');
                     orderCard.querySelector('.border-l-4').classList.add('border-yellow-500');
                     
                     // Update status badge
-                    const badge = orderCard.querySelector('span.bg-green-100');
+                    const badge = orderCard.querySelector('span.px-2');
                     badge.className = 'px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full';
                     badge.textContent = 'Processing';
                     
-                    // Remove accept/reject buttons
-                    const buttonsDiv = orderCard.querySelector('.flex.gap-2');
-                    buttonsDiv.innerHTML = '<a href="/Restaurant/Orders/ViewOrder/' + orderId + '" class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors text-center">View</a>';
+                    // Update number badge color
+                    const numberBadge = orderCard.querySelector('.bg-green-500');
+                    numberBadge.classList.remove('bg-green-500');
+                    numberBadge.classList.add('bg-yellow-500');
                     
+                    // Remove accept/reject buttons, keep only View button
+                    const buttonsDiv = orderCard.querySelector('.flex.gap-2');
+                    buttonsDiv.innerHTML = `
+                        <a href="/Restaurant/Orders/ViewOrder/${orderId}" 
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors text-center">
+                            View
+                        </a>
+                    `;
+                    
+                    // Update counts
                     updateOrderCounts();
-                    alert('Order accepted successfully!');
+                    
+                    // If we're on the "Pending" tab, hide the card since it moved to Processing
+                    if (currentFilter === 'Pending') {
+                        orderCard.style.display = 'none';
+                    }
+                    
+                    // Show success message
+                    showSuccessNotification('Order accepted successfully!');
                 } else {
                     alert('Error: ' + result.message);
                 }
             } catch (error) {
                 console.error('Error accepting order:', error);
-                alert('Error accepting order');
+                alert('Error accepting order. Please try again.');
             }
+        }
+
+        // Add this helper function for success notifications
+        function showSuccessNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in';
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         async function rejectOrder(orderId) {

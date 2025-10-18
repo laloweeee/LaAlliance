@@ -24,7 +24,6 @@ namespace ASI.Basecode.Data.Repositories
         {
             return _dbContext.OrderProcesseds.ToList();
         }
-
         /// <summary>
         /// Get OrderProcessed by ID
         /// </summary>

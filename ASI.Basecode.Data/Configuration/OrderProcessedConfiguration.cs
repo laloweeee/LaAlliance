@@ -18,7 +18,11 @@ namespace ASI.Basecode.Data.Configuration
             builder.Property(op => op.ProcessedAt)
                 .IsRequired();
 
-            // Relationships are configured in OrderConfiguration and RestaurantStaffConfiguration
+            // Configure the relationship to User (staff who processed)
+            builder.HasOne(op => op.HandledBy)
+                .WithMany()  // No navigation property on RestaurantStaff side
+                .HasForeignKey(op => op.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Table Name
             builder.ToTable("OrderProcessed");

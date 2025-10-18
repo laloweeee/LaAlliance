@@ -119,5 +119,28 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Reject a pending order
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectOrder(int orderId)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                await _orderService.UpdateOrderStatus(orderId, userId, Enums.OrderStatus.Cancelled);
+
+                TempData["SuccessMessage"] = "Order rejected successfully!";
+                return Json(new { success = true, message = "Order rejected successfully!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rejecting order {OrderId}", orderId);
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

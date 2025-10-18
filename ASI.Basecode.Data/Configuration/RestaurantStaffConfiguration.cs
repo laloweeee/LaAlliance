@@ -23,11 +23,9 @@ namespace ASI.Basecode.Data.Configuration
                 .HasConversion<string>()
                 .HasDefaultValue(AccountStatus.Active);
 
-            // Relationships
-            builder.HasMany(rs => rs.OrderProcessed)
-                .WithOne(op => op.HandledBy)
-                .HasForeignKey(op => op.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // REMOVED the conflicting relationship
+            // The UserID in OrderProcessed will just be a simple foreign key
+            // without navigation property from RestaurantStaff side
 
             // Table Name
             builder.ToTable("RestaurantStaff");

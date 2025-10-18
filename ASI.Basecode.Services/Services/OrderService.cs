@@ -368,33 +368,27 @@ namespace ASI.Basecode.Services.Services
                 throw new InvalidDataException("User is not a restaurant.");
             }
 
-            if (newStatus == OrderStatus.Pending)
+            if (newStatus == OrderStatus.Processing)
             {
                 _orderProcessedRepository.AddOrderProcessed(new OrderProcessed
                 {
                     OrderID = orderID,
                     UserID = userID,
-                    ProcessedAt = DateTime.UtcNow,
+                    ElapsedTime = TimeOnly.FromDateTime(DateTime.UtcNow),
+                    ProcessedAt = DateTime.UtcNow
                 });
             }
 
             // Update order status
-            _orderRepository.UpdateOrder(new Order
-            {
-                OrderID = orderID,
-                OrderStatus = newStatus
-            });
+            order.OrderStatus = newStatus;
+            _orderRepository.UpdateOrder(order);
+
+            // Notify ALL restaurant staff about the status change
+            await NotifyRestaurantOrderStatusChange(orderID, newStatus);
 
             // Notify customer about order status change
             await NotifyOrderStatusChange(orderID, newStatus);
         }
-
-
-
-
-
-
-
 
         /// <summary>
         /// Notify restaurant of new order via SignalR
@@ -475,6 +469,27 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
+        /// <summary>
+        /// Notify all restaurant staff about order status change
+        /// </summary>
+        private async Task NotifyRestaurantOrderStatusChange(int orderID, OrderStatus newStatus)
+        {
+            try
+            {
+                await _orderHubContext.Clients.Group("Restaurant")
+                    .SendAsync("OrderStatusChanged", new
+                    {
+                        orderId = orderID,
+                        newStatus = newStatus.ToString(),
+                        timestamp = DateTime.UtcNow
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending restaurant status update: {ex.Message}");
+            }
+        }
+        
         /// <summary>
         /// Gets user-friendly status message
         /// </summary>
