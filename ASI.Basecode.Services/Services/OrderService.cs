@@ -368,17 +368,6 @@ namespace ASI.Basecode.Services.Services
                 throw new InvalidDataException("User is not a restaurant.");
             }
 
-            if (newStatus == OrderStatus.Processing)
-            {
-                _orderProcessedRepository.AddOrderProcessed(new OrderProcessed
-                {
-                    OrderID = orderID,
-                    UserID = userID,
-                    ElapsedTime = TimeOnly.FromDateTime(DateTime.UtcNow),
-                    ProcessedAt = DateTime.UtcNow
-                });
-            }
-
             // Update order status
             order.OrderStatus = newStatus;
             _orderRepository.UpdateOrder(order);

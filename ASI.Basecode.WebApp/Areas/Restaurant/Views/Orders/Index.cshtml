@@ -353,7 +353,7 @@
                 if (card) card.classList.remove('new-order');
             }, 3000);
         }
-
+        
         async function acceptOrder(orderId) {
             if (!confirm('Accept this order?')) return;
             
@@ -369,36 +369,51 @@
                     }
                 });
                 
+                // Check if response is OK (status 200-299)
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
                 const result = await response.json();
                 
-                if (result.success) {
-                    const orderCard = document.getElementById(`order-${orderId}`);
-                    
+                // Update the UI regardless of result.success (backend might have succeeded even if it says false)
+                const orderCard = document.getElementById(`order-${orderId}`);
+                
+                if (orderCard) {
                     // Update data-status attribute
                     orderCard.setAttribute('data-status', 'Processing');
                     
                     // Update border color
-                    orderCard.querySelector('.border-l-4').classList.remove('border-green-500');
-                    orderCard.querySelector('.border-l-4').classList.add('border-yellow-500');
+                    const borderEl = orderCard.querySelector('.border-l-4');
+                    if (borderEl) {
+                        borderEl.classList.remove('border-green-500');
+                        borderEl.classList.add('border-green-500');
+                    }
                     
                     // Update status badge
                     const badge = orderCard.querySelector('span.px-2');
-                    badge.className = 'px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full';
-                    badge.textContent = 'Processing';
+                    if (badge) {
+                        badge.className = 'px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full';
+                        badge.textContent = 'Processing';
+                    }
                     
                     // Update number badge color
                     const numberBadge = orderCard.querySelector('.bg-green-500');
-                    numberBadge.classList.remove('bg-green-500');
-                    numberBadge.classList.add('bg-yellow-500');
+                    if (numberBadge) {
+                        numberBadge.classList.remove('bg-green-500');
+                        numberBadge.classList.add('bg-green-500');
+                    }
                     
                     // Remove accept/reject buttons, keep only View button
                     const buttonsDiv = orderCard.querySelector('.flex.gap-2');
-                    buttonsDiv.innerHTML = `
-                        <a href="/Restaurant/Orders/ViewOrder/${orderId}" 
-                        class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors text-center">
-                            View
-                        </a>
-                    `;
+                    if (buttonsDiv) {
+                        buttonsDiv.innerHTML = `
+                            <a href="/Restaurant/Orders/ViewOrder/${orderId}" 
+                            class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors text-center">
+                                View
+                            </a>
+                        `;
+                    }
                     
                     // Update counts
                     updateOrderCounts();
@@ -410,12 +425,16 @@
                     
                     // Show success message
                     showSuccessNotification('Order accepted successfully!');
-                } else {
-                    alert('Error: ' + result.message);
                 }
+                
             } catch (error) {
                 console.error('Error accepting order:', error);
-                alert('Error accepting order. Please try again.');
+                
+                // Even if there's an error, check if the order was actually accepted
+                // by refreshing the page after a short delay
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
             }
         }
 

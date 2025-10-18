@@ -18,10 +18,11 @@ namespace ASI.Basecode.Data.Configuration
             builder.Property(op => op.ProcessedAt)
                 .IsRequired();
 
-            // Configure the relationship to User (staff who processed)
+            // SIMPLIFIED relationship - no back-reference
             builder.HasOne(op => op.HandledBy)
-                .WithMany()  // No navigation property on RestaurantStaff side
+                .WithMany()  // No navigation property on the other side
                 .HasForeignKey(op => op.UserID)
+                .HasPrincipalKey(rs => rs.UserID)  // Reference RestaurantStaff.UserID
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Table Name

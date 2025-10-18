@@ -40,7 +40,24 @@ namespace ASI.Basecode.Data.Repositories
         /// <param name="orderProcessed"></param>
         public void AddOrderProcessed(OrderProcessed orderProcessed)
         {
-            _dbContext.OrderProcesseds.Add(orderProcessed);
+            // Check if OrderProcessed already exists for this order
+            var existing = _dbContext.OrderProcesseds
+                .FirstOrDefault(op => op.OrderID == orderProcessed.OrderID);
+            
+            if (existing != null)
+            {
+                // If it exists, update it instead of adding
+                existing.UserID = orderProcessed.UserID;
+                existing.ProcessedAt = orderProcessed.ProcessedAt;
+                existing.ElapsedTime = orderProcessed.ElapsedTime;
+                _dbContext.OrderProcesseds.Update(existing);
+            }
+            else
+            {
+                // If it doesn't exist, add new
+                _dbContext.OrderProcesseds.Add(orderProcessed);
+            }
+            
             _dbContext.SaveChanges();
         }
 
