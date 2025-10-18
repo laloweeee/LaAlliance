@@ -1,10 +1,24 @@
+@using ASI.Basecode.WebApp.Models
+@model ASI.Basecode.Services.ServiceModels.ProductViewModel
 @{
     ViewData["Title"] = "Product Form";
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
 }
 
-@model ASI.Basecode.Services.ServiceModels.ProductViewModel
-
 <div class="min-h-screen py-8">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
+    }
+
+    <partial name="_ConfirmModal" />
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <div class="mb-8">
@@ -250,10 +264,40 @@
                 </button>
             </div>
         </form>
+
+        @if (Model.ProductID != 0)
+        {
+            <div class="bg-white rounded-2xl shadow-sm border border-red-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-50 to-red-100 px-6 py-4 border-b border-red-200">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                        Danger Zone
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900">Delete this Product</h3>
+                            <p class="text-xs text-gray-500 mt-1">If you accidentally deleted this product, you can still recover it.</p>
+                        </div>
+                        <button type="button"  
+                                data-item-id="@Model.ProductID"
+                                data-item-name="@Model.ProductName"
+                                data-url="@Url.Action("DeleteProduct", "Menu", new { area = "Restaurant" })"
+                                class="confirm-btn px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            <span class="btn-text">
+                                <i class="fas fa-trash-alt mr-2"></i>Delete Product
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/confirmModal.js"></script>
     <script>
         let customizationGroupIndex = 0;
         let optionIndexes = {};

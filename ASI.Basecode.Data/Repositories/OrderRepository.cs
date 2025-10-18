@@ -86,5 +86,15 @@ namespace ASI.Basecode.Data.Repositories
                 .Include(o => o.PaymentLogs)
                 .FirstOrDefault(o => o.OrderID == orderID);
         }
+    
+        /// <summary>
+        /// Check if a product is included in any order
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <returns></returns>
+        public bool IsProductInAnyOrder(int productID)
+        {
+            return _dbContext.OrderItems.Any(oi => oi.ProductID == productID);
+        }
     }
 }

@@ -70,6 +70,7 @@ namespace ASI.Basecode.Data.Repositories
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
             Context.Remove(entity);
+            UnitOfWork.SaveChanges();
         }
 
         /// <summary>
@@ -105,8 +106,9 @@ namespace ASI.Basecode.Data.Repositories
             entity.IsDeleted = false;
             entity.DeletedDate = null;
             entity.DeletedBy = null;
-            
+
             Context.Update(entity);
+            UnitOfWork.SaveChanges();
         }
 
         /// <summary>

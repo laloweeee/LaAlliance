@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace ASI.Basecode.Data.Interfaces
 {
-    public interface IProductRepository
+    public interface IProductRepository : IBaseRepository
     {
         void AddProduct(Product product);
         void UpdateProduct(Product product);
