@@ -18,5 +18,6 @@ namespace ASI.Basecode.Services.Interfaces
         Task EditProduct(ProductViewModel model);
         void DeleteProduct(int productID, string deletedBy);
         void RecoverProduct(int productID);
+        void PermanentDelete(int productID);
     }
 }

@@ -59,7 +59,12 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public IQueryable<Product> GetAllProducts()
         {
-            return _productRepository.GetProducts();
+            return _productRepository
+                .GetAllIncludingDeleted<Product>()
+                .OrderBy(p => p.IsDeleted)
+                .ThenBy(p => p.ProductCategory.CategoryName)
+                .ThenBy(p => p.ProductName)
+                .AsQueryable();
         }
 
         /// <summary>
@@ -69,15 +74,14 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public ProductViewModel GetProductByID(int productID)
         {
-            var product = _productRepository.GetProducts().Where(p => p.ProductID == productID);
+            var product = _productRepository
+                .GetAllIncludingDeleted<Product>().FirstOrDefault(p => p.ProductID == productID);
 
-            if (product == null || !product.Any())
-            {
-                throw new ArgumentException("The product does not exist.");
-            }
+            if (product == null) throw new ArgumentException("The product does not exist.");
 
-            var model = _mapper.Map<ProductViewModel>(product.First());
-            model.CategoryName = product.First().ProductCategory?.CategoryName;
+            
+            var model = _mapper.Map<ProductViewModel>(product);
+            model.CategoryName = product.ProductCategory?.CategoryName;
 
             return model;
         }
@@ -331,6 +335,22 @@ namespace ASI.Basecode.Services.Services
             if (!product.IsDeleted) throw new InvalidOperationException("The product is not deleted.");
 
             _productRepository.Restore(product);
+        }
+
+        public void PermanentDelete(int productID)
+        {
+            var product = _productRepository.GetAllIncludingDeleted<Product>().FirstOrDefault(p => p.ProductID == productID);
+
+            // Validate product existence
+            if (product == null) throw new ArgumentException("The product does not exist.");
+
+            // Validate product is deleted
+            if (!product.IsDeleted) throw new InvalidOperationException("The product is not deleted.");
+
+            // Validate product is not associated with any orders
+            if (_orderRepository.IsProductInAnyOrder(productID)) throw new InvalidOperationException("Cannot permanently delete product that is associated with existing orders.");
+
+            _productRepository.HardDelete(product);
         }
 
         /// <summary>
