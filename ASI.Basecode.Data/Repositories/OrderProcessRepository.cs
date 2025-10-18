@@ -40,25 +40,29 @@ namespace ASI.Basecode.Data.Repositories
         /// <param name="orderProcessed"></param>
         public void AddOrderProcessed(OrderProcessed orderProcessed)
         {
-            // Check if OrderProcessed already exists for this order
-            var existing = _dbContext.OrderProcesseds
-                .FirstOrDefault(op => op.OrderID == orderProcessed.OrderID);
+            Console.WriteLine($"→ Repository: Adding OrderProcessed for Order {orderProcessed.OrderID}");
             
-            if (existing != null)
+            try
             {
-                // If it exists, update it instead of adding
-                existing.UserID = orderProcessed.UserID;
-                existing.ProcessedAt = orderProcessed.ProcessedAt;
-                existing.ElapsedTime = orderProcessed.ElapsedTime;
-                _dbContext.OrderProcesseds.Update(existing);
-            }
-            else
-            {
-                // If it doesn't exist, add new
                 _dbContext.OrderProcesseds.Add(orderProcessed);
+                Console.WriteLine($"→ Repository: Entity added to context");
+                
+                _dbContext.SaveChanges();
+                Console.WriteLine($"✓ Repository: Changes saved to database");
             }
-            
-            _dbContext.SaveChanges();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"✗✗✗ Repository ERROR ✗✗✗");
+                Console.WriteLine($"Error Message: {ex.Message}");
+                Console.WriteLine($"Error Type: {ex.GetType().Name}");
+                
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                
+                throw; // Re-throw to be caught by the service layer
+            }
         }
 
         /// <summary>

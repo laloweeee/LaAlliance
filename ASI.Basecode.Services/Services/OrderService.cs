@@ -368,15 +368,89 @@ namespace ASI.Basecode.Services.Services
                 throw new InvalidDataException("User is not a restaurant.");
             }
 
-            // Update order status
+            // Update order status FIRST
             order.OrderStatus = newStatus;
             _orderRepository.UpdateOrder(order);
+            
+            Console.WriteLine($"✓ Order {orderID} status updated to {newStatus}");
 
-            // Notify ALL restaurant staff about the status change
-            await NotifyRestaurantOrderStatusChange(orderID, newStatus);
+            // Add OrderProcessed record when order is accepted
+            if (newStatus == OrderStatus.Processing)
+            {
+                Console.WriteLine($"→ Attempting to create OrderProcessed for Order {orderID}");
+                
+                try
+                {
+                    // Get the StaffID from RestaurantStaff table using the UserID
+                    var staff = user.RestaurantStaff; // Assuming User has RestaurantStaff navigation property
+                    
+                    if (staff == null)
+                    {
+                        Console.WriteLine($"✗ No RestaurantStaff found for UserID {userID}");
+                        // Don't fail the entire operation
+                        return;
+                    }
+                    
+                    Console.WriteLine($"→ Found StaffID: {staff.StaffID} for UserID: {userID}");
+                    
+                    // Check if record already exists
+                    var existingProcessed = _orderProcessedRepository.GetAllOrderProcesseds()
+                        .FirstOrDefault(op => op.OrderID == orderID);
 
-            // Notify customer about order status change
-            await NotifyOrderStatusChange(orderID, newStatus);
+                    if (existingProcessed == null)
+                    {
+                        Console.WriteLine("→ Creating new OrderProcessed record...");
+                        
+                        var orderProcessed = new OrderProcessed
+                        {
+                            OrderID = orderID,
+                            UserID = staff.StaffID,  // ← CHANGED: Use StaffID instead of UserID
+                            ProcessedAt = DateTime.UtcNow,
+                            ElapsedTime = TimeOnly.FromDateTime(DateTime.UtcNow)
+                        };
+
+                        _orderProcessedRepository.AddOrderProcessed(orderProcessed);
+                        
+                        Console.WriteLine($"✓ OrderProcessed created successfully for OrderID: {orderID}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("→ Updating existing OrderProcessed record...");
+                        
+                        existingProcessed.UserID = staff.StaffID;  // ← CHANGED: Use StaffID
+                        existingProcessed.ProcessedAt = DateTime.UtcNow;
+                        existingProcessed.ElapsedTime = TimeOnly.FromDateTime(DateTime.UtcNow);
+                        
+                        _orderProcessedRepository.UpdateOrderProcessed(existingProcessed);
+                        
+                        Console.WriteLine($"✓ OrderProcessed updated for OrderID: {orderID}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"✗✗✗ ERROR saving OrderProcessed ✗✗✗");
+                    Console.WriteLine($"Error Message: {ex.Message}");
+                    Console.WriteLine($"Error Type: {ex.GetType().Name}");
+                    Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                    
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                    }
+                    
+                    // Don't throw - order was already accepted successfully
+                }
+            }
+
+            // Notifications
+            try
+            {
+                await NotifyOrderStatusChange(orderID, newStatus);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error notifying customer: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -463,7 +537,7 @@ namespace ASI.Basecode.Services.Services
         /// </summary>
         private async Task NotifyRestaurantOrderStatusChange(int orderID, OrderStatus newStatus)
         {
-            try
+            /*try
             {
                 await _orderHubContext.Clients.Group("Restaurant")
                     .SendAsync("OrderStatusChanged", new
@@ -476,7 +550,7 @@ namespace ASI.Basecode.Services.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error sending restaurant status update: {ex.Message}");
-            }
+            }*/
         }
         
         /// <summary>
