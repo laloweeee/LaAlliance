@@ -386,10 +386,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 this.ShowSuccessToast("Product recovered successfully!");
             }
             catch (Exception ex)
-            {
+            {   
+                // Log the exception for debugging purposes
                 this.ShowErrorToast("Error recovering product: " + ex.Message);
             }
 
+            // Redirect back to the products tab
             return RedirectToAction("Index", new { activeTab = "products" });
         }
 

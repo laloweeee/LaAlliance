@@ -87,27 +87,37 @@ namespace ASI.Basecode.Services.Services
         }
 
         /// <summary>
-        /// Retrieve products by category ID.
-        /// </summary>
-        /// <param name="categoryID"></param>
-        /// <returns></returns>
-        public IQueryable<Product> GetProductsByCategoryID(int categoryID)
-        {
-            var products = _productRepository.GetProducts().Where(p => p.CategoryID == categoryID);
-
-            // Validate products existence
-            if (products == null || !products.Any()) throw new ArgumentException("The category does not exist.");
-
-            return products;
-        }
-
-        /// <summary>
         /// Retrieve all active products.
         /// </summary>
         /// <returns></returns>
         public List<ProductViewModel> GetActiveProducts()
         {
             var products = _productRepository.GetProducts().Where(p => p.IsActive);
+
+            // Return empty list if no products found
+            if (products == null || !products.Any()) return new List<ProductViewModel>();
+
+            var model = new List<ProductViewModel>();
+
+            // Map each product to ProductViewModel and include CategoryName
+            foreach (var product in products)
+            {
+                var productViewModel = _mapper.Map<ProductViewModel>(product);
+                productViewModel.CategoryName = product.ProductCategory?.CategoryName;
+                model.Add(productViewModel);
+            }
+
+            // Return model
+            return model;
+        }
+
+        /// <summary>
+        /// Retrieve all deleted products.
+        /// </summary>
+        /// <returns></returns>
+        public List<ProductViewModel> GetDeletedProducts()
+        {
+            var products = _productRepository.GetAllIncludingDeleted<Product>().Where(p => p.IsDeleted);
 
             // Return empty list if no products found
             if (products == null || !products.Any()) return new List<ProductViewModel>();
@@ -337,6 +347,12 @@ namespace ASI.Basecode.Services.Services
             _productRepository.Restore(product);
         }
 
+        /// <summary>
+        /// Permanently delete a product.
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
         public void PermanentDelete(int productID)
         {
             var product = _productRepository.GetAllIncludingDeleted<Product>().FirstOrDefault(p => p.ProductID == productID);
@@ -399,5 +415,6 @@ namespace ASI.Basecode.Services.Services
 
             return false;
         }
+
     }
 }
