@@ -33,6 +33,18 @@ namespace ASI.Basecode.Data.Interfaces
         /// <returns></returns>
         IEnumerable<Order> GetAllOrders();
 
+        /// <summary>
+        /// Get order by its ID
+        /// </summary>
+        /// <param name="orderID"></param>
+        /// <returns></returns>
         Order GetOrderById(int orderID);
+
+        /// <summary>
+        /// Check if a product is included in any order
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <returns></returns>
+        bool IsProductInAnyOrder(int productID);
     }
 }
