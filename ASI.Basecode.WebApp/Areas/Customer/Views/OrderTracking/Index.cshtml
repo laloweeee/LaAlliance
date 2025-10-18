@@ -149,26 +149,4 @@
         <script src="~/js/order-tracking-map.js"></script>
     }
     
-    <script>
-        // Cancel order functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const cancelOrderBtn = document.getElementById('cancelOrderBtn');
-            
-            if (cancelOrderBtn) {
-                cancelOrderBtn.addEventListener('click', function() {
-                    if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
-                        // Show loading state
-                        cancelOrderBtn.disabled = true;
-                        cancelOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cancelling...';
-                        
-                        // Simulate API call to cancel order
-                        setTimeout(() => {
-                            alert('Order has been cancelled successfully.');
-                            window.location.href = '/Customer/OrderTracking'; // Refresh page or redirect
-                        }, 1500);
-                    }
-                });
-            }
-        });
-    </script>
 }
