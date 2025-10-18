@@ -1,10 +1,24 @@
+@using ASI.Basecode.WebApp.Models
+@model ASI.Basecode.Services.ServiceModels.CategoryViewModel
 @{
     ViewData["Title"] = "Category Form";
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
 }
 
-@model ASI.Basecode.Services.ServiceModels.CategoryViewModel
-
 <div class="py-8">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
+    }
+
+    <partial name="_ConfirmModal" />
+
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <div class="mb-8">
@@ -27,7 +41,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Form Card -->
         <form asp-action="@(Model.CategoryID == 0 ? "AddCategory" : "UpdateCategory")" method="post" id="categoryForm">
             @Html.AntiForgeryToken()
@@ -109,47 +122,37 @@
         <!-- Delete Button (Only for existing categories) -->
         @if (Model.CategoryID != 0)
         {
-            <form asp-action="DeleteCategory" method="post" class="mt-6" id="deleteForm">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="categoryID" value="@Model.CategoryID" />
-                <input type="hidden" name="returnTab" value="@ViewBag.ReturnTab" />
-                
-                <div class="bg-white rounded-2xl shadow-sm border border-red-200 overflow-hidden">
-                    <div class="bg-gradient-to-r from-red-50 to-red-100 px-6 py-4 border-b border-red-200">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
-                            <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
-                            Danger Zone
-                        </h2>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div>
-                                <h3 class="text-sm font-semibold text-gray-900">Delete this category</h3>
-                                <p class="text-xs text-gray-500 mt-1">Once deleted, this action cannot be undone</p>
-                            </div>
-                            <button type="submit" id="deleteBtn"
-                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                                <span class="btn-text">
-                                    <i class="fas fa-trash-alt mr-2"></i>
-                                    Delete Category
-                                </span>
-                                <span class="btn-loading hidden">
-                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Deleting...
-                                </span>
-                            </button>
+            <div class="bg-white rounded-2xl shadow-sm border border-red-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-50 to-red-100 px-6 py-4 border-b border-red-200">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                        Danger Zone
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900">Delete this category</h3>
+                            <p class="text-xs text-gray-500 mt-1">If you accidentally deleted this category, you can still recover it.</p>
                         </div>
+                        <button type="button"  
+                                data-item-id="@Model.CategoryID"
+                                data-item-name="@Model.CategoryName"
+                                data-url="@Url.Action("DeleteCategory", "Menu", new { area = "Restaurant" })"
+                                class="confirm-btn px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            <span class="btn-text">
+                                <i class="fas fa-trash-alt mr-2"></i>Delete Category
+                            </span>
+                        </button>
                     </div>
                 </div>
-            </form>
+            </div>
         }
     </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/confirmModal.js"></script>
     <script>
         const isEditMode = @(Model.CategoryID != 0 ? "true" : "false");
         let originalValues = {};

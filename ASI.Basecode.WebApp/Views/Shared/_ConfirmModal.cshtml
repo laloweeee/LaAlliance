@@ -47,9 +47,8 @@
                 <form id="confirmForm" method="post" style="display: inline; flex: 1;">
                     @Html.AntiForgeryToken()
                     <!-- JS will set input name/value and form.action -->
-                    <input type="hidden" id="confirmHiddenInput" name="" value="" />
-                    <button type="submit"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <input type="hidden" id="confirmHiddenInput" name="id" value="" />
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                         <i class="fas fa-trash"></i>
                         Remove
                     </button>

@@ -15,12 +15,12 @@
             <!-- Toast Notifications - Matching cart style -->
             @if (TempData["SuccessMessage"] != null)
             {
-                <partial name="~/Views/Shared/_ToastNotificationViewModel.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["SuccessMessage"]?.ToString(),})" />
+                <partial name="~/Views/Shared/_ToastNotification.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["SuccessMessage"]?.ToString(),})" />
             }
 
             @if (TempData["ErrorMessage"] != null)
             {
-                <partial name="~/Views/Shared/_ToastNotificationViewModel.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["ErrorMessage"]?.ToString(),})" />
+                <partial name="~/Views/Shared/_ToastNotification.cshtml"  model="@(new ASI.Basecode.WebApp.Models.ToastNotificationViewModel {Message = TempData["ErrorMessage"]?.ToString(),})" />
             }
 
             <!-- Delete Confirmation Modal - Matching cart style -->

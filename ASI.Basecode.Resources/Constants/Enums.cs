@@ -40,11 +40,13 @@
         {
             Pending,
             Processing,
+            Ready,
+            OutForDelivery,
+            ReadyForPickup,
             Completed,
             Cancelled,
-            Refunded,
-            Ready
         }
+        
         /// <summary>
         /// Order Type
         /// </summary>
@@ -58,6 +60,7 @@
         /// </summary>
         public enum PaymentMethod
         {
+            GCash,
             CreditCard,
             CashOnDelivery
         }

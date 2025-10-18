@@ -187,11 +187,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult SaveAddress(UserAddressViewModel model, string returnUrl)
         {
-            if (!ModelState.IsValid)
-            {
-                return View("AddressForm", model);
-            }
-
             try
             {
                 var userAddress = new UserAddressServiceModel

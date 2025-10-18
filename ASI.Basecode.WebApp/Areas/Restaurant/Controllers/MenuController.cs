@@ -58,7 +58,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ToastrError"] = "Error loading menu: " + ex.Message;
+                TempData["ErrorMessage"] = "Error loading menu: " + ex.Message;
                 return View(new MenuViewModel());
             }
         }
@@ -87,6 +87,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             }
 
             var category = _categoryService.GetCategoryByID(categoryID.Value);
+            
             if (category == null)
             {
                 return NotFound();
@@ -111,12 +112,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 try
                 {
                     _categoryService.AddCategory(model);
-                    TempData["ToastrSuccess"] = "Category added successfully!";
+                    TempData["SuccessMessage"] = "Category added successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
                 catch (Exception ex)
                 {
-                    TempData["ToastrError"] = ex.Message;
+                    TempData["ErrorMessage"] = ex.Message;
                 }
             }
 
@@ -139,12 +140,12 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 try
                 {
                     _categoryService.UpdateCategory(model);
-                    TempData["ToastrSuccess"] = "Category updated successfully!";
+                    TempData["SuccessMessage"] = "Category updated successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
                 catch (Exception ex)
                 {
-                    TempData["ToastrError"] = ex.Message;
+                    TempData["ErrorMessage"] = ex.Message;
                 }
             }
 
@@ -160,31 +161,68 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteCategory(CategoryViewModel model, string returnTab = "categories")
+        public IActionResult DeleteCategory(int id, string returnTab = "categories")
         {
             try
             {
-                _categoryService.DeleteCategory(model.CategoryID, User.FindFirstValue(ClaimTypes.Name));
-                TempData["ToastrSuccess"] = "Category deleted successfully!";
-                return RedirectToAction("Index", new { activeTab = returnTab });
+                var category = _categoryService.GetCategoryByID(id);
 
+                _categoryService.DeleteCategory(id, User.FindFirstValue(ClaimTypes.Name));
+
+                TempData["SuccessMessage"] = "Category deleted successfully!";
+
+                return RedirectToAction("Index", new { activeTab = returnTab });
             }
             catch (Exception ex)
             {
-                TempData["ToastrError"] = ex.Message;
+                TempData["ErrorMessage"] = ex.Message;
                 ViewBag.ReturnTab = returnTab;
-
-                var category = _categoryService.GetCategoryByID(model.CategoryID);
-
-                if (category == null)
-                {
-                    TempData["ToastrError"] = "Category not found.";
-                    return RedirectToAction("Index", new { activeTab = returnTab });
-                }
-
-                var categoryViewModel = _mapper.Map<CategoryViewModel>(category);
-                return View("CategoryForm", categoryViewModel);
+                return RedirectToAction("CategoryForm", new { categoryID = id, returnTab });
             }
+        }
+
+        /// <summary>
+        /// Handles the recovery of a deleted category.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <returns></returns>
+        public IActionResult RecoverCategory(int id)
+        {
+            _logger.LogInformation($"RecoverCategory action called with ID: {id}");
+            try
+            {
+                _categoryService.RecoverCategory(id);
+                TempData["SuccessMessage"] = "Category recovered successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error recovering category: " + ex.Message;
+            }
+
+            return RedirectToAction("Index", new { activeTab = "categories" });
+        }
+
+        /// <summary>
+        /// Handles the permanent deletion of a category.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <returns></returns>
+        public IActionResult PermanentDelete(int id)
+        {
+            try
+            {
+                var category = _categoryService.GetCategoryByID(id);
+
+                _categoryService.PermanentDeleteCategory(id);
+
+                TempData["SuccessMessage"] = "Category permanently deleted successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error permanently deleting category: " + ex.Message;
+            }
+
+            return RedirectToAction("Index", new { activeTab = "categories" });
         }
 
         #endregion
@@ -231,7 +269,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 
                 if (product == null)
                 {
-                    TempData["ToastrError"] = "Product not found.";
+                    TempData["ErrorMessage"] = "Product not found.";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
              
@@ -240,7 +278,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error loading product with ID: {productID}");
-                TempData["ToastrError"] = "Error loading product: " + ex.Message;
+                TempData["ErrorMessage"] = "Error loading product: " + ex.Message;
                 return RedirectToAction("Index", new { activeTab = returnTab });
             }
         }
@@ -272,7 +310,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 {
                     await _productService.AddProduct(model);
 
-                    TempData["ToastrSuccess"] = "Product added successfully!";
+                    TempData["SuccessMessage"] = "Product added successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
 
@@ -283,7 +321,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding product");
-                TempData["ToastrError"] = "Error adding product: " + ex.Message;
+                TempData["ErrorMessage"] = "Error adding product: " + ex.Message;
                 ViewBag.Categories = _categoryService.GetAllCategories().ToList();
                 ViewBag.ReturnTab = returnTab;
                 return View("ProductForm", model);
@@ -317,7 +355,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 {
                     await _productService.EditProduct(model);
 
-                    TempData["ToastrSuccess"] = "Product updated successfully!";
+                    TempData["SuccessMessage"] = "Product updated successfully!";
                     return RedirectToAction("Index", new { activeTab = returnTab });
                 }
 
@@ -328,11 +366,60 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating product");
-                TempData["ToastrError"] = "Error updating product: " + ex.Message;
+                TempData["ErrorMessage"] = "Error updating product: " + ex.Message;
                 ViewBag.Categories = _categoryService.GetAllCategories().ToList();
                 ViewBag.ReturnTab = returnTab;
                 return View("ProductForm", model);
             }
+        }
+
+        /// <summary>
+        /// Handles the deletion of a category.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <param name="returnTab"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteProduct(int id, string returnTab = "products")
+        {
+            try
+            {
+                var product = _productService.GetProductByID(id);
+
+                _productService.DeleteProduct(id, User.FindFirstValue(ClaimTypes.Name));
+
+                TempData["SuccessMessage"] = "Product deleted successfully!";
+
+                return RedirectToAction("Index", new { activeTab = returnTab });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                ViewBag.ReturnTab = returnTab;
+                return RedirectToAction("ProductForm", new { productID = id, returnTab });
+            }
+        }
+
+        /// <summary>
+        /// Handles the recovery of a deleted category.
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <returns></returns>
+        public IActionResult RecoverProduct(int id)
+        {
+            _logger.LogInformation($"RecoverProduct action called with ID: {id}");
+            try
+            {
+                _productService.RecoverProduct(id);
+                TempData["SuccessMessage"] = "Product recovered successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error recovering product: " + ex.Message;
+            }
+
+            return RedirectToAction("Index", new { activeTab = "products" });
         }
 
         #endregion

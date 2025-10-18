@@ -16,5 +16,7 @@ namespace ASI.Basecode.Services.Interfaces
         List<ProductViewModel> GetActiveProducts();
         Task AddProduct(ProductViewModel model);
         Task EditProduct(ProductViewModel model);
+        void DeleteProduct(int productID, string deletedBy);
+        void RecoverProduct(int productID);
     }
 }
