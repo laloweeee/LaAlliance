@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 using ASI.Basecode.WebApp.Areas.Customer.Models;
 using System.Security.Claims;
 
@@ -83,9 +84,27 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 return View(model);
             }
 
+            // Persist delivery coordinates/address to session so OrderTracking can read them
+            try
+            {
+                var latStr = model.Latitude.HasValue ? model.Latitude.Value.ToString("G", CultureInfo.InvariantCulture) : string.Empty;
+                var lngStr = model.Longitude.HasValue ? model.Longitude.Value.ToString("G", CultureInfo.InvariantCulture) : string.Empty;
+                _session?.SetString("DeliveryLat", latStr);
+                _session?.SetString("DeliveryLng", lngStr);
+                _session?.SetString("DeliveryAddress", model.DeliveryAddress ?? string.Empty);
+                _session?.SetString("OrderType", model.OrderType ?? "Delivery");
+            }
+            catch
+            {
+                // If session is unavailable, continue without failing the order placement
+            }
+
             _cartService.ClearCart(userId);
             TempData["SuccessMessage"] = "Order placed successfully!";
-            return RedirectToAction("Receipt");
+
+            // Render the confirmation page so users can click "Track your order" and OrderTracking
+            // will pick up the coordinates we just saved to session.
+            return View("PlaceOrder", model);
         }
 
         public IActionResult Receipt()
