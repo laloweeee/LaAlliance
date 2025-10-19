@@ -22,6 +22,8 @@ using System.IO;
 using System.Text;
 using Azure.Storage.Blobs;
 using ASI.Basecode.Services.Hubs;
+using ASI.Basecode.Services.Interfaces;
+using ASI.Basecode.Services.Services; 
 
 namespace ASI.Basecode.WebApp
 {
@@ -47,6 +49,7 @@ namespace ASI.Basecode.WebApp
         private IWebHostEnvironment _environment;
 
         private IServiceCollection _services;
+
 
         /// <summary>
         /// Initialize new <see cref="StartupConfigurer"/> instance using <paramref name="configuration"/>
@@ -113,6 +116,9 @@ namespace ASI.Basecode.WebApp
             services.AddControllersWithViews();
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
+            // Register FavoriteService
+            services.AddScoped<IFavoriteService, FavoriteService>();
+
             //Configuration
             services.Configure<TokenAuthentication>(Configuration.GetSection("TokenAuthentication"));
 
@@ -167,6 +173,8 @@ namespace ASI.Basecode.WebApp
             services.AddSingleton<IFileProvider>(
                 new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
+
+               
         }
 
         /// <summary>
