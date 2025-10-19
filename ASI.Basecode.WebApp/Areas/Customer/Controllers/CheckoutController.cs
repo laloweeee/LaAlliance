@@ -40,7 +40,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         public IActionResult Index()
         {
             ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             var cart = _cartService.GetOrCreateCart(userId);
 
@@ -58,8 +58,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 Cart = cart,
                 AvailableVouchers = new List<string> { "WELCOME10", "FREESHIP", "SAVE20" },
                 Addresses = _mapper != null
-                    ? _mapper.Map<List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>>(addresses)
-                    : addresses.Select(a => new ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel()).ToList()
+                    ? _mapper.Map<List<UserAddressViewModel>>(addresses)
+                    : addresses.Select(a => new UserAddressViewModel()).ToList()
             };
 
             var googleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
@@ -71,7 +71,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
         {
-            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             
             try
             {
@@ -82,9 +82,9 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     model.Cart = _cartService.GetOrCreateCart(userId);
                     model.AvailableVouchers = new List<string> { "WELCOME10", "FREESHIP", "SAVE20" };
                     model.Addresses = _mapper != null
-                        ? _mapper.Map<List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>>(_addressService.GetUserAddresses(userId))
-                        : new List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>();
-                    
+                        ? _mapper.Map<List<UserAddressViewModel>>(_addressService.GetUserAddresses(userId))
+                        : new List<UserAddressViewModel>();
+
                     this.ShowErrorToast("Please fill in all required fields.");
                     return View("Index", model);
                 }
@@ -95,8 +95,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     model.Cart = _cartService.GetOrCreateCart(userId);
                     model.AvailableVouchers = new List<string> { "WELCOME10", "FREESHIP", "SAVE20" };
                     model.Addresses = _mapper != null
-                        ? _mapper.Map<List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>>(_addressService.GetUserAddresses(userId))
-                        : new List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>();
+                        ? _mapper.Map<List<UserAddressViewModel>>(_addressService.GetUserAddresses(userId))
+                        : new List<UserAddressViewModel>();
 
                     this.ShowErrorToast("Please select a delivery address.");
                     return View("Index", model);
@@ -140,8 +140,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
         public IActionResult Receipt(int? orderId)
         {
-            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
-            
             try
             {
                 // Get the order ID from parameter or TempData
@@ -157,7 +155,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 var order = _orderService.GetOrderById(orderIdToView);
                 
                 // Verify that the order belongs to the current user
-                if (order.UserID != userId)
+                if (order.UserID != UserId)
                 {
                     this.ShowErrorToast("Unauthorized access to order.");
                     return RedirectToAction("Index", "Home");
@@ -167,7 +165,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving order receipt for user {UserId}", userId);
+                _logger.LogError(ex, "Error retrieving order receipt for user {UserId}", UserId);
                 this.ShowErrorToast("Unable to retrieve order details." + ex.Message);
                 return RedirectToAction("Index", "Home");
             }
