@@ -142,5 +142,28 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Mark an order as ready for pickup/delivery
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkOrderReady(int orderId)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                await _orderService.UpdateOrderStatus(orderId, userId, Enums.OrderStatus.ReadyForPickup);
+
+                TempData["SuccessMessage"] = "Order marked as ready!";
+                return Json(new { success = true, message = "Order marked as ready!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error marking order {OrderId} as ready", orderId);
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

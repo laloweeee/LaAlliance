@@ -110,6 +110,27 @@
             </div>
         </div>
     </div>
+
+    //For the Ready button
+    @if (Model.OrderStatus.ToString() == "Processing")
+    {
+        <div class="mt-4">
+            <button onclick="markOrderReady(@Model.OrderID)" 
+                    class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <i class="fas fa-check-circle mr-2"></i>Mark as Ready
+            </button>
+        </div>
+    }
+
+    @if (Model.OrderStatus.ToString() == "ReadyForPickup")
+    {
+        <div class="mt-4">
+            <div class="bg-blue-100 text-blue-800 px-6 py-3 rounded-lg inline-flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span class="font-medium">This order is ready for pickup/delivery</span>
+            </div>
+        </div>
+    }
 </div>
 
 @using ASI.Basecode.Resources.Constants
@@ -132,4 +153,40 @@
                 return "bg-gray-100 text-gray-800";
         }
     }
+}
+
+@section Scripts {
+    <script>
+        async function markOrderReady(orderId) {
+            if (!confirm('Mark this order as ready for pickup/delivery?')) return;
+            
+            try {
+                // TO get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                
+                const response = await fetch(`/Restaurant/Orders/MarkOrderReady?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Order marked as ready successfully!');
+                    // Redirect back to orders page
+                    window.location.href = '/Restaurant/Orders';
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error marking order as ready:', error);
+                alert('Error marking order as ready. Please try again.');
+            }
+        }
+    </script>
+    
+    @Html.AntiForgeryToken()
 }
