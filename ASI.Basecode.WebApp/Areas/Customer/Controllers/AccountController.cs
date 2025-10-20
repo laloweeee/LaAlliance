@@ -10,6 +10,7 @@ using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.WebApp.Areas.Customer.Models;
 using ASI.Basecode.Services.ServiceModels;
 using System.IO;
+using ASI.Basecode.WebApp.Helpers;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -126,7 +127,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 // Save changes
                 _userProfileService.UpdateUserProfile(userProfile);
 
-                TempData["SuccessMessage"] = "Profile updated successfully.";
+                this.ShowSuccessToast("Profile updated successfully.");
 
                 // Redirect to avoid form resubmission
                 return RedirectToAction("Index");
@@ -135,7 +136,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             {
                 _logger.LogError(ex, "Error updating profile for user ID {UserId}", UserId);
 
-                TempData["ErrorMessage"] = "An error occurred while updating your profile. Please try again.";
+                this.ShowErrorToast("An error occurred while updating your profile. Please try again.");
 
                 return View("ProfileForm", model);
             }
@@ -169,7 +170,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Address not found.";
+                    this.ShowErrorToast("Address not found.");
                     return RedirectToAction("Index");
                 }
             }
@@ -187,11 +188,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult SaveAddress(UserAddressViewModel model, string returnUrl)
         {
-            if (!ModelState.IsValid)
-            {
-                return View("AddressForm", model);
-            }
-
             try
             {
                 var userAddress = new UserAddressServiceModel
@@ -215,12 +211,12 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 if (model.AddressID > 0)
                 {
                     _addressService.UpdateUserAddress(userAddress, UserId);
-                    TempData["SuccessMessage"] = "Address updated successfully.";
+                    this.ShowSuccessToast("Address updated successfully.");
                 }
                 else
                 {
                     _addressService.AddUserAddress(userAddress);
-                    TempData["SuccessMessage"] = "Address added successfully.";
+                    this.ShowSuccessToast("Address added successfully.");
                 }
 
 
@@ -235,7 +231,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             {
                 _logger.LogError(ex, "Error saving address for user ID {UserId}", UserId);
 
-                TempData["ErrorMessage"] = "An error occurred while saving your address. Please try again.";
+                this.ShowErrorToast(ex.Message);
 
                 return View("AddressForm", model);
             }
@@ -253,12 +249,12 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             try
             {
                 _addressService.RemoveUserAddress(id, UserId);
-                TempData["SuccessMessage"] = "Address deleted successfully.";
+                this.ShowSuccessToast("Address deleted successfully.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting address ID {AddressId} for user ID {UserId}", id, UserId);
-                TempData["ErrorMessage"] = "An error occurred while deleting the address. Please try again.";
+                this.ShowErrorToast(ex.Message);
             }
 
             return RedirectToAction("Index");
@@ -293,21 +289,15 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 return View("PasswordForm", model);
             }
 
-            if (TempData != null)
-            {
-                TempData.Remove("ErrorMessage");
-                TempData.Remove("SuccessMessage");
-            }
-
             if (model.NewPassword == model.CurrentPassword)
             {
-                TempData["ErrorMessage"] = "The new password must be different from the current password.";
+                this.ShowErrorToast("The new password must be different from the current password.");
                 return View("PasswordForm", model);
             }
 
             if (model.NewPassword != model.ConfirmPassword)
             {
-                TempData["ErrorMessage"] = "The new password and confirmation password do not match.";
+                this.ShowErrorToast("The new password and confirmation password do not match.");
                 return View("PasswordForm", model);
             }
 
@@ -321,19 +311,19 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 }
 
                 _userService.UpdatePassword(UserId, model.NewPassword);
-                TempData["SuccessMessage"] = "Password changed successfully.";
+                this.ShowSuccessToast("Password changed successfully.");
                 return RedirectToAction("Index");
             }
             catch (InvalidDataException ex)
             {
                 _logger.LogError(ex, "Error changing password for user ID {UserId}", UserId);
-                TempData["ErrorMessage"] = ex.Message;
+                this.ShowErrorToast(ex.Message);
                 return View("PasswordForm", model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error changing password for user ID {UserId}", UserId);
-                TempData["ErrorMessage"] = "An error occurred while changing your password. Please try again.";
+                this.ShowErrorToast("An error occurred while changing your password. Please try again.");
                 return View("PasswordForm", model);
             }
         }
@@ -351,7 +341,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 var user = _userService.GetUserByID(UserId);
                 if (user == null)
                 {
-                    TempData["ErrorMessage"] = "User not found.";
+                    this.ShowErrorToast("User not found.");
                     return RedirectToAction("Login", "Auth", new { area = "Customer" });
                 }
 
@@ -363,13 +353,13 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     return RedirectToAction("OTPForm");
                 }
 
-                TempData["ErrorMessage"] = "Failed to send OTP. Please try again.";
+                this.ShowErrorToast("Failed to send OTP. Please try again.");
                 return RedirectToAction("PasswordForm");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending password OTP for user ID {UserId}", UserId);
-                TempData["ErrorMessage"] = "An error occurred. Please try again.";
+                this.ShowErrorToast("An error occurred. Please try again." + ex.Message);
                 return RedirectToAction("PasswordForm");
             }
         }
@@ -409,7 +399,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Invalid OTP format.";
+                this.ShowErrorToast("Invalid OTP format.");
                 return RedirectToAction("OTPForm");
             }
 
@@ -418,7 +408,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(verificationType))
             {
-                TempData["ErrorMessage"] = "Session expired. Please try again.";
+                this.ShowErrorToast("Session expired. Please try again.");
                 return RedirectToAction("Index");
             }
 
@@ -426,7 +416,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             {
                 if (!int.TryParse(model.OTPCode, out int otpCode))
                 {
-                    TempData["ErrorMessage"] = "Invalid OTP format.";
+                    this.ShowErrorToast("Invalid OTP format.");
                     TempData["Email"] = email;
                     TempData["VerificationType"] = verificationType;
                     return RedirectToAction("OTPForm");
@@ -441,7 +431,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     {
                         _otpService.ClearPasswordResetOtp(email);
                         TempData["OTPVerified"] = true;
-                        TempData["SuccessMessage"] = "OTP verified successfully. You can now change your password.";
+                        this.ShowSuccessToast("OTP verified successfully. You can now change your password.");
                         return RedirectToAction("PasswordForm");
                     }
                 }
@@ -452,7 +442,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     {
                         _otpService.ClearEmailChangeOtp(email);
                         TempData["CurrentEmailVerified"] = true;
-                        TempData["SuccessMessage"] = "Current email verified. Please enter your new email.";
+                        this.ShowSuccessToast("Current email verified. Please enter your new email.");
                         return RedirectToAction("EmailForm");
                     }
                 }
@@ -461,7 +451,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     var newEmail = TempData["NewEmail"]?.ToString();
                     if (string.IsNullOrEmpty(newEmail))
                     {
-                        TempData["ErrorMessage"] = "Session expired. Please try again.";
+                        this.ShowErrorToast("Session expired. Please try again.");
                         return RedirectToAction("EmailForm");
                     }
 
@@ -470,12 +460,12 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     {
                         _otpService.ClearEmailChangeOtp(newEmail);
                         _userService.UpdateEmail(UserId, newEmail);
-                        TempData["SuccessMessage"] = "Email changed successfully.";
+                        this.ShowSuccessToast("Email changed successfully.");
                         return RedirectToAction("Index");
                     }
                 }
 
-                TempData["ErrorMessage"] = "Invalid or expired OTP. Please try again.";
+                this.ShowErrorToast("Invalid or expired OTP. Please try again.");
                 TempData["Email"] = email;
                 TempData["VerificationType"] = verificationType;
                 return RedirectToAction("OTPForm");
@@ -483,7 +473,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error verifying OTP for user ID {UserId}", UserId);
-                TempData["ErrorMessage"] = "An error occurred. Please try again.";
+                this.ShowErrorToast("An error occurred. Please try again." + ex.Message);
                 return RedirectToAction("OTPForm");
             }
         }
@@ -585,7 +575,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 var newEmail = TempData["NewEmail"]?.ToString();
                 if (string.IsNullOrEmpty(newEmail))
                 {
-                    TempData["ErrorMessage"] = "Session expired. Please try again.";
+                    this.ShowErrorToast("Session expired. Please try again.");
                     return RedirectToAction("EmailForm");
                 }
 

@@ -27,6 +27,7 @@ namespace ASI.Basecode.Services.Services
         private readonly IFileHandlingService _fileHandlingService;
         private readonly IMapper _mapper;
         private readonly ICategoryService _categoryService;
+        private readonly IOrderRepository _orderRepository;
 
         /// <summary>
         /// Constructor for ProductService.
@@ -37,17 +38,19 @@ namespace ASI.Basecode.Services.Services
         /// <param name="mapper"></param>
         /// <param name="categoryService"></param>
         public ProductService(
-            IProductRepository productRepository,
-            IUserRepository userRepository,
-            IFileHandlingService fileHandlingService,
-            IMapper mapper,
-            ICategoryService categoryService)
+                            IProductRepository productRepository,
+                            IUserRepository userRepository,
+                            IFileHandlingService fileHandlingService,
+                            IMapper mapper,
+                            ICategoryService categoryService,
+                            IOrderRepository orderRepository )
         {
             _productRepository = productRepository;
             _userRepository = userRepository;
             _fileHandlingService = fileHandlingService;
             _mapper = mapper;
             _categoryService = categoryService;
+            _orderRepository = orderRepository;
         }
 
         /// <summary>
@@ -56,7 +59,12 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public IQueryable<Product> GetAllProducts()
         {
-            return _productRepository.GetProducts();
+            return _productRepository
+                .GetAllIncludingDeleted<Product>()
+                .OrderBy(p => p.IsDeleted)
+                .ThenBy(p => p.ProductCategory.CategoryName)
+                .ThenBy(p => p.ProductName)
+                .AsQueryable();
         }
 
         /// <summary>
@@ -66,27 +74,16 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public ProductViewModel GetProductByID(int productID)
         {
-            var product = _productRepository.GetProducts().Where(p => p.ProductID == productID);
+            var product = _productRepository
+                .GetAllIncludingDeleted<Product>().FirstOrDefault(p => p.ProductID == productID);
 
-            if (product == null || !product.Any())
-            {
-                throw new ArgumentException("The product does not exist.");
-            }
+            if (product == null) throw new ArgumentException("The product does not exist.");
 
-            var model = _mapper.Map<ProductViewModel>(product.First());
-            model.CategoryName = product.First().ProductCategory?.CategoryName;
+            
+            var model = _mapper.Map<ProductViewModel>(product);
+            model.CategoryName = product.ProductCategory?.CategoryName;
 
             return model;
-        }
-
-        /// <summary>
-        /// Retrieve products by category ID.
-        /// </summary>
-        /// <param name="categoryID"></param>
-        /// <returns></returns>
-        public IQueryable<Product> GetProductsByCategoryID(int categoryID)
-        {
-            return _productRepository.GetProducts().Where(p => p.CategoryID == categoryID);
         }
 
         /// <summary>
@@ -97,7 +94,12 @@ namespace ASI.Basecode.Services.Services
         {
             var products = _productRepository.GetProducts().Where(p => p.IsActive);
 
+            // Return empty list if no products found
+            if (products == null || !products.Any()) return new List<ProductViewModel>();
+
             var model = new List<ProductViewModel>();
+
+            // Map each product to ProductViewModel and include CategoryName
             foreach (var product in products)
             {
                 var productViewModel = _mapper.Map<ProductViewModel>(product);
@@ -105,6 +107,32 @@ namespace ASI.Basecode.Services.Services
                 model.Add(productViewModel);
             }
 
+            // Return model
+            return model;
+        }
+
+        /// <summary>
+        /// Retrieve all deleted products.
+        /// </summary>
+        /// <returns></returns>
+        public List<ProductViewModel> GetDeletedProducts()
+        {
+            var products = _productRepository.GetAllIncludingDeleted<Product>().Where(p => p.IsDeleted);
+
+            // Return empty list if no products found
+            if (products == null || !products.Any()) return new List<ProductViewModel>();
+
+            var model = new List<ProductViewModel>();
+
+            // Map each product to ProductViewModel and include CategoryName
+            foreach (var product in products)
+            {
+                var productViewModel = _mapper.Map<ProductViewModel>(product);
+                productViewModel.CategoryName = product.ProductCategory?.CategoryName;
+                model.Add(productViewModel);
+            }
+
+            // Return model
             return model;
         }
 
@@ -278,6 +306,70 @@ namespace ASI.Basecode.Services.Services
         }
 
         /// <summary>
+        /// Delete a product.
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <param name="deletedBy"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void DeleteProduct(int productID, string deletedBy)
+        {
+            var product = _productRepository.GetProducts().FirstOrDefault(p => p.ProductID == productID);
+
+            // Validate product existence
+            if (product == null) throw new ArgumentException("The product does not exist.");
+
+            // Validate product is not active
+            if (product.IsActive) throw new InvalidOperationException("Cannot delete product that is currently active.");
+
+            // Validate product is not associated with any orders
+            if (_orderRepository.IsProductInAnyOrder(productID)) throw new InvalidOperationException("Cannot delete product that is associated with existing orders.");
+
+            _productRepository.SoftDelete(product, deletedBy);
+        }
+
+        /// <summary>
+        /// Recover a deleted product.
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void RecoverProduct(int productID)
+        {
+            var product = _productRepository.GetAllIncludingDeleted<Product>().FirstOrDefault(p => p.ProductID == productID);
+
+            // Validate product existence
+            if (product == null) throw new ArgumentException("The product does not exist.");
+
+            // Validate product is deleted
+            if (!product.IsDeleted) throw new InvalidOperationException("The product is not deleted.");
+
+            _productRepository.Restore(product);
+        }
+
+        /// <summary>
+        /// Permanently delete a product.
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void PermanentDelete(int productID)
+        {
+            var product = _productRepository.GetAllIncludingDeleted<Product>().FirstOrDefault(p => p.ProductID == productID);
+
+            // Validate product existence
+            if (product == null) throw new ArgumentException("The product does not exist.");
+
+            // Validate product is deleted
+            if (!product.IsDeleted) throw new InvalidOperationException("The product is not deleted.");
+
+            // Validate product is not associated with any orders
+            if (_orderRepository.IsProductInAnyOrder(productID)) throw new InvalidOperationException("Cannot permanently delete product that is associated with existing orders.");
+
+            _productRepository.HardDelete(product);
+        }
+
+        /// <summary>
         /// Check if customization groups have changed.
         /// </summary>
         /// <param name="existingGroups"></param>
@@ -323,5 +415,6 @@ namespace ASI.Basecode.Services.Services
 
             return false;
         }
+
     }
 }

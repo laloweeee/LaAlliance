@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using ASI.Basecode.WebApp.Helpers;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -122,7 +123,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading cart item for edit");
-                TempData["ErrorMessage"] = "Unable to load item for editing.";
+                this.ShowErrorToast("Unable to load item for editing." + ex.Message);
                 return RedirectToAction("Index", "Cart");
             }
         }
@@ -159,17 +160,19 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 }
 
                 _cartService.AddItemToCart(request, UserId);
-
-                TempData["SuccessMessage"] = cartItemID.HasValue
+                
+                var _message = cartItemID.HasValue
                     ? "Cart item updated successfully!"
                     : "Item added to cart successfully!";
+
+                this.ShowSuccessToast(_message);
 
                 return RedirectToAction("ProductToCart", new { productID });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding/updating item in cart");
-                TempData["ErrorMessage"] = "An error occurred. Please try again.";
+                this.ShowErrorToast(ex.Message);
                 return RedirectToAction("ProductToCart", new { productID });
             }
         }

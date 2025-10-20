@@ -49,7 +49,7 @@ namespace ASI.Basecode.Data
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderItems> OrderItems { get; set; }
         public virtual DbSet<OrderItemOption> OrderItemOptions { get; set; }
-        public virtual DbSet<OrderProcessed> OrderProcessed { get; set; }
+        public virtual DbSet<OrderProcessed> OrderProcesseds { get; set; }
 
         // Promotion related
         public virtual DbSet<RestaurantPromotions> RestaurantPromotions { get; set; }

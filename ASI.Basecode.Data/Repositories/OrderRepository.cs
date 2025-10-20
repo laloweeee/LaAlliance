@@ -1,10 +1,8 @@
 using ASI.Basecode.Data.Interfaces;
 using ASI.Basecode.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Repositories
 {
@@ -55,14 +53,29 @@ namespace ASI.Basecode.Data.Repositories
         }
 
         /// <summary>
-        /// Get an order by its ID
+        /// Get all orders
         /// </summary>
-        /// <param name="orderID"></param>
         /// <returns></returns>
+        public IEnumerable<Order> GetAllOrders()
+        {
+            return _dbContext.Orders
+                .Include(o => o.User)
+                    .ThenInclude(u => u.UserProfile)
+                .Include(o => o.Address)
+                .Include(o => o.RestaurantPromotion)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.OrderItemOption)
+                .Include(o => o.OrderProcessed)
+                .Include(o => o.PaymentLogs).ToList();
+        }
+
         public Order GetOrderById(int orderID)
         {
             return _dbContext.Orders
                 .Include(o => o.User)
+                    .ThenInclude(u => u.UserProfile)
                 .Include(o => o.Address)
                 .Include(o => o.RestaurantPromotion)
                 .Include(o => o.OrderItems)
@@ -73,70 +86,15 @@ namespace ASI.Basecode.Data.Repositories
                 .Include(o => o.PaymentLogs)
                 .FirstOrDefault(o => o.OrderID == orderID);
         }
-
+    
         /// <summary>
-        /// Get all orders for a specific user
+        /// Check if a product is included in any order
         /// </summary>
-        /// <param name="userID"></param>
+        /// <param name="productID"></param>
         /// <returns></returns>
-        public IEnumerable<Order> GetOrdersByUserId(int userID)
+        public bool IsProductInAnyOrder(int productID)
         {
-            return _dbContext.Orders
-                .Include(o => o.Address)
-                .Include(o => o.RestaurantPromotion)
-                .Include(o => o.OrderItems)
-                .Include(o => o.OrderProcessed)
-                .Where(o => o.UserID == userID)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Get all orders
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<Order> GetAllOrders()
-        {
-            return _dbContext.Orders
-                .Include(o => o.User)
-                .Include(o => o.Address)
-                .Include(o => o.OrderItems)
-                .Include(o => o.OrderProcessed)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Get orders by status
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        public IEnumerable<Order> GetOrdersByStatus(OrderStatus status)
-        {
-            return _dbContext.Orders
-                .Include(o => o.User)
-                .Include(o => o.Address)
-                .Include(o => o.OrderItems)
-                .Where(o => o.OrderStatus == status)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Get orders by date range
-        /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <returns></returns>
-        public IEnumerable<Order> GetOrdersByDateRange(DateTime startDate, DateTime endDate)
-        {
-            return _dbContext.Orders
-                .Include(o => o.User)
-                .Include(o => o.Address)
-                .Include(o => o.OrderItems)
-                .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
+            return _dbContext.OrderItems.Any(oi => oi.ProductID == productID);
         }
     }
 }

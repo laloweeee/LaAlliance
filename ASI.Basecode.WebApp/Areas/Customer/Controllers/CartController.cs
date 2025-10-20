@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System;
+using ASI.Basecode.WebApp.Helpers;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -48,7 +49,12 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             return View(cart);
         }
 
-        // POST: /Customer/Cart/UpdateQuantity
+        /// <summary>
+        /// Updates the quantity of a cart item
+        /// </summary>
+        /// <param name="cartItemID"></param>
+        /// <param name="quantity"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateQuantity(int cartItemID, int quantity)
@@ -73,7 +79,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 // Calculate totals
                 var totalItems = cart.CartItems.Sum(x => x.Quantity);
                 var subTotal = cart.CartItems.Sum(x => x.TotalPrice);
-                var deliveryFee = cart.DeliveryFee; // Adjust this based on your business logic
+                var deliveryFee = cart.DeliveryFee;
                 var total = subTotal + deliveryFee;
 
                 return Json(new
@@ -93,25 +99,41 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             }
         }
 
-        // POST: /Customer/Cart/Remove
+        /// <summary>
+        /// Removes an item from the cart
+        /// </summary>
+        /// <param name="cartItemID"></param>
+        /// <returns></returns>
         [HttpPost]
-        public IActionResult Remove(int cartItemID)
+        public IActionResult Remove(int id)
         {
-            var cart = _cartService.GetOrCreateCart(UserId);
-            var itemToRemove = cart.CartItems.FirstOrDefault(i => i.CartItemID == cartItemID);
-            var productName = itemToRemove?.ProductName ?? "Item";
+            try 
+            {
+                var cart = _cartService.GetOrCreateCart(UserId);
+                var itemToRemove = cart.CartItems.FirstOrDefault(i => i.CartItemID == id);
+                var productName = itemToRemove?.ProductName ?? "Item";
 
-            _cartService.RemoveCartItem(cartItemID, UserId);
+                _cartService.RemoveCartItem(id, UserId);
 
-            TempData["SuccessMessage"] = $"\"{productName}\" has been removed from your cart";
+                this.ShowSuccessToast($"\"{productName}\" has been removed from your cart");
+            }
+            catch (Exception ex)
+            {
+                this.ShowErrorToast("Failed to remove item: " + ex.Message);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// Gets the customer profile including addresses
+        /// </summary>
+        /// <returns></returns>
         private AccountViewModel GetCustomerProfile()
         {
             try
             {
-                var userProfile = _userProfileService.GetUserProfile(UserId);  // Keep this if it exists
+                var userProfile = _userProfileService.GetUserProfile(UserId);
                 if (userProfile == null) return null;
 
                 var accountViewModel = new AccountViewModel
@@ -124,36 +146,26 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     Addresses = new List<UserAddressViewModel>()
                 };
 
-                // Try to get user addresses - now returns a list
-                try
-                {
-                    var userAddresses = _addressService.GetUserAddresses(UserId);  // Use IAddressService instead
+                // Get User Addresses
+                var userAddresses = _addressService.GetUserAddresses(UserId);
 
-                    if (userAddresses != null && userAddresses.Any())
-                    {
-                        foreach (var userAddress in userAddresses)
-                        {
-                            accountViewModel.Addresses.Add(new UserAddressViewModel
-                            {
-                                UserAddressID = userAddress.UserAddressID,
-                                AddressID = userAddress.AddressID,
-                                IsDefault = userAddress.IsDefault,
-                                AddressType = userAddress.AddressType,
-                                AddressNote = userAddress.AddressNote,
-                                Street = userAddress.Street,
-                                Barangay = userAddress.Barangay,
-                                City = userAddress.City,
-                                Province = userAddress.Province,
-                                ZipCode = userAddress.ZipCode,
-                                Longitude = userAddress.Longitude,
-                                Latitude = userAddress.Latitude
-                            });
-                        }
-                    }
-                }
-                catch
+                foreach (var userAddress in userAddresses)
                 {
-                    // If getting addresses fails, continue with empty address list
+                    accountViewModel.Addresses.Add(new UserAddressViewModel
+                    {
+                        UserAddressID = userAddress.UserAddressID,
+                        AddressID = userAddress.AddressID,
+                        IsDefault = userAddress.IsDefault,
+                        AddressType = userAddress.AddressType,
+                        AddressNote = userAddress.AddressNote,
+                        Street = userAddress.Street,
+                        Barangay = userAddress.Barangay,
+                        City = userAddress.City,
+                        Province = userAddress.Province,
+                        ZipCode = userAddress.ZipCode,
+                        Longitude = userAddress.Longitude,
+                        Latitude = userAddress.Latitude
+                    });
                 }
 
                 return accountViewModel;

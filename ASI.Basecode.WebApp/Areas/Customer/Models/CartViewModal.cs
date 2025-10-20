@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,6 +13,11 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         public decimal DeliveryFee { get; set; } = 50.00m;
         public decimal Total => SubTotal + DeliveryFee;
         public List<CartItemViewModel> CartItems { get; set; } = new List<CartItemViewModel>();
+
+        public static implicit operator CartViewModel(Services.ServiceModels.CartViewModel v)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class CartItemViewModel

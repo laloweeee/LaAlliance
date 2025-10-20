@@ -28,38 +28,23 @@ namespace ASI.Basecode.Data.Interfaces
         void DeleteOrder(int orderID);
 
         /// <summary>
-        /// Get an order by its ID
-        /// </summary>
-        /// <param name="orderID"></param>
-        /// <returns></returns>
-        Order GetOrderById(int orderID);
-
-        /// <summary>
-        /// Get all orders for a specific user
-        /// </summary>
-        /// <param name="userID"></param>
-        /// <returns></returns>
-        IEnumerable<Order> GetOrdersByUserId(int userID);
-
-        /// <summary>
         /// Get all orders
         /// </summary>
         /// <returns></returns>
         IEnumerable<Order> GetAllOrders();
 
         /// <summary>
-        /// Get orders by status
+        /// Get order by its ID
         /// </summary>
-        /// <param name="status"></param>
+        /// <param name="orderID"></param>
         /// <returns></returns>
-        IEnumerable<Order> GetOrdersByStatus(OrderStatus status);
+        Order GetOrderById(int orderID);
 
         /// <summary>
-        /// Get orders by date range
+        /// Check if a product is included in any order
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
+        /// <param name="productID"></param>
         /// <returns></returns>
-        IEnumerable<Order> GetOrdersByDateRange(System.DateTime startDate, System.DateTime endDate);
+        bool IsProductInAnyOrder(int productID);
     }
 }
