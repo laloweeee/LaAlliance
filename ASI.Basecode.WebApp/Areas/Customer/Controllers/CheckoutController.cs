@@ -138,7 +138,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 return View("Index", model);
             }
         }
-
         public IActionResult Receipt(int? orderId)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
