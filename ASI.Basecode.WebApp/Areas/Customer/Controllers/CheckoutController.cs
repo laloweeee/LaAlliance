@@ -12,6 +12,7 @@ using System.Security.Claims;
 using ASI.Basecode.Services.ServiceModels;
 using System;
 using System.Threading.Tasks;
+using ASI.Basecode.WebApp.Helpers;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -84,7 +85,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                         ? _mapper.Map<List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>>(_addressService.GetUserAddresses(userId))
                         : new List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>();
                     
-                    TempData["ErrorMessage"] = "Please fill in all required fields.";
+                    this.ShowErrorToast("Please fill in all required fields.");
                     return View("Index", model);
                 }
 
@@ -96,8 +97,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     model.Addresses = _mapper != null
                         ? _mapper.Map<List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>>(_addressService.GetUserAddresses(userId))
                         : new List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>();
-                    
-                    TempData["ErrorMessage"] = "Please select a delivery address.";
+
+                    this.ShowErrorToast("Please select a delivery address.");
                     return View("Index", model);
                 }
 
@@ -148,7 +149,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 
                 if (orderIdToView == 0)
                 {
-                    TempData["ErrorMessage"] = "Order not found.";
+                    this.ShowErrorToast("Order not found.");
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -158,7 +159,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 // Verify that the order belongs to the current user
                 if (order.UserID != userId)
                 {
-                    TempData["ErrorMessage"] = "Unauthorized access to order.";
+                    this.ShowErrorToast("Unauthorized access to order.");
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -167,7 +168,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving order receipt for user {UserId}", userId);
-                TempData["ErrorMessage"] = "Unable to retrieve order details.";
+                this.ShowErrorToast("Unable to retrieve order details." + ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }

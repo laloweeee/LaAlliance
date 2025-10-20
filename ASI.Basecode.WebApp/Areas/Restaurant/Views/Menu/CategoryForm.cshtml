@@ -7,18 +7,6 @@
 }
 
 <div class="py-8">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
-    }
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
-    }
-
-    <partial name="_ConfirmModal" />
-
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <div class="mb-8">
@@ -101,19 +89,13 @@
                     class="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-all duration-200 text-center">
                     <i class="fas fa-times mr-2"></i>Cancel
                 </a>
-                <button type="submit" id="saveBtn"
-                    class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    @(Model.CategoryID != 0 ? "disabled" : "")>
+                <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                     <span class="btn-text">
-                        <i class="fas fa-save mr-2"></i>
-                        @(Model.CategoryID == 0 ? "Create Category" : "Update Category")
+                        <i class="fas fa-save mr-2"></i>@(Model.CategoryID == 0 ? "Create Category" : "Update Category")
                     </span>
                     <span class="btn-loading hidden">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Saving...
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        @(Model.CategoryID == 0 ? "Creating..." : "Updating...")
                     </span>
                 </button>
             </div>
@@ -135,14 +117,13 @@
                             <h3 class="text-sm font-semibold text-gray-900">Delete this category</h3>
                             <p class="text-xs text-gray-500 mt-1">If you accidentally deleted this category, you can still recover it.</p>
                         </div>
-                        <button type="button"  
+                        <button type="button"
+                                data-confirm-delete 
                                 data-item-id="@Model.CategoryID"
                                 data-item-name="@Model.CategoryName"
                                 data-url="@Url.Action("DeleteCategory", "Menu", new { area = "Restaurant" })"
-                                class="confirm-btn px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                            <span class="btn-text">
+                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                                 <i class="fas fa-trash-alt mr-2"></i>Delete Category
-                            </span>
                         </button>
                     </div>
                 </div>
@@ -150,89 +131,3 @@
         }
     </div>
 </div>
-
-@section Scripts {
-    <script src="~/js/confirmModal.js"></script>
-    <script>
-        const isEditMode = @(Model.CategoryID != 0 ? "true" : "false");
-        let originalValues = {};
-        
-        if (isEditMode) {
-            originalValues = {
-                name: document.getElementById('categoryName').value.trim(),
-                isActive: document.getElementById('isActiveCheckbox').checked
-            };
-        }
-
-        // Function to check if form has changes
-        function hasFormChanges() {
-            if (!isEditMode) return true;
-            
-            const currentName = document.getElementById('categoryName').value.trim();
-            const currentIsActive = document.getElementById('isActiveCheckbox').checked;
-            
-            return currentName !== originalValues.name || currentIsActive !== originalValues.isActive;
-        }
-
-        // Function to update button state
-        function updateButtonState() {
-            const saveBtn = document.getElementById('saveBtn');
-            const hasChanges = hasFormChanges();
-            
-            if (hasChanges) {
-                saveBtn.disabled = false;
-                saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                saveBtn.disabled = true;
-                saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            }
-        }
-
-        // Add event listeners for change detection
-        if (isEditMode) {
-            document.getElementById('categoryName').addEventListener('input', updateButtonState);
-            document.getElementById('isActiveCheckbox').addEventListener('change', updateButtonState);
-
-            updateButtonState();
-        }
-
-        
-
-        // Save/Update button loading state
-        document.getElementById('categoryForm').addEventListener('submit', function(e) {
-            const saveBtn = document.getElementById('saveBtn');
-
-            if (isEditMode && !hasFormChanges()) {
-                e.preventDefault();
-                return;
-            }
-            
-            const btnText = saveBtn.querySelector('.btn-text');
-            const btnLoading = saveBtn.querySelector('.btn-loading');
-
-            btnText.classList.add('hidden');
-            btnLoading.classList.remove('hidden');
-            saveBtn.disabled = true;
-        });
-
-        // Delete button loading state with confirmation
-        const deleteForm = document.getElementById('deleteForm');
-        if (deleteForm) {
-            deleteForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
-                    const deleteBtn = document.getElementById('deleteBtn');
-                    const btnText = deleteBtn.querySelector('.btn-text');
-                    const btnLoading = deleteBtn.querySelector('.btn-loading');
-
-                    btnText.classList.add('hidden');
-                    btnLoading.classList.remove('hidden');
-                    deleteBtn.disabled = true;
-
-                    this.submit();
-                }
-            });
-        }
-    </script>
-}

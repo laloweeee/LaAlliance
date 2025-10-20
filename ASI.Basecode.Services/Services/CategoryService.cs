@@ -54,6 +54,19 @@ namespace ASI.Basecode.Services.Services
         }
 
         /// <summary>
+        /// Get deleted product categories
+        /// </summary>
+        /// <returns></returns>
+        public List<ProductCategory> GetDeletedProductCategories()
+        {
+            return _categoryRepository
+                .GetAllIncludingDeleted<ProductCategory>()
+                .Where(c => c.IsDeleted)
+                .OrderBy(c => c.CategoryName)
+                .ToList();
+        }
+
+        /// <summary>
         /// Add a new category
         /// </summary>
         /// <param name="model"></param>

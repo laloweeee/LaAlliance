@@ -1,4 +1,4 @@
-﻿@using ASI.Basecode.WebApp.Models
+﻿@model ASI.Basecode.WebApp.Areas.Restaurant.Models.MenuViewModel
 
 @{
     ViewData["Title"] = "LaAlliancé";
@@ -6,22 +6,7 @@
     var errorMessage = TempData["ErrorMessage"] as string;
 }
 
-@model ASI.Basecode.WebApp.Areas.Restaurant.Models.MenuViewModel
-
 <div class="mt-4">
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
-    }
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
-    }
-
-    <partial name="_ConfirmModal" />
-    
     <div class="bg-gray-100 rounded-xl p-3">
         <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 w-full md:w-auto">
@@ -163,8 +148,7 @@
                 
                 <div>
                     <label for="category-status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="category-status-filter" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <select id="category-status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
                         <option value="">All Status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
@@ -238,17 +222,42 @@
                                         <span>ID: @product.ProductID</span>
                                     </div>
                                 </div>
-
-                                <div class="flex gap-2">
-                                    <a asp-controller="Menu" 
-                                       asp-action="ProductForm" 
-                                       asp-area="Restaurant" 
-                                       asp-route-productID="@product.ProductID" 
-                                       asp-route-returnTab="products"
-                                       class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                                        <i class="fas fa-edit"></i>
-                                        <span>Edit</span>
-                                    </a>
+                                <div class="p-6">
+                                    @if (product.IsDeleted)
+                                    {
+                                        <div class="flex flex-col md:flex-row gap-2">
+                                            <button type="button"
+                                                    data-confirm-restore  
+                                                    data-item-id="@product.ProductID"
+                                                    data-item-name="@product.ProductName"
+                                                    data-url="@Url.Action("RecoverProduct", "Menu", new { area = "Restaurant" })"
+                                                    class="confirm-btn flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                                <span class="btn-text">Recover</span>
+                                            </button>
+                                            <button type="button"
+                                                    data-confirm-delete  
+                                                    data-item-id="@product.ProductID"
+                                                    data-item-name="@product.ProductName"
+                                                    data-url="@Url.Action("HardDeleteProduct", "Menu", new { area = "Restaurant" })"
+                                                    class="confirm-btn flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                                <span class="btn-text">Delete</span>
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flex gap-2">
+                                            <a asp-controller="Menu" 
+                                                asp-action="ProductForm" 
+                                                asp-area="Restaurant" 
+                                                asp-route-productID="@product.ProductID" 
+                                                asp-route-returnTab="products"
+                                                class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                                    <i class="fas fa-edit"></i>
+                                                    <span>Edit</span>
+                                            </a>
+                                        </div>
+                                    }
                                 </div>
                             </div>
 
@@ -338,17 +347,19 @@
                                 @if (category.IsDeleted)
                                 {
                                     <div class="flex flex-col md:flex-row gap-2">
-                                        <button type="button"  
+                                        <button type="button"
+                                                data-confirm-restore  
                                                 data-item-id="@category.CategoryID"
                                                 data-item-name="@category.CategoryName"
                                                 data-url="@Url.Action("RecoverCategory", "Menu", new { area = "Restaurant" })"
                                                 class="confirm-btn flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                                             <span class="btn-text">Recover</span>
                                         </button>
-                                        <button type="button"  
+                                        <button type="button"
+                                                data-confirm-delete  
                                                 data-item-id="@category.CategoryID"
                                                 data-item-name="@category.CategoryName"
-                                                data-url="@Url.Action("PermanentDelete", "Menu", new { area = "Restaurant" })"
+                                                data-url="@Url.Action("HardDeleteCategory", "Menu", new { area = "Restaurant" })"
                                                 class="confirm-btn flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                                             <span class="btn-text">Delete</span>
                                         </button>
@@ -404,32 +415,6 @@
     <script src="~/js/confirmModal.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Toastr notifications - properly escaped
-            @if (TempData["ToastrSuccess"] != null)
-            {
-                <text>toastr.success(@Json.Serialize(TempData["ToastrSuccess"].ToString()));</text>
-            }
-
-            @if (TempData["ToastrError"] != null)
-            {
-                <text>toastr.error(@Json.Serialize(TempData["ToastrError"].ToString()));</text>
-            }
-
-            @if (TempData["ToastrWarning"] != null)
-            {
-                <text>toastr.warning(@Json.Serialize(TempData["ToastrWarning"].ToString()));</text>
-            }
-
-            @if (TempData["ToastrInfo"] != null)
-            {
-                <text>toastr.info(@Json.Serialize(TempData["ToastrInfo"].ToString()));</text>
-            }
-
-            // Configure toastr for mobile
-            toastr.options = {
-                "positionClass": window.innerWidth < 768 ? "toast-bottom-center" : "toast-top-right",
-                "timeOut": "3000"
-            };
             const tabButtons = document.querySelectorAll('.tab-button');
             const tabContents = document.querySelectorAll('.tab-content');
             const productsAddButton = document.getElementById('products-add-button');

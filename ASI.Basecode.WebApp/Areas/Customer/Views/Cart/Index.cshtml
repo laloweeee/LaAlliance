@@ -2,25 +2,10 @@
 @model ASI.Basecode.Services.ServiceModels.CartViewModel
 @{
     ViewData["Title"] = "LaAlliancé";
-    
-    // Check for success messages (only for delete)
-    var successMessage = TempData["SuccessMessage"] as string;
-    var errorMessage = TempData["ErrorMessage"] as string;
 }
 
 <div class="p-6 bg-gray-50 min-h-screen">
     @Html.AntiForgeryToken()
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
-    }
-    
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
-    }
-
-    <partial name="_ConfirmModal" />
 
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
@@ -117,7 +102,8 @@
                                                             </a>
                                                             <!-- Delete Button -->
                                                             <button type="button" 
-                                                                    class="confirm-btn text-red-600 hover:text-red-800"
+                                                                    class="text-red-600 hover:text-red-800"
+                                                                    data-confirm-delete
                                                                     data-item-id="@item.CartItemID"
                                                                     data-item-name="@item.ProductName"
                                                                     data-url="@Url.Action("Remove", "Cart", new { area = "Customer" })"
