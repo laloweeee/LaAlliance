@@ -1,0 +1,53 @@
+@using ASI.Basecode.WebApp.Models
+@using ASI.Basecode.WebApp.Helpers
+
+@{
+    ToastNotificationViewModel toast = null;
+    
+    // Check ViewBag first
+    if (ViewBag.Toast != null)
+    {
+        toast = ViewBag.Toast as ToastNotificationViewModel;
+    }
+    // Then check TempData
+    else if (TempData["Toast"] != null)
+    {
+        var toastJson = TempData["Toast"].ToString();
+        toast = System.Text.Json.JsonSerializer.Deserialize<ToastNotificationViewModel>(toastJson);
+    }
+}
+
+@if (toast != null && !string.IsNullOrEmpty(toast.Message))
+{
+    <div class="fixed top-4 right-4 z-50 animate-fade-in">
+        <div class="mb-6 p-4 @toast.BackgroundClass border @toast.BorderClass @toast.TextClass rounded-xl shadow-sm flex items-center gap-3">
+            <div class="w-6 h-6 @toast.IconBackgroundClass rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="@toast.IconClass text-white text-xs"></i>
+            </div>
+            <span class="font-medium">@toast.Message</span>
+        </div>
+    </div>
+
+    <style>
+        @@keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.querySelector('.animate-fade-in');
+            if (toast) {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
+}

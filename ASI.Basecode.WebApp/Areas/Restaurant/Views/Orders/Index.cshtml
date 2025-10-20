@@ -1,18 +1,27 @@
+@model List<ASI.Basecode.Services.ServiceModels.OrderViewModel>
+
 @{
     ViewData["Title"] = "Order List";
 }
 
 <div id="orders" class="section active">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-start mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div class="flex flex-col md:flex-row gap-4">
             <div class="relative">
-                <input type="text" placeholder="Search orders..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full md:w-64">
+                <input type="text" id="searchInput" placeholder="Search orders..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full md:w-64">
                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
             </div>
-            <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+            <button onclick="refreshOrders()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
                 <i class="fas fa-sync-alt mr-2"></i>Refresh
             </button>
+        </div>
+        
+        <!-- Connection Status -->
+        <div class="flex items-center gap-2 mt-4 md:mt-0">
+            <span id="connectionStatus" class="text-sm">
+                <i class="fas fa-circle text-gray-400"></i> Connecting...
+            </span>
         </div>
     </div>
 
@@ -21,19 +30,19 @@
         <div class="border-b border-gray-200">
             <nav class="-mb-px flex space-x-8 overflow-x-auto">
                 <button onclick="filterOrders('all')" class="order-filter-tab active border-b-2 border-emerald-500 py-2 px-1 text-sm font-medium text-emerald-600 whitespace-nowrap">
-                    All Orders
+                    All Orders <span id="count-all" class="ml-1 text-xs bg-emerald-100 px-2 py-0.5 rounded-full">0</span>
                 </button>
-                <button onclick="filterOrders('new')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
-                    New
+                <button onclick="filterOrders('Pending')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    New <span id="count-pending" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
                 </button>
-                <button onclick="filterOrders('preparing')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
-                    Preparing
+                <button onclick="filterOrders('Processing')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    Preparing <span id="count-processing" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
                 </button>
-                <button onclick="filterOrders('ready')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
-                    Ready
+                <button onclick="filterOrders('ReadyForPickup')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    Ready <span id="count-ready" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
                 </button>
-                <button onclick="filterOrders('completed')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
-                    Completed
+                <button onclick="filterOrders('Completed')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    Completed <span id="count-completed" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
                 </button>
             </nav>
         </div>
@@ -44,264 +53,444 @@
         <h3 class="text-lg font-semibold text-gray-800 mb-4">ACTIVE ORDERS</h3>
         
         <!-- Orders Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Order #349 - New -->
-            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-green-500" data-status="new">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center">
-                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">1</div>
-                            <span class="font-semibold text-gray-800">#349</span>
-                        </div>
-                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">New</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-medium text-gray-800">Sarah Wilson</p>
-                        <p class="text-sm text-gray-600">23 Feb 2021, 08:28 PM</p>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between text-sm">
-                            <span>1x Vegetable Fritters with Egg</span>
-                            <span class="font-medium">$5.30</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>1x Fresh Prawn mix salad</span>
-                            <span class="font-medium">$5.30</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-gray-600">2 Items</span>
-                        <span class="text-lg font-bold text-green-600">$10.60</span>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <button class="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
-                            Accept
-                        </button>
-                        <button class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors">
-                            Reject
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order #350 - Preparing -->
-            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-orange-500" data-status="preparing">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center">
-                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">1</div>
-                            <span class="font-semibold text-gray-800">#350</span>
-                        </div>
-                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">Preparing</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-medium text-gray-800">Tom Brown</p>
-                        <p class="text-sm text-gray-600">23 Feb 2021, 07:28 PM</p>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between text-sm">
-                            <span>1x Fresh Meat with salad</span>
-                            <span class="font-medium">$25.30</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>1x Vegetable Mixups</span>
-                            <span class="font-medium">$5.30</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-gray-600">2 Items</span>
-                        <span class="text-lg font-bold text-blue-600">$30.60</span>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <button class="w-full bg-blue-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-blue-700 transition-colors">
-                            Mark Ready
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order #351 - Ready -->
-            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-blue-500" data-status="ready">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center">
-                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">1</div>
-                            <span class="font-semibold text-gray-800">#351</span>
-                        </div>
-                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Ready</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-medium text-gray-800">Lisa Davis</p>
-                        <p class="text-sm text-gray-600">23 Feb 2021, 08:28 PM</p>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between text-sm">
-                            <span>1x Vegetable Fritters with Egg</span>
-                            <span class="font-medium">$5.30</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>1x Fresh Prawn mix salad</span>
-                            <span class="font-medium">$5.30</span>
+        <div id="ordersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var order in Model)
+                {
+                    <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-green-500 transition-all duration-300" 
+                         data-status="@order.OrderStatus" 
+                         data-order-id="@order.OrderID"
+                         id="order-@order.OrderID">
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-2">#@order.OrderID</div>
+                                </div>
+                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">@order.OrderStatus</span>
+                            </div>
+                            <div class="mb-3">
+                                <p class="font-medium text-gray-800">@order.FirstName @order.LastName</p>
+                                <p class="text-xs text-gray-500">@order.ContactNumber</p>
+                                <p class="text-sm text-gray-600">@order.OrderDate.ToString("MMM dd, yyyy h:mm tt")</p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-@(order.OrderType.ToString() == "Delivery" ? "motorcycle" : "shopping-bag")"></i>
+                                    @order.OrderType
+                                </p>
+                            </div>
+                            <div class="space-y-2 mb-4 max-h-32 overflow-y-auto">
+                                @if (order.OrderItems != null && order.OrderItems.Any())
+                                {
+                                    foreach (var item in order.OrderItems)
+                                    {
+                                        <div class="text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="font-medium">@item.Quantity x @item.ProductName</span>
+                                                <span class="font-medium text-gray-700">₱@((item.UnitPrice * item.Quantity).ToString("N2"))</span>
+                                            </div>
+                                            @if (item.OrderItemOptions != null && item.OrderItemOptions.Any())
+                                            {
+                                                <div class="ml-4 text-xs text-gray-500">
+                                                    @foreach (var option in item.OrderItemOptions)
+                                                    {
+                                                        <div>+ @option.OptionName (@option.OptionGroupName)</div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-sm text-gray-500">No products</div>
+                                }
+                            </div>
+                            <div class="border-t pt-3 mb-4">
+                                <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+                                    <span>Subtotal</span>
+                                    <span>₱@order.SubTotal.ToString("N2")</span>
+                                </div>
+                                @if (order.DeliveryFee > 0)
+                                {
+                                    <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+                                        <span>Delivery Fee</span>
+                                        <span>₱@order.DeliveryFee.ToString("N2")</span>
+                                    </div>
+                                }
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-700">Total</span>
+                                    <span class="text-lg font-bold text-green-600">₱@order.TotalAmount.ToString("N2")</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                @if (order.OrderStatus.ToString() == "Pending")
+                                {
+                                    <button onclick="acceptOrder(@order.OrderID)" class="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                                        Accept
+                                    </button>
+                                    <button onclick="rejectOrder(@order.OrderID)" class="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-red-700 transition-colors">
+                                        Reject
+                                    </button>
+                                }
+                                <a href="/Restaurant/Orders/ViewOrder/@order.OrderID" class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors text-center">
+                                    View
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-gray-600">2 Items</span>
-                        <span class="text-lg font-bold text-green-600">$10.60</span>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <button class="w-full bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
-                            Complete
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order #352 - New -->
-            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-green-500" data-status="new">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center">
-                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">2</div>
-                            <span class="font-semibold text-gray-800">#352</span>
-                        </div>
-                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">New</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-medium text-gray-800">Robert Miller</p>
-                        <p class="text-sm text-gray-600">23 Feb 2021, 07:45 PM</p>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between text-sm">
-                            <span>2x Vegetable Mixups</span>
-                            <span class="font-medium">$5.30</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-gray-600">1 Item</span>
-                        <span class="text-lg font-bold text-green-600">$10.60</span>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <button class="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
-                            Accept
-                        </button>
-                        <button class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors">
-                            Reject
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order #353 - Preparing -->
-            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-orange-500" data-status="preparing">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center">
-                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">2</div>
-                            <span class="font-semibold text-gray-800">#353</span>
-                        </div>
-                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">Preparing</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-medium text-gray-800">Emily Wilson</p>
-                        <p class="text-sm text-gray-600">23 Feb 2021, 08:15 PM</p>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between text-sm">
-                            <span>1x Fresh Meat</span>
-                            <span class="font-medium">$25.30</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-gray-600">1 Item</span>
-                        <span class="text-lg font-bold text-blue-600">$25.30</span>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <button class="w-full bg-blue-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-blue-700 transition-colors">
-                            Mark Ready
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order #354 - Ready -->
-            <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-blue-500" data-status="ready">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center">
-                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">2</div>
-                            <span class="font-semibold text-gray-800">#354</span>
-                        </div>
-                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Ready</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-medium text-gray-800">David Clark</p>
-                        <p class="text-sm text-gray-600">23 Feb 2021, 08:30 PM</p>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between text-sm">
-                            <span>3x Prawn Mix Salad</span>
-                            <span class="font-medium">$5.30</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-gray-600">1 Item</span>
-                        <span class="text-lg font-bold text-green-600">$15.90</span>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <button class="w-full bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
-                            Complete
-                        </button>
-                    </div>
-                </div>
-            </div>
+                }
+            }
+            else 
+            {
+                <p class="text-gray-500 col-span-full text-center py-8">No orders found.</p>
+            }
         </div>
     </div>
 </div>
 
-<script>
-function filterOrders(status) {
-    // Remove active class from all tabs
-    document.querySelectorAll('.order-filter-tab').forEach(tab => {
-        tab.classList.remove('active', 'border-emerald-500', 'text-emerald-600');
-        tab.classList.add('border-transparent', 'text-gray-500');
-    });
-    
-    // Add active class to clicked tab
-    event.target.classList.add('active', 'border-emerald-500', 'text-emerald-600');
-    event.target.classList.remove('border-transparent', 'text-gray-500');
-    
-    // Filter order cards
-    const orderCards = document.querySelectorAll('.order-card');
-    orderCards.forEach(card => {
-        if (status === 'all' || card.dataset.status === status) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        let currentFilter = 'all';
+
+        // Create SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/orderHub")
+            .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        // Connection state management
+        connection.onreconnecting(() => {
+            updateConnectionStatus("Reconnecting...", "warning");
+        });
+
+        connection.onreconnected(() => {
+            updateConnectionStatus("Connected", "success");
+            connection.invoke("JoinRestaurantGroup");
+        });
+
+        connection.onclose(() => {
+            updateConnectionStatus("Disconnected", "error");
+        });
+
+        // Listen for new orders
+        connection.on("NewOrderReceived", (order) => {
+            console.log("New order received:", order);
+            addOrderToUI(order);
+            showNotification(`New Order #${order.orderId} from ${order.customerName}`);
+            playNotificationSound();
+            updateOrderCounts();
+        });
+
+        // Start connection and join restaurant group
+        connection.start()
+            .then(() => {
+                updateConnectionStatus("Connected", "success");
+                return connection.invoke("JoinRestaurantGroup");
+            })
+            .then(() => {
+                console.log("Joined Restaurant group");
+                updateOrderCounts();
+            })
+            .catch(err => {
+                console.error("Connection error:", err);
+                updateConnectionStatus("Connection failed", "error");
+            });
+
+        function updateConnectionStatus(message, type) {
+            const statusEl = document.getElementById("connectionStatus");
+            const iconClass = type === "success" ? "text-green-500" : type === "warning" ? "text-yellow-500" : "text-red-500";
+            statusEl.innerHTML = `<i class="fas fa-circle ${iconClass}"></i> ${message}`;
         }
-    });
+
+        function addOrderToUI(order) {
+            const ordersGrid = document.getElementById("ordersGrid");
+            
+            // Check if order already exists
+            if (document.getElementById(`order-${order.orderId}`)) {
+                console.log("Order already exists in UI");
+                return;
+            }
+
+            const itemsList = order.items.map(item => {
+                let optionsHtml = '';
+                if (item.options && item.options.length > 0) {
+                    optionsHtml = '<div class="ml-4 text-xs text-gray-500">';
+                    item.options.forEach(opt => {
+                        optionsHtml += `<div>+ ${opt.optionName} (${opt.groupName})</div>`;
+                    });
+                    optionsHtml += '</div>';
+                }
+                return `
+                    <div class="text-sm">
+                        <div class="flex justify-between">
+                            <span class="font-medium">${item.quantity} x ${item.name}</span>
+                            <span class="font-medium text-gray-700">₱${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                        ${optionsHtml}
+                    </div>
+                `;
+            }).join('');
+
+            const deliveryInfo = order.orderType === 'Delivery' 
+                ? `<i class="fas fa-motorcycle"></i> Delivery` 
+                : `<i class="fas fa-shopping-bag"></i> Pickup`;
+
+            const orderCard = `
+                <div class="order-card bg-white rounded-lg shadow-md border-l-4 border-green-500 transition-all duration-300 animate-slide-in new-order" 
+                     data-status="Pending" 
+                     data-order-id="${order.orderId}"
+                     id="order-${order.orderId}">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-2 animate-pulse">#${order.orderId}</div>
+                            </div>
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Pending</span>
+                        </div>
+                        <div class="mb-3">
+                            <p class="font-medium text-gray-800">${order.customerName}</p>
+                            <p class="text-xs text-gray-500">${order.contactNumber}</p>
+                            <p class="text-sm text-gray-600">${new Date(order.timestamp).toLocaleString()}</p>
+                            <p class="text-xs text-gray-500 mt-1">${deliveryInfo}</p>
+                        </div>
+                        <div class="space-y-2 mb-4 max-h-32 overflow-y-auto">
+                            ${itemsList}
+                        </div>
+                        <div class="border-t pt-3 mb-4">
+                            <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+                                <span>Subtotal</span>
+                                <span>₱${order.subtotal.toFixed(2)}</span>
+                            </div>
+                            ${order.deliveryFee > 0 ? `
+                            <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+                                <span>Delivery Fee</span>
+                                <span>₱${order.deliveryFee.toFixed(2)}</span>
+                            </div>` : ''}
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-700">Total</span>
+                                <span class="text-lg font-bold text-green-600">₱${order.totalAmount.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        ${order.deliveryAddress ? `
+                        <div class="text-xs text-gray-600 mb-3 p-2 bg-gray-50 rounded">
+                            <i class="fas fa-map-marker-alt text-red-500"></i> ${order.deliveryAddress.fullAddress}
+                        </div>` : ''}
+                        <div class="flex gap-2">
+                            <button onclick="acceptOrder(${order.orderId})" class="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                                Accept
+                            </button>
+                            <button onclick="rejectOrder(${order.orderId})" class="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-red-700 transition-colors">
+                                Reject
+                            </button>
+                            <a href="/Restaurant/Orders/ViewOrder/${order.orderId}" class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors text-center">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            ordersGrid.insertAdjacentHTML('afterbegin', orderCard);
+            
+            // Remove highlight after animation
+            setTimeout(() => {
+                const card = document.getElementById(`order-${order.orderId}`);
+                if (card) card.classList.remove('new-order');
+            }, 3000);
+        }
+
+        async function acceptOrder(orderId) {
+            if (!confirm('Accept this order?')) return;
+            
+            try {
+                const response = await fetch(`/Restaurant/Orders/AcceptOrder?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const orderCard = document.getElementById(`order-${orderId}`);
+                    orderCard.style.opacity = '0.5';
+                    orderCard.querySelector('[data-status]').setAttribute('data-status', 'Processing');
+                    orderCard.querySelector('.border-l-4').classList.remove('border-green-500');
+                    orderCard.querySelector('.border-l-4').classList.add('border-yellow-500');
+                    
+                    // Update status badge
+                    const badge = orderCard.querySelector('span.bg-green-100');
+                    badge.className = 'px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full';
+                    badge.textContent = 'Processing';
+                    
+                    // Remove accept/reject buttons
+                    const buttonsDiv = orderCard.querySelector('.flex.gap-2');
+                    buttonsDiv.innerHTML = '<a href="/Restaurant/Orders/ViewOrder/' + orderId + '" class="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm font-medium hover:bg-gray-400 transition-colors text-center">View</a>';
+                    
+                    updateOrderCounts();
+                    alert('Order accepted successfully!');
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error accepting order:', error);
+                alert('Error accepting order');
+            }
+        }
+
+        async function rejectOrder(orderId) {
+            if (!confirm('Are you sure you want to reject this order?')) return;
+            
+            try {
+                const response = await fetch(`/Restaurant/Orders/RejectOrder?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const orderCard = document.getElementById(`order-${orderId}`);
+                    orderCard.style.opacity = '0';
+                    orderCard.style.transform = 'scale(0.9)';
+                    setTimeout(() => orderCard.remove(), 300);
+                    
+                    updateOrderCounts();
+                    alert('Order rejected successfully!');
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error rejecting order:', error);
+                alert('Error rejecting order');
+            }
+        }
+
+        function filterOrders(status) {
+            currentFilter = status;
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.order-filter-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-emerald-500', 'text-emerald-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active', 'border-emerald-500', 'text-emerald-600');
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            
+            // Filter order cards
+            const orderCards = document.querySelectorAll('.order-card');
+            orderCards.forEach(card => {
+                const cardStatus = card.getAttribute('data-status');
+                if (status === 'all' || cardStatus === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function updateOrderCounts() {
+            const allOrders = document.querySelectorAll('.order-card');
+            const pending = document.querySelectorAll('[data-status="Pending"]').length;
+            const processing = document.querySelectorAll('[data-status="Processing"]').length;
+            const ready = document.querySelectorAll('[data-status="ReadyForPickup"]').length;
+            const completed = document.querySelectorAll('[data-status="Completed"]').length;
+            
+            document.getElementById('count-all').textContent = allOrders.length;
+            document.getElementById('count-pending').textContent = pending;
+            document.getElementById('count-processing').textContent = processing;
+            document.getElementById('count-ready').textContent = ready;
+            document.getElementById('count-completed').textContent = completed;
+        }
+
+        function showNotification(message) {
+            if (Notification.permission === "granted") {
+                new Notification("New Order! 🔔", {
+                    body: message,
+                    icon: "/images/order-icon.png"
+                });
+            }
+        }
+
+        function playNotificationSound() {
+            const audio = new Audio('/sounds/notification.mp3');
+            audio.play().catch(e => console.log('Could not play sound:', e));
+        }
+
+        function refreshOrders() {
+            location.reload();
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const orderCards = document.querySelectorAll('.order-card');
+            
+            orderCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Request notification permission
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+
+        // Initialize counts on page load
+        updateOrderCounts();
+    </script>
+
+    <style>
+        .new-order {
+            animation: pulse-border 2s ease-in-out 3;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+
+        @@keyframes pulse-border {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 0 0 30px rgba(34, 197, 94, 0.8);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @@keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .order-card {
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
 }
-</script>

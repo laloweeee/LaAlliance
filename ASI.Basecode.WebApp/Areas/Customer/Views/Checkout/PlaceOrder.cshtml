@@ -131,9 +131,6 @@
                             <div>
                                 <h3 class="font-semibold text-gray-900 mb-3">Shipping address</h3>
                                 <div class="text-sm text-gray-600 space-y-1">
-                                    <p>@Model.FullName</p>
-                                    <p>@Model.DeliveryAddress</p>
-                                    <p>@Model.ContactNumber</p>
                                 </div>
                             </div>
                             
@@ -275,7 +272,7 @@
 @section Scripts {
     <!-- html2canvas for PNG export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Simulate order progress after 10 seconds

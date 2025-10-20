@@ -64,11 +64,8 @@
                         <i class="fas fa-users @IconClass("Staff")"></i>
                         <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Staff</span>
                     </a>
-                    <a asp-area="Restaurant" asp-controller="Finance" asp-action="Index" class="@ItemClass("Finance")">
-                        <i class="fas fa-money-bill-wave @IconClass("Finance")"></i>
-                        <span class="menu-text hidden xl:inline transition-all duration-300 ease-in-out">Finance</span>
-                    </a>
-                } else
+                } 
+                else
                 {
                     <a asp-area="Restaurant" asp-controller="Orders" asp-action="Index" class="@ItemClass("Orders")">
                         <i class="fas fa-shopping-cart @IconClass("Orders")"></i>

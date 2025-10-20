@@ -47,6 +47,8 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<ICartService, CartService>();
             this._services.AddScoped<IUserProfileService, UserProfileService>();
             this._services.AddScoped<IAddressService, AddressService>();
+            this._services.AddScoped<IOrderService, OrderService>();
+
 
             this._services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
             this._services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
@@ -62,6 +64,10 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IRestaurantProfileRepository, RestaurantProfileRepository>();
             this._services.AddScoped<ICartRepository, CartRepository>();
             this._services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+            this._services.AddScoped<IOrderRepository, OrderRepository>();
+            this._services.AddScoped<IOrderProcessedRepository, OrderProcessedRepository>();
+            this._services.AddScoped<IAddressRepository, AddressRepository>();
+
 
             // Manager Class
             this._services.AddScoped<SignInManager>();

@@ -18,12 +18,14 @@ namespace ASI.Basecode.Services.Services
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly IProductRepository _productRepository;
 
-        public CategoryService(ICategoryRepository categoryRepository, IUserRepository userRepository)
+        public CategoryService(ICategoryRepository categoryRepository, ILoggerFactory loggerFactory, IProductRepository productRepository)
         {
             _categoryRepository = categoryRepository;
-            _userRepository = userRepository;
+            _loggerFactory = loggerFactory;
+            _productRepository = productRepository;
         }
 
         /// <summary>
@@ -32,7 +34,11 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public List<ProductCategory> GetAllCategories()
         {
-            return _categoryRepository.GetAllCategories().OrderBy(c => c.CategoryName).ToList();
+            return _categoryRepository
+                .GetAllIncludingDeleted<ProductCategory>()
+                .OrderBy(c => c.IsDeleted)
+                .ThenBy(c => c.CategoryName)
+                .ToList();
         }
 
         /// <summary>
@@ -42,7 +48,22 @@ namespace ASI.Basecode.Services.Services
         /// <returns></returns>
         public ProductCategory GetCategoryByID(int categoryID)
         {
-            return _categoryRepository.GetAllCategories().FirstOrDefault(c => c.CategoryID == categoryID);
+            return _categoryRepository
+                .GetAllIncludingDeleted<ProductCategory>()
+                .FirstOrDefault(c => c.CategoryID == categoryID);
+        }
+
+        /// <summary>
+        /// Get deleted product categories
+        /// </summary>
+        /// <returns></returns>
+        public List<ProductCategory> GetDeletedProductCategories()
+        {
+            return _categoryRepository
+                .GetAllIncludingDeleted<ProductCategory>()
+                .Where(c => c.IsDeleted)
+                .OrderBy(c => c.CategoryName)
+                .ToList();
         }
 
         /// <summary>
@@ -104,7 +125,10 @@ namespace ASI.Basecode.Services.Services
                 throw new ArgumentException("Category not found.");
             }
 
-            if (category.Products.Any())
+            var productCount = _productRepository.GetProducts()
+                .Count(p => p.CategoryID == categoryID);
+
+            if (productCount > 0)
             {
                 throw new InvalidOperationException("Cannot delete category with associated products.");
             }
@@ -113,8 +137,50 @@ namespace ASI.Basecode.Services.Services
             {
                 throw new InvalidOperationException("Cannot delete an active category. Please deactivate it first.");
             }
-            
+
             _categoryRepository.SoftDelete(category, deletedBy);
+        }
+
+        /// <summary>
+        /// Recover a soft-deleted category
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <exception cref="ArgumentException"></exception>
+        public void RecoverCategory(int categoryID)
+        {
+            _loggerFactory.CreateLogger<CategoryService>().LogInformation($"Attempting to recover category with ID: {categoryID}");
+            
+            var category = GetCategoryByID(categoryID);
+
+            if (category == null)
+            {
+                throw new ArgumentException("Category not found.");
+            }
+
+            _categoryRepository.Restore(category);
+        }
+
+        /// <summary>
+        /// Permanently delete a category
+        /// </summary>
+        /// <param name="categoryID"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void PermanentDeleteCategory(int categoryID)
+        {
+            var category = GetCategoryByID(categoryID);
+
+            if (category == null)
+            {
+                throw new ArgumentException("Category not found.");
+            }
+
+            if (category.Products.Count() > 0)
+            {
+                throw new InvalidOperationException("Cannot permanently delete category with associated products.");
+            }
+
+            _categoryRepository.HardDelete(category);
         }
     }
 }

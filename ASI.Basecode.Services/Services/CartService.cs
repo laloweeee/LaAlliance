@@ -122,6 +122,7 @@ namespace ASI.Basecode.Services.Services
         public void UpdateCartItemQuantity(int cartItemID, int quantity, int userID)
         {
             var cartItem = _cartRepository.GetCartItemByID(cartItemID);
+            
             if (cartItem == null || cartItem.Cart.UserID != userID)
             {
                 throw new Exception("Cart item not found");
