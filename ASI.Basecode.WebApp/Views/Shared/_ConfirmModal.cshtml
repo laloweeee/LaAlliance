@@ -1,4 +1,4 @@
-<!-- Reusable Confirmation Modal -->
+<!-- Reusable Confirmation Modal with AJAX Support -->
 <div id="confirmModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" aria-describedby="modalMessage" role="dialog" aria-modal="true" tabindex="-1">
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
@@ -33,7 +33,6 @@
                     class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-all duration-200">
                     Cancel
                 </button>
-                <button type="button" id="modalCloseBtn" class="sr-only">Close</button>
             </div>
         </div>
     </div>
@@ -64,6 +63,15 @@
             transform: translateY(0) scale(1);
         }
     }
+    
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
 </style>
 
 <script>
@@ -76,7 +84,8 @@
             iconBg: 'bg-blue-100',
             iconColor: 'text-blue-600',
             btnColor: 'bg-blue-600 hover:bg-blue-700',
-            btnText: 'Edit'
+            btnText: 'Edit',
+            method: 'GET' // Navigation action
         },
         delete: {
             title: 'Delete Item',
@@ -85,7 +94,8 @@
             iconBg: 'bg-red-100',
             iconColor: 'text-red-600',
             btnColor: 'bg-red-600 hover:bg-red-700',
-            btnText: 'Delete'
+            btnText: 'Delete',
+            method: 'DELETE'
         },
         permanentDelete: {
             title: 'Permanent Delete',
@@ -94,7 +104,8 @@
             iconBg: 'bg-orange-100',
             iconColor: 'text-orange-600',
             btnColor: 'bg-orange-600 hover:bg-orange-700',
-            btnText: 'Delete Forever'
+            btnText: 'Delete Forever',
+            method: 'DELETE'
         },
         restore: {
             title: 'Restore Item',
@@ -103,7 +114,8 @@
             iconBg: 'bg-green-100',
             iconColor: 'text-green-600',
             btnColor: 'bg-green-600 hover:bg-green-700',
-            btnText: 'Restore'
+            btnText: 'Restore',
+            method: 'POST'
         }
     };
 
@@ -111,6 +123,8 @@
     let currentModalAction = null;
     let currentModalUrl = null;
     let currentItemId = null;
+    let currentUseAjax = false;
+    let currentCallback = null;
 
     // Modal Elements
     const modal = document.getElementById('confirmModal');
@@ -121,16 +135,19 @@
     const modalIconClass = document.getElementById('modalIconClass');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
     const modalConfirmText = document.getElementById('modalConfirmText');
+    const modalLoading = document.getElementById('modalLoading');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
 
     // Open Modal Function
-    function openConfirmModal(action, itemId, itemName, url) {
+    function openConfirmModal(action, itemId, itemName, url, options = {}) {
         const config = ModalConfig[action];
         if (!config) return;
 
         currentModalAction = action;
         currentModalUrl = url;
         currentItemId = itemId;
+        currentUseAjax = options.useAjax || false;
+        currentCallback = options.callback || null;
 
         // Update modal content
         modalTitle.textContent = config.title;
@@ -144,10 +161,15 @@
         // Update button
         modalConfirmBtn.className = `inline-flex w-full justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm sm:w-auto transition-all duration-200 ${config.btnColor}`;
         modalConfirmText.textContent = config.btnText;
+        modalLoading.classList.add('hidden');
+        modalConfirmBtn.disabled = false;
 
         // Show modal
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        
+        // Focus on confirm button for accessibility
+        setTimeout(() => modalConfirmBtn.focus(), 100);
     }
 
     // Close Modal Function
@@ -157,46 +179,116 @@
         currentModalAction = null;
         currentModalUrl = null;
         currentItemId = null;
+        currentUseAjax = false;
+        currentCallback = null;
+        modalConfirmBtn.disabled = false;
+        modalLoading.classList.add('hidden');
+    }
+
+    // Show loading state
+    function showModalLoading(show) {
+        if (show) {
+            modalConfirmBtn.disabled = true;
+            modalCancelBtn.disabled = true;
+            modalLoading.classList.remove('hidden');
+        } else {
+            modalConfirmBtn.disabled = false;
+            modalCancelBtn.disabled = false;
+            modalLoading.classList.add('hidden');
+        }
     }
 
     // Confirm Action
     modalConfirmBtn.addEventListener('click', function() {
-        if (currentModalUrl && currentItemId) {
-            // Create form and submit
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = currentModalUrl;
+        if (!currentModalUrl || !currentItemId) return;
 
-            // Add anti-forgery token
-            const token = document.querySelector('input[name="__RequestVerificationToken"]');
-            if (token) {
-                const tokenInput = document.createElement('input');
-                tokenInput.type = 'hidden';
-                tokenInput.name = '__RequestVerificationToken';
-                tokenInput.value = token.value;
-                form.appendChild(tokenInput);
+        const config = ModalConfig[currentModalAction];
+        
+        // Handle AJAX requests
+        if (currentUseAjax) {
+            showModalLoading(true);
+            
+            // For edit action (navigation), just redirect
+            if (currentModalAction === 'edit') {
+                window.location.href = currentModalUrl;
+                return;
             }
-
-            // Add item ID
-            const idInput = document.createElement('input');
-            idInput.type = 'hidden';
-            idInput.name = 'id';
-            idInput.value = currentItemId;
-            form.appendChild(idInput);
-
-            // Add returnTab if exists
-            const returnTab = document.querySelector('[name="returnTab"]');
-            if (returnTab) {
-                const tabInput = document.createElement('input');
-                tabInput.type = 'hidden';
-                tabInput.name = 'returnTab';
-                tabInput.value = returnTab.value;
-                form.appendChild(tabInput);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
+            
+            // Build URL with ID parameter
+            const url = currentModalUrl.includes('?') 
+                ? `${currentModalUrl}&id=${currentItemId}`
+                : `${currentModalUrl}?id=${currentItemId}`;
+            
+            // Make AJAX request
+            ajaxRequest(url, config.method || 'POST', null, {
+                showLoadingToast: false // We're showing modal loading instead
+            })
+            .then(result => {
+                showModalLoading(false);
+                closeConfirmModal();
+                
+                if (result.success) {
+                    // Execute callback if provided
+                    if (currentCallback) {
+                        currentCallback(result);
+                    } else {
+                        // Default: reload page after short delay
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                }
+            })
+            .catch(error => {
+                showModalLoading(false);
+                closeConfirmModal();
+                console.error('Modal AJAX error:', error);
+            });
+            
+            return;
         }
+
+        // Handle traditional form submission
+        // For edit action (navigation), just navigate
+        if (currentModalAction === 'edit') {
+            window.location.href = currentModalUrl;
+            return;
+        }
+
+        // Create and submit form for other actions
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = currentModalUrl;
+
+        // Add anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = token.value;
+            form.appendChild(tokenInput);
+        }
+
+        // Add item ID
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = currentItemId;
+        form.appendChild(idInput);
+
+        // Add returnTab if exists
+        const returnTab = document.querySelector('[name="returnTab"]');
+        if (returnTab) {
+            const tabInput = document.createElement('input');
+            tabInput.type = 'hidden';
+            tabInput.name = 'returnTab';
+            tabInput.value = returnTab.value;
+            form.appendChild(tabInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
         closeConfirmModal();
     });
 
@@ -219,56 +311,92 @@
 
     // Initialize confirm buttons with data attributes
     document.addEventListener('DOMContentLoaded', function() {
+        initializeConfirmButtons();
+    });
+
+    // Separate initialization function for dynamic content
+    function initializeConfirmButtons() {
         // Edit buttons
         document.querySelectorAll('[data-confirm-edit]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            // Remove existing listener if any
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-edit][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 openConfirmModal(
                     'edit',
                     this.dataset.itemId,
                     this.dataset.itemName,
-                    this.dataset.url
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true'
+                    }
                 );
             });
         });
 
         // Delete buttons
         document.querySelectorAll('[data-confirm-delete]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-delete][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 openConfirmModal(
                     'delete',
                     this.dataset.itemId,
                     this.dataset.itemName,
-                    this.dataset.url
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true',
+                        callback: window[this.dataset.callback] // Optional callback function
+                    }
                 );
             });
         });
 
         // Permanent delete buttons
         document.querySelectorAll('[data-confirm-permanent]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-permanent][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 openConfirmModal(
                     'permanentDelete',
                     this.dataset.itemId,
                     this.dataset.itemName,
-                    this.dataset.url
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true',
+                        callback: window[this.dataset.callback]
+                    }
                 );
             });
         });
 
         // Restore buttons
         document.querySelectorAll('[data-confirm-restore]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-restore][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 openConfirmModal(
                     'restore',
                     this.dataset.itemId,
                     this.dataset.itemName,
-                    this.dataset.url
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true',
+                        callback: window[this.dataset.callback]
+                    }
                 );
             });
         });
-    });
+    }
+
+    // Expose function for re-initialization after dynamic content loads
+    window.reinitializeConfirmButtons = initializeConfirmButtons;
 </script>

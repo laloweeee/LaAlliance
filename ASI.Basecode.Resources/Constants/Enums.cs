@@ -1,4 +1,4 @@
-﻿namespace ASI.Basecode.Resources.Constants
+﻿ namespace ASI.Basecode.Resources.Constants
 {
     /// <summary>
     /// Class for enumerated values
