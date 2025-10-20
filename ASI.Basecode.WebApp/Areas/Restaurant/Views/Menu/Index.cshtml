@@ -21,6 +21,11 @@
                         <i class="fas fa-tags mr-2"></i>
                         Categories
                     </button>
+                    <a asp-controller="Menu" asp-action="RecentlyDeleted" asp-area="Restaurant"
+                    class="bg-red-50 hover:bg-red-100 text-red-700 border-2 border-red-200 whitespace-nowrap py-2 px-4 rounded-md font-medium text-sm focus:outline-none transition-colors duration-200 flex items-center">
+                        <i class="fas fa-trash-restore mr-2"></i>
+                        Recently Deleted
+                    </a>
                 </div>
             </div>
 
@@ -31,7 +36,7 @@
                 @if (hasActiveCategories)
                 {
                     <a asp-controller="Menu" asp-action="ProductForm" asp-area="Restaurant" asp-route-returnTab="products"
-                       class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center md:justify-start transition-all duration-200 shadow-md hover:shadow-lg w-full md:w-auto">
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center md:justify-start transition-all duration-200 shadow-md hover:shadow-lg w-full md:w-auto">
                         <i class="fas fa-plus mr-2"></i>
                         <span class="font-medium">Add Product</span>
                     </a>
@@ -49,7 +54,7 @@
 
             <div id="categories-add-button" class="@(ViewBag.ActiveTab == "categories" ? "" : "hidden") w-full md:w-auto">
                 <a asp-controller="Menu" asp-action="CategoryForm" asp-area="Restaurant" asp-route-returnTab="categories"
-                   class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center md:justify-start transition-all duration-200 shadow-md hover:shadow-lg w-full md:w-auto">
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center md:justify-start transition-all duration-200 shadow-md hover:shadow-lg w-full md:w-auto">
                     <i class="fas fa-plus mr-2"></i>
                     <span class="font-medium">Add Category</span>
                 </a>

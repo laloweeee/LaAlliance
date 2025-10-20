@@ -418,6 +418,37 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             return RedirectToAction("Index", new { returnTab = "products" });
         }
 
+        /// <summary>
+        /// Renders the recently deleted items page with both deleted categories and products.
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult RecentlyDeleted()
+        {
+            try
+            {
+                var deletedCategories = _categoryService.GetAllCategories()
+                    .Where(c => c.IsDeleted)
+                    .ToList();
+                
+                var deletedProducts = _productService.GetAllProducts()
+                    .Where(p => p.IsDeleted)
+                    .ToList();
+
+                var model = new MenuViewModel
+                {
+                    Categories = deletedCategories,
+                    Products = deletedProducts
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                this.ShowErrorToast("Error loading deleted items: " + ex.Message);
+                return View(new MenuViewModel());
+            }
+        }
+
         #endregion
     }    
 }
