@@ -1,38 +1,29 @@
 using ASI.Basecode.Data.Models;
+using ASI.Basecode.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace ASI.Basecode.Data.Interfaces
+namespace ASI.Basecode.Services.Interfaces
 {
     /// <summary>
-    /// Interface for Promotion Repository
+    /// Interface for Promotion Service
     /// </summary>
-    public interface IPromotionRepository
+    public interface IPromotionService
     {
         /// <summary>
         /// Add a new promotion
         /// </summary>
-        /// <param name="promotion"></param>
-        /// <returns>The saved promotion with generated ID</returns>
-        RestaurantPromotions AddPromotion(RestaurantPromotions promotion);
-
-        /// <summary>
-        /// Add a promotion code
-        /// </summary>
-        /// <param name="promotionCode"></param>
-        void AddPromotionCode(PromotionCodes promotionCode);
-
-        /// <summary>
-        /// Add promotion products
-        /// </summary>
-        /// <param name="promotionProducts"></param>
-        void AddPromotionProducts(IEnumerable<PromotionProducts> promotionProducts);
+        /// <param name="model"></param>
+        /// <returns></returns>
+        Task AddPromotion(PromotionViewModel model);
 
         /// <summary>
         /// Update an existing promotion
         /// </summary>
-        /// <param name="promotion"></param>
-        void UpdatePromotion(RestaurantPromotions promotion);
+        /// <param name="model"></param>
+        /// <returns></returns>
+        Task UpdatePromotion(PromotionViewModel model);
 
         /// <summary>
         /// Delete a promotion by its ID

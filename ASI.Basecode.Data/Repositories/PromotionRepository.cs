@@ -23,9 +23,31 @@ namespace ASI.Basecode.Data.Repositories
         /// Add a new promotion
         /// </summary>
         /// <param name="promotion"></param>
-        public void AddPromotion(RestaurantPromotions promotion)
+        /// <returns>The saved promotion with generated ID</returns>
+        public RestaurantPromotions AddPromotion(RestaurantPromotions promotion)
         {
             _dbContext.RestaurantPromotions.Add(promotion);
+            UnitOfWork.SaveChanges();
+            return promotion; // Entity Framework will populate the ID after SaveChanges
+        }
+
+        /// <summary>
+        /// Add a promotion code
+        /// </summary>
+        /// <param name="promotionCode"></param>
+        public void AddPromotionCode(PromotionCodes promotionCode)
+        {
+            _dbContext.PromotionCodes.Add(promotionCode);
+            UnitOfWork.SaveChanges();
+        }
+
+        /// <summary>
+        /// Add promotion products
+        /// </summary>
+        /// <param name="promotionProducts"></param>
+        public void AddPromotionProducts(IEnumerable<PromotionProducts> promotionProducts)
+        {
+            _dbContext.PromotionProducts.AddRange(promotionProducts);
             UnitOfWork.SaveChanges();
         }
 
