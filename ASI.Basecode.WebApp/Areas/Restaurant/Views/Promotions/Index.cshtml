@@ -8,18 +8,18 @@
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
     <h2 class="text-2xl font-bold text-gray-800">Promotions</h2>
     <div class="flex items-center gap-2">
-        <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700" onclick="openModal('createCampaignModal')">
+@*         <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700" onclick="openModal('createCampaignModal')">
             <i class="fas fa-bullhorn mr-2"></i>Create Campaign
+        </button> *@
+        <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" onclick="openModal('createPromotionModal')">
+            <i class="fas fa-calendar-plus mr-2"></i>Create Promotion
         </button>
-        <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" onclick="openModal('createEventModal')">
-            <i class="fas fa-calendar-plus mr-2"></i>Create Event
-        </button>
-        <button type="button" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700" onclick="openModal('createDiscountModal')">
+@*         <button type="button" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700" onclick="openModal('createDiscountModal')">
             <i class="fas fa-tags mr-2"></i>Create Discount
         </button>
         <button type="button" class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-black" onclick="openModal('manageTrendingModal')">
             <i class="fas fa-fire mr-2"></i>Manage Trending
-        </button>
+        </button> *@
     </div>
 </div>
 
@@ -27,7 +27,7 @@
 <div class="border-b mb-6">
     <nav class="flex flex-wrap gap-2" id="promoTabs">
 @*         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="campaigns">Campaigns</button> *@
-        <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="events">Events</button>
+        <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="promotions">Promotions</button>
 @*         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="discounts">Discounts</button>
         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="trending">Trending</button> *@
         <button class="promo-tab-btn px-4 py-2 rounded-t border-b-2 border-transparent text-gray-600 hover:text-gray-800" data-tab="analytics">Analytics</button>
@@ -66,51 +66,103 @@
     </div>
 </div> *@
 
-<!-- Events -->
-<div id="tab-events" class="promo-tab section hidden">
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="w-full h-40 bg-black"></div>
-            <div class="p-6">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Promo Name Placeholder</h3>
-                        <p class="text-sm text-gray-500">Discount: <span class="font-medium text-emerald-600">20% OFF</span></p>
+<!-- Promotions -->
+<div id="tab-promotions" class="promo-tab section">
+    @if (Model != null && Model.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            @foreach (var promotion in Model)
+            {
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    @if (!string.IsNullOrEmpty(promotion.PromotionBanner))
+                    {
+                        <img src="@promotion.PromotionBanner" alt="@promotion.PromotionName" class="w-full h-40 object-cover">
+                    }
+                    else
+                    {
+                        <div class="w-full h-40 bg-gray-200 flex items-center justify-center">
+                            <span class="text-gray-500">No Image</span>
+                        </div>
+                    }
+                    <div class="p-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold">@promotion.PromotionName</h3>
+                                <p class="text-sm text-gray-500">
+                                    Discount: 
+                                    <span class="font-medium text-emerald-600">
+                                        @if (promotion.DiscountType == ASI.Basecode.Resources.Constants.Enums.DiscountType.Percentage)
+                                        {
+                                            @promotion.DiscountValue.ToString("0")@("%")
+                                        }
+                                        else
+                                        {
+                                            @promotion.DiscountValue.ToString("C")
+                                        }
+                                    </span>
+                                </p>
+                            </div>
+                            @{
+                                var currentDate = DateTime.Now;
+                                var statusClass = "";
+                                var statusText = "";
+                                
+                                if (!promotion.IsActive)
+                                {
+                                    statusClass = "bg-gray-100 text-gray-700";
+                                    statusText = "Inactive";
+                                }
+                                else if (promotion.StartDate > currentDate)
+                                {
+                                    statusClass = "bg-blue-100 text-blue-700";
+                                    statusText = "Upcoming";
+                                }
+                                else if (promotion.EndDate < currentDate)
+                                {
+                                    statusClass = "bg-red-100 text-red-700";
+                                    statusText = "Expired";
+                                }
+                                else
+                                {
+                                    statusClass = "bg-green-100 text-green-700";
+                                    statusText = "Active";
+                                }
+                            }
+                            <span class="text-xs px-2 py-1 rounded-full @statusClass">@statusText</span>
+                        </div>
+                        <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div><span class="font-medium">Start:</span> @promotion.StartDate.ToString("MMM dd, yyyy")</div>
+                            <div><span class="font-medium">End:</span> @promotion.EndDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(promotion.PromotionDescription))
+                        {
+                            <p class="mt-2 text-sm text-gray-600">@promotion.PromotionDescription</p>
+                        }
+                        <div class="mt-4 flex gap-2">
+                            <a asp-action="Edit" asp-route-id="@promotion.PromotionID" class="px-3 py-1 rounded border hover:bg-gray-50">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@promotion.PromotionID" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this promotion?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="px-3 py-1 rounded border text-red-600 hover:bg-red-50">Delete</button>
+                            </form>
+                        </div>
                     </div>
-                    <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">Upcoming</span>
                 </div>
-                <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div><span class="font-medium">Start:</span> Oct 20, 2025</div>
-                    <div><span class="font-medium">End:</span> Oct 22, 2025</div>
-                </div>
-                <div class="mt-4 flex gap-2">
-                    <button class="px-3 py-1 rounded border hover:bg-gray-50" onclick="openModal('editPromotionModal')">Edit</button>
-                    <button class="px-3 py-1 rounded border text-red-600 hover:bg-red-50">Cancel</button>
-                </div>
-            </div>
+            }
         </div>
-
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="w-full h-40 bg-black"></div>
-            <div class="p-6">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Holiday Sale Placeholder</h3>
-                        <p class="text-sm text-gray-500">Discount: <span class="font-medium text-emerald-600">₱100 OFF</span></p>
-                    </div>
-                    <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Active</span>
-                </div>
-                <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div><span class="font-medium">Start:</span> Dec 01, 2025</div>
-                    <div><span class="font-medium">End:</span> Dec 31, 2025</div>
-                </div>
-                <div class="mt-4 flex gap-2">
-                    <button class="px-3 py-1 rounded border hover:bg-gray-50" onclick="openModal('editPromotionModal')">Edit</button>
-                    <button class="px-3 py-1 rounded border text-red-600 hover:bg-red-50">Cancel</button>
-                </div>
+    }
+    else
+    {
+        <div class="text-center py-12">
+            <div class="text-gray-500 mb-4">
+                <i class="fas fa-tags text-4xl"></i>
             </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No promotions yet</h3>
+            <p class="text-gray-500 mb-4">Create your first promotion to start attracting customers.</p>
+            <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" onclick="openModal('createPromotionModal')">
+                <i class="fas fa-calendar-plus mr-2"></i>Create Promotion
+            </button>
         </div>
-    </div>
+    }
 </div>
 
 @* <!-- Discounts -->
@@ -183,21 +235,36 @@
     </div>
 </div>
 
-@await Html.PartialAsync("_PromotionModals")
+@await Html.PartialAsync("CreatePromotion", new ASI.Basecode.Services.ServiceModels.PromotionViewModel())
 
 @section Scripts {
     <script>
+        // --- Modal functions
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+        
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
         // --- Tabs
         (function initPromoTabs(){
           const buttons = document.querySelectorAll('.promo-tab-btn');
           const sections = {
             campaigns: document.getElementById('tab-campaigns'),
-            events:    document.getElementById('tab-events'),
+            promotions:    document.getElementById('tab-promotions'),
             discounts: document.getElementById('tab-discounts'),
             trending:  document.getElementById('tab-trending'),
             analytics: document.getElementById('tab-analytics')
           };
-          let active = 'campaigns';
+          let active = 'promotions';
           function activate(name){
             active = name;
             Object.entries(sections).forEach(([k, el]) => {
