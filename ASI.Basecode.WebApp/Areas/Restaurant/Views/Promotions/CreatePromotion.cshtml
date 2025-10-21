@@ -1,0 +1,131 @@
+﻿@model ASI.Basecode.Services.ServiceModels.PromotionViewModel
+
+<div id="createPromotionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white w-full max-w-4xl rounded-lg shadow-lg overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold">Create Promotion</h3>
+            <button type="button" class="text-gray-500 hover:text-gray-700" onclick="closeModal('createPromotionModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6 max-h-96 overflow-y-auto">
+            <form asp-action="CreatePromotion" asp-controller="Promotions" asp-area="Restaurant" method="post" enctype="multipart/form-data" class="space-y-5">
+                @Html.AntiForgeryToken()
+                
+                <!-- Promotion Basic Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="PromotionName" class="block text-sm font-medium text-gray-700 mb-1">Promotion Name</label>
+                        <input asp-for="PromotionName" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., Summer Sale">
+                        <span asp-validation-for="PromotionName" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="PromotionalBannerFile" class="block text-sm font-medium text-gray-700 mb-1">Promotion Image</label>
+                        <input asp-for="PromotionalBannerFile" type="file" accept="image/*" class="w-full px-4 py-2 border rounded-lg">
+                        <span asp-validation-for="PromotionalBannerFile" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="PromotionDescription" class="block text-sm font-medium text-gray-700 mb-1">Promotion Description</label>
+                    <textarea asp-for="PromotionDescription" rows="3" class="w-full px-4 py-2 border rounded-lg" placeholder="Describe the promotion details"></textarea>
+                    <span asp-validation-for="PromotionDescription" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Discount Settings -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label asp-for="DiscountType" class="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
+                        <select asp-for="DiscountType" asp-items="Html.GetEnumSelectList<ASI.Basecode.Resources.Constants.Enums.DiscountType>()" class="w-full px-3 py-2 border rounded-lg">
+                            <option value="">Select Type</option>
+                        </select>
+                        <span asp-validation-for="DiscountType" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="DiscountValue" class="block text-sm font-medium text-gray-700 mb-1">Discount Value</label>
+                        <input asp-for="DiscountValue" type="number" step="0.01" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., 20 or 5.00">
+                        <span asp-validation-for="DiscountValue" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="MinimumOrderAmount" class="block text-sm font-medium text-gray-700 mb-1">Minimum Order Amount</label>
+                        <input asp-for="MinimumOrderAmount" type="number" step="0.01" class="w-full px-4 py-2 border rounded-lg" placeholder="₱0.00">
+                        <span asp-validation-for="MinimumOrderAmount" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Date Range -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="StartDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input asp-for="StartDate" type="datetime-local" class="w-full px-4 py-2 border rounded-lg" value="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")">
+                        <span asp-validation-for="StartDate" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="EndDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input asp-for="EndDate" type="datetime-local" class="w-full px-4 py-2 border rounded-lg" value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")">
+                        <span asp-validation-for="EndDate" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Promotion Code Settings -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label asp-for="Code" class="block text-sm font-medium text-gray-700 mb-1">Promotion Code</label>
+                        <input asp-for="Code" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., SAVE20">
+                        <span asp-validation-for="Code" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="UsageLimit" class="block text-sm font-medium text-gray-700 mb-1">Usage Limit</label>
+                        <input asp-for="UsageLimit" type="number" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., 100">
+                        <span asp-validation-for="UsageLimit" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="ExpirationDate" class="block text-sm font-medium text-gray-700 mb-1">Code Expiration Date</label>
+                        <input asp-for="ExpirationDate" type="datetime-local" class="w-full px-4 py-2 border rounded-lg" value="@Model.ExpirationDate.ToString("yyyy-MM-ddTHH:mm:ss")">
+                        <span asp-validation-for="ExpirationDate" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Product Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Applicable Products</label>
+                    <div class="border rounded-lg p-3 max-h-32 overflow-y-auto">
+                        <div class="space-y-2">
+                            @if (ViewBag.Products != null)
+                            {
+                                @foreach (var product in ViewBag.Products)
+                                {
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="ProductIDs" value="@product.ProductID" class="mr-2">
+                                        <span>@product.ProductName</span>
+                                    </label>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-gray-500 text-sm">No products available</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Status -->
+                <div>
+                    <label class="flex items-center">
+                        <input asp-for="IsActive" type="checkbox" class="mr-2">
+                        <span class="text-sm font-medium text-gray-700">Active Promotion</span>
+                    </label>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="px-4 py-2 rounded border" onclick="closeModal('createPromotionModal')">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Additional scripts for promotion creation can go here
+    </script>
+}

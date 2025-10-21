@@ -117,7 +117,6 @@ function updateCoordinates(lat, lng, latInputId = 'latitude', lngInputId = 'long
     document.getElementById(lngInputId).value = lng;
     updateCoordinatesDisplay(lat, lng);
     
-    console.log('🔄 Calling reverseGeocode...');
     // Perform reverse geocoding to auto-fill address fields
     reverseGeocode(lat, lng);
 }

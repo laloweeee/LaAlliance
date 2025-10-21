@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using ASI.Basecode.Data.Models;
 using ASI.Basecode.Services.ServiceModels;
 using static ASI.Basecode.Resources.Constants.Enums;
+using ASI.Basecode.WebApp.Areas.Customer.Models;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Models
 {
@@ -10,5 +11,9 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         public IEnumerable<ProductCategory> Categories { get; set; } = new List<ProductCategory>();
         public IEnumerable<ProductViewModel> Products { get; set; } = new List<ProductViewModel>();
         public CartViewModel Carts { get; set; } = new CartViewModel();
+
+        // Add these properties for favorites
+        public FavoriteServiceModel Favorites { get; set; }
+        public int FavoriteCount => Favorites?.TotalItems ?? 0;
     }
 }

@@ -7,18 +7,6 @@
 }
 
 <div class="min-h-screen py-8">
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = errorMessage, Type = ToastType.Error }" />
-    }
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <partial name="_ToastNotification" model="new ToastNotificationViewModel { Message = successMessage, Type = ToastType.Success }" />
-    }
-
-    <partial name="_ConfirmModal" />
-
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <div class="mb-8">
@@ -258,9 +246,14 @@
                     class="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-all duration-200 text-center">
                     <i class="fas fa-times mr-2"></i>Cancel
                 </a>
-                <button type="submit" 
-                    class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                    <i class="fas fa-save mr-2"></i>@(Model.ProductID == 0 ? "Create Product" : "Update Product")
+                <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                    <span class="btn-text">
+                        <i class="fas fa-save mr-2"></i>@(Model.ProductID == 0 ? "Create Product" : "Update Product")
+                    </span>
+                    <span class="btn-loading hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        @(Model.ProductID == 0 ? "Creating..." : "Updating...")
+                    </span>
                 </button>
             </div>
         </form>
@@ -281,13 +274,12 @@
                             <p class="text-xs text-gray-500 mt-1">If you accidentally deleted this product, you can still recover it.</p>
                         </div>
                         <button type="button"  
+                                data-confirm-delete
                                 data-item-id="@Model.ProductID"
                                 data-item-name="@Model.ProductName"
                                 data-url="@Url.Action("DeleteProduct", "Menu", new { area = "Restaurant" })"
-                                class="confirm-btn px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                            <span class="btn-text">
-                                <i class="fas fa-trash-alt mr-2"></i>Delete Product
-                            </span>
+                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                            <i class="fas fa-trash-alt mr-2"></i>Delete Product
                         </button>
                     </div>
                 </div>
@@ -297,7 +289,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/confirmModal.js"></script>
     <script>
         let customizationGroupIndex = 0;
         let optionIndexes = {};

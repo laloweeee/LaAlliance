@@ -13,7 +13,20 @@ namespace ASI.Basecode.Data.Interfaces
         /// Add a new promotion
         /// </summary>
         /// <param name="promotion"></param>
-        void AddPromotion(RestaurantPromotions promotion);
+        /// <returns>The saved promotion with generated ID</returns>
+        RestaurantPromotions AddPromotion(RestaurantPromotions promotion);
+
+        /// <summary>
+        /// Add a promotion code
+        /// </summary>
+        /// <param name="promotionCode"></param>
+        void AddPromotionCode(PromotionCodes promotionCode);
+
+        /// <summary>
+        /// Add promotion products
+        /// </summary>
+        /// <param name="promotionProducts"></param>
+        void AddPromotionProducts(IEnumerable<PromotionProducts> promotionProducts);
 
         /// <summary>
         /// Update an existing promotion

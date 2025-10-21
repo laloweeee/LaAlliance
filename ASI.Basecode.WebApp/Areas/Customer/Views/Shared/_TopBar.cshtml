@@ -2,7 +2,7 @@
     <div class="flex items-center justify-between w-full max-w-full">
         <!-- LOGO -->
         <div class="flex items-center gap-3">
-                <img src="~/img/laAlliance Logo 2.png" alt="LaAlliancé Logo" class="h-10 w-auto filter" />
+            <img src="~/img/laAlliance Logo 2.png" alt="LaAlliancé Logo" class="h-10 w-auto filter" />
             <div class="flex flex-col">
                 <span class="text-xl font-bold text-gray-800 tracking-tight">LaAlliancé</span>
                 <p class="text-xs text-gray-600">Premium Food Delivery</p>
@@ -90,17 +90,25 @@
                             <span class="text-sm font-medium">Activity</span>
                         </a>
 
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500">
-                            <div class="w-7 h-7 bg-green-100 rounded flex items-center justify-center">
-                                <i class="fa-solid fa-heart text-green-600 text-xs"></i>
+                        <!-- Keep Favorites in dropdown too for easy access -->
+                        <a href="@Url.Action("Index", "Favorites", new { area = "Customer" })" 
+                            class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-rose-50 transition-colors group border-l-2 border-transparent hover:border-rose-500">
+                            <div class="w-7 h-7 bg-rose-100 rounded flex items-center justify-center">
+                                <i class="fas fa-heart text-rose-600 text-xs"></i>
                             </div>
                             <span class="text-sm font-medium">Favorites</span>
+                            @if (ViewBag.FavoriteCount > 0)
+                            {
+                                <span class="favorite-count bg-rose-500 text-white text-xs rounded-full px-2 py-1 ml-auto">
+                                    @ViewBag.FavoriteCount
+                                </span>
+                            }
                         </a>
 
                         <div class="border-t border-gray-200 my-1"></div>
 
                         <a asp-area="" asp-controller="Account" asp-action="Logout" 
-                           class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors group border-l-2 border-transparent hover:border-red-500">
+                        class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors group border-l-2 border-transparent hover:border-red-500">
                             <div class="w-7 h-7 bg-red-100 rounded flex items-center justify-center">
                                 <i class="fa-solid fa-arrow-right-from-bracket text-red-600 text-xs"></i>
                             </div>

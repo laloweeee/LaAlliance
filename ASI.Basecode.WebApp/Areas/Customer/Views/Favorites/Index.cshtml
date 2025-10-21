@@ -1,0 +1,203 @@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.FavoriteViewModel
+@{
+    ViewData["Title"] = "My Favorites";
+}
+
+<div class="p-6 bg-gray-50 min-h-screen">
+    @Html.AntiForgeryToken()
+    
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">My Favorites</h1>
+            <p class="text-gray-600">Your saved favorite items (@Model.TotalItems items)</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 min-h-[calc(100vh-24rem)]">
+            @if (!Model.FavoriteItems.Any())
+            {
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-heart text-gray-400 text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-3">No favorites yet</h2>
+                    <p class="text-gray-600 mb-6">Start adding your favorite items to see them here!</p>
+                    <a href="@Url.Action("Index", "Home", new { area = "Customer" })" 
+                       class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors inline-flex items-center gap-2">
+                        <i class="fas fa-utensils"></i>
+                        <span>Browse Menu</span>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <!-- Favorites Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @foreach (var item in Model.FavoriteItems)
+                    {
+                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group"
+                             id="favorite-item-@item.FavoriteItemID">
+                            <!-- Product Image -->
+                            <div class="relative h-48 bg-gray-100 overflow-hidden">
+                                @if (!string.IsNullOrEmpty(item.ProductImage))
+                                {
+                                    <img src="@item.ProductImage" alt="@item.ProductName" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                }
+                                else
+                                {
+                                    <div class="flex items-center justify-center h-full">
+                                        <i class="fas fa-image text-gray-300 text-3xl"></i>
+                                    </div>
+                                }
+                                
+                                <!-- Favorite Button -->
+                                <button type="button" 
+                                        class="favorite-toggle absolute top-3 right-3 w-8 h-8 bg-white/95 hover:bg-white rounded-full shadow-sm flex items-center justify-center transition-all duration-200 hover:scale-110 border border-gray-200"
+                                        data-product-id="@item.ProductID"
+                                        data-favorite-item-id="@item.FavoriteItemID">
+                                    <i class="fas fa-heart text-rose-500 text-sm"></i>
+                                </button>
+                                
+                                <!-- Category Badge -->
+                                @if (!string.IsNullOrEmpty(item.CategoryName))
+                                {
+                                    <div class="absolute top-3 left-3">
+                                        <div class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                            @item.CategoryName
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <!-- Product Details -->
+                            <div class="p-4">
+                                <h3 class="font-bold text-gray-900 mb-2 line-clamp-1">@item.ProductName</h3>
+                                <p class="text-gray-600 text-sm mb-3 line-clamp-2">@item.ProductDescription</p>
+                                
+                                <div class="flex items-center justify-between">
+                                    <span class="text-lg font-bold text-green-600">₱@item.ProductPrice.ToString("F2")</span>
+                                    
+                                    <!-- Add to Cart Button -->
+                                    <a href="@Url.Action("ProductToCart", "Home", new { area = "Customer", productID = item.ProductID })" 
+                                       class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg font-semibold transition-colors flex items-center gap-1 text-sm">
+                                        <i class="fas fa-cart-plus"></i>
+                                        <span>Add to Cart</span>
+                                    </a>
+                                </div>
+                                
+                                <!-- Date Added -->
+                                <div class="mt-3 pt-3 border-t border-gray-100">
+                                    <p class="text-xs text-gray-500">
+                                        Added @item.DateAdded.ToString("MMM dd, yyyy")
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Favorite toggle functionality
+            document.querySelectorAll('.favorite-toggle').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    const favoriteItemId = this.getAttribute('data-favorite-item-id');
+                    
+                    if (favoriteItemId) {
+                        // Remove from favorites page
+                        if (confirm('Remove this item from favorites?')) {
+                            removeFromFavorites(favoriteItemId);
+                        }
+                    } else {
+                        // Toggle favorite status
+                        toggleFavorite(productId, this);
+                    }
+                });
+            });
+            
+            function toggleFavorite(productId, button) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                fetch('@Url.Action("ToggleFavorite", "Favorites", new { area = "Customer" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ productID: productId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (!data.isFavorite) {
+                            // If on favorites page, remove the item
+                            const favoriteItem = button.closest('[id^="favorite-item-"]');
+                            if (favoriteItem) {
+                                favoriteItem.style.opacity = '0';
+                                setTimeout(() => favoriteItem.remove(), 300);
+                            }
+                        }
+                        showNotification(data.message, data.isFavorite);
+                    }
+                })
+                .catch(error => console.error('Error toggling favorite:', error));
+            }
+            
+            function removeFromFavorites(favoriteItemId) {
+                const formData = new FormData();
+                formData.append('favoriteItemID', favoriteItemId);
+                formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+                
+                fetch('@Url.Action("Remove", "Favorites", new { area = "Customer" })', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        const favoriteItem = document.getElementById(`favorite-item-${favoriteItemId}`);
+                        if (favoriteItem) {
+                            favoriteItem.style.opacity = '0';
+                            setTimeout(() => favoriteItem.remove(), 300);
+                        }
+                        showNotification('Item removed from favorites!', false);
+                        
+                        // Update item count in header
+                        const itemCountElements = document.querySelectorAll('.favorite-count');
+                        itemCountElements.forEach(el => {
+                            const currentCount = parseInt(el.textContent) || 0;
+                            el.textContent = Math.max(0, currentCount - 1);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error removing favorite:', error));
+            }
+            
+            function showNotification(message, isFavorite) {
+                // Simple notification
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                    isFavorite ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-rose-50 border border-rose-200 text-rose-800'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fas ${isFavorite ? 'fa-heart text-rose-500' : 'fa-times text-rose-600'}"></i>
+                        <span class="text-sm font-medium">${message}</span>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+        });
+    </script>
+}

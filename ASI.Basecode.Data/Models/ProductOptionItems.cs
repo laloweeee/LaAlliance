@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class ProductOptionItems
+    public partial class ProductOptionItems : BaseEntity
     {
         public int ProductOptionItemsID { get; set; }
         public int ProductOptionGroupID { get; set; }

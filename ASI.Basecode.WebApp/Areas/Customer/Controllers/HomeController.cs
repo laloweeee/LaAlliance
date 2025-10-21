@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using ASI.Basecode.WebApp.Helpers;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -19,6 +20,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private new readonly ICartService _cartService;
+        private readonly IFavoriteService _favoriteService; // ADDED
 
         public HomeController(
             IHttpContextAccessor httpContextAccessor,
@@ -27,12 +29,14 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             IProductService productService,
             ICategoryService categoryService,
             ICartService cartService,
+            IFavoriteService favoriteService, // ADDED THIS PARAMETER
             IMapper mapper = null)
             : base(httpContextAccessor, loggerFactory, configuration, mapper, cartService)
         {
             _productService = productService;
             _categoryService = categoryService;
             _cartService = cartService;
+            _favoriteService = favoriteService; // ADDED THIS ASSIGNMENT
         }
 
         /// <summary>
@@ -46,6 +50,20 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 Categories = _categoryService.GetAllCategories().ToList().AsQueryable(),
                 Products = _productService.GetActiveProducts()
             };
+
+            // ADDED: Safely load favorites with null check
+            if (_favoriteService != null)
+            {
+                try
+                {
+                    model.Favorites = _favoriteService.GetOrCreateFavorites(UserId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error loading favorites for user {UserId}", UserId);
+                    // Continue without favorites - don't break the page
+                }
+            }
 
             ViewBag.UserName = User.FindFirst(ClaimTypes.Name)?.Value;
             return View(model);
@@ -122,12 +140,10 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading cart item for edit");
-                TempData["ErrorMessage"] = "Unable to load item for editing.";
+                this.ShowErrorToast("Unable to load item for editing." + ex.Message);
                 return RedirectToAction("Index", "Cart");
             }
         }
-
-        
 
         /// <summary>
         /// Add or update item in cart
@@ -159,17 +175,19 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 }
 
                 _cartService.AddItemToCart(request, UserId);
-
-                TempData["SuccessMessage"] = cartItemID.HasValue
+                
+                var _message = cartItemID.HasValue
                     ? "Cart item updated successfully!"
                     : "Item added to cart successfully!";
+
+                this.ShowSuccessToast(_message);
 
                 return RedirectToAction("ProductToCart", new { productID });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding/updating item in cart");
-                TempData["ErrorMessage"] = "An error occurred. Please try again.";
+                this.ShowErrorToast(ex.Message);
                 return RedirectToAction("ProductToCart", new { productID });
             }
         }

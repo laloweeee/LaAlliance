@@ -30,6 +30,12 @@
   <ItemGroup>
     <ProjectReference Include="..\ASI.Basecode.Data\ASI.Basecode.Data.csproj" />
     <ProjectReference Include="..\ASI.Basecode.Resources\ASI.Basecode.Resources.csproj" />
+    
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Mapping\" />
   </ItemGroup>
 
 </Project>

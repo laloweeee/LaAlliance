@@ -1,59 +1,402 @@
-<style>
-    @@keyframes fade-in {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .animate-fade-in {
-        animation: fade-in 0.3s ease-out;
-    }
-
-    /* Modal animations */
-    @@keyframes modal-fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @@keyframes modal-slide-in {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-
-    .modal-fade-in {
-        animation: modal-fade-in 0.2s ease-out;
-    }
-
-    .modal-slide-in {
-        animation: modal-slide-in 0.2s ease-out;
-    }
-</style>
-
-<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm mx-4">
-        <div class="text-center">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+<!-- Reusable Confirmation Modal with AJAX Support -->
+<div id="confirmModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" aria-describedby="modalMessage" role="dialog" aria-modal="true" tabindex="-1">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
+    <!-- Modal Container -->
+    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg" role="document">
+            <!-- Modal Content -->
+            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <!-- Icon -->
+                    <div id="modalIcon" class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                        <i id="modalIconClass" class="text-xl"></i>
+                    </div>
+                    <!-- Content -->
+                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left flex-1">
+                        <h3 class="text-lg font-semibold leading-6 text-gray-900" id="modalTitle">Confirm Action</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500" id="modalMessage">Are you sure you want to proceed with this action?</p>
+                            <p class="text-sm font-medium text-gray-700 mt-2" id="modalItemName"></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <h3 class="text-lg font-bold text-gray-900 mb-2" id="confirmTitle">Confirm</h3>
-            <p class="text-gray-600 mb-6" id="confirmMessage">Are you sure?</p>
-
-            <div class="flex gap-3">
-                <button type="button" id="confirmCancel"
-                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-lg transition-colors">
+            <!-- Modal Actions -->
+            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-3">
+                <button type="button" id="modalConfirmBtn"
+                    class="inline-flex w-full justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:w-auto transition-all duration-200">
+                    <span id="modalConfirmText">Confirm</span>
+                    <span id="modalLoading" class="hidden ml-2 animate-spin"><i class="fas fa-spinner"></i></span>
+                </button>
+                <button type="button" id="modalCancelBtn"
+                    class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-all duration-200">
                     Cancel
                 </button>
-
-                <form id="confirmForm" method="post" style="display: inline; flex: 1;">
-                    @Html.AntiForgeryToken()
-                    <!-- JS will set input name/value and form.action -->
-                    <input type="hidden" id="confirmHiddenInput" name="id" value="" />
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <i class="fas fa-trash"></i>
-                        Remove
-                    </button>
-                </form>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Modal animations */
+    #confirmModal:not(.hidden) {
+        animation: fadeIn 0.2s ease-out;
+    }
+    
+    #confirmModal:not(.hidden) > div:last-child {
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @@keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+</style>
+
+<script>
+    // Modal Configuration
+    const ModalConfig = {
+        edit: {
+            title: 'Edit Item',
+            message: 'Do you want to edit this item?',
+            icon: 'fas fa-edit',
+            iconBg: 'bg-blue-100',
+            iconColor: 'text-blue-600',
+            btnColor: 'bg-blue-600 hover:bg-blue-700',
+            btnText: 'Edit',
+            method: 'GET' // Navigation action
+        },
+        delete: {
+            title: 'Delete Item',
+            message: 'Are you sure you want to delete this item? You can restore it later.',
+            icon: 'fas fa-trash-alt',
+            iconBg: 'bg-red-100',
+            iconColor: 'text-red-600',
+            btnColor: 'bg-red-600 hover:bg-red-700',
+            btnText: 'Delete',
+            method: 'DELETE'
+        },
+        permanentDelete: {
+            title: 'Permanent Delete',
+            message: 'Are you sure you want to permanently delete this item? This action cannot be undone!',
+            icon: 'fas fa-exclamation-triangle',
+            iconBg: 'bg-orange-100',
+            iconColor: 'text-orange-600',
+            btnColor: 'bg-orange-600 hover:bg-orange-700',
+            btnText: 'Delete Forever',
+            method: 'DELETE'
+        },
+        restore: {
+            title: 'Restore Item',
+            message: 'Do you want to restore this item?',
+            icon: 'fas fa-undo',
+            iconBg: 'bg-green-100',
+            iconColor: 'text-green-600',
+            btnColor: 'bg-green-600 hover:bg-green-700',
+            btnText: 'Restore',
+            method: 'POST'
+        }
+    };
+
+    // Modal State
+    let currentModalAction = null;
+    let currentModalUrl = null;
+    let currentItemId = null;
+    let currentUseAjax = false;
+    let currentCallback = null;
+
+    // Modal Elements
+    const modal = document.getElementById('confirmModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalItemName = document.getElementById('modalItemName');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalIconClass = document.getElementById('modalIconClass');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const modalConfirmText = document.getElementById('modalConfirmText');
+    const modalLoading = document.getElementById('modalLoading');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+    // Open Modal Function
+    function openConfirmModal(action, itemId, itemName, url, options = {}) {
+        const config = ModalConfig[action];
+        if (!config) return;
+
+        currentModalAction = action;
+        currentModalUrl = url;
+        currentItemId = itemId;
+        currentUseAjax = options.useAjax || false;
+        currentCallback = options.callback || null;
+
+        // Update modal content
+        modalTitle.textContent = config.title;
+        modalMessage.textContent = config.message;
+        modalItemName.textContent = itemName ? `Item: ${itemName}` : '';
+        
+        // Update icon
+        modalIcon.className = `mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 ${config.iconBg}`;
+        modalIconClass.className = `${config.icon} ${config.iconColor} text-xl`;
+        
+        // Update button
+        modalConfirmBtn.className = `inline-flex w-full justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm sm:w-auto transition-all duration-200 ${config.btnColor}`;
+        modalConfirmText.textContent = config.btnText;
+        modalLoading.classList.add('hidden');
+        modalConfirmBtn.disabled = false;
+
+        // Show modal
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on confirm button for accessibility
+        setTimeout(() => modalConfirmBtn.focus(), 100);
+    }
+
+    // Close Modal Function
+    function closeConfirmModal() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        currentModalAction = null;
+        currentModalUrl = null;
+        currentItemId = null;
+        currentUseAjax = false;
+        currentCallback = null;
+        modalConfirmBtn.disabled = false;
+        modalLoading.classList.add('hidden');
+    }
+
+    // Show loading state
+    function showModalLoading(show) {
+        if (show) {
+            modalConfirmBtn.disabled = true;
+            modalCancelBtn.disabled = true;
+            modalLoading.classList.remove('hidden');
+        } else {
+            modalConfirmBtn.disabled = false;
+            modalCancelBtn.disabled = false;
+            modalLoading.classList.add('hidden');
+        }
+    }
+
+    // Confirm Action
+    modalConfirmBtn.addEventListener('click', function() {
+        if (!currentModalUrl || !currentItemId) return;
+
+        const config = ModalConfig[currentModalAction];
+        
+        // Handle AJAX requests
+        if (currentUseAjax) {
+            showModalLoading(true);
+            
+            // For edit action (navigation), just redirect
+            if (currentModalAction === 'edit') {
+                window.location.href = currentModalUrl;
+                return;
+            }
+            
+            // Build URL with ID parameter
+            const url = currentModalUrl.includes('?') 
+                ? `${currentModalUrl}&id=${currentItemId}`
+                : `${currentModalUrl}?id=${currentItemId}`;
+            
+            // Make AJAX request
+            ajaxRequest(url, config.method || 'POST', null, {
+                showLoadingToast: false // We're showing modal loading instead
+            })
+            .then(result => {
+                showModalLoading(false);
+                closeConfirmModal();
+                
+                if (result.success) {
+                    // Execute callback if provided
+                    if (currentCallback) {
+                        currentCallback(result);
+                    } else {
+                        // Default: reload page after short delay
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                }
+            })
+            .catch(error => {
+                showModalLoading(false);
+                closeConfirmModal();
+                console.error('Modal AJAX error:', error);
+            });
+            
+            return;
+        }
+
+        // Handle traditional form submission
+        // For edit action (navigation), just navigate
+        if (currentModalAction === 'edit') {
+            window.location.href = currentModalUrl;
+            return;
+        }
+
+        // Create and submit form for other actions
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = currentModalUrl;
+
+        // Add anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = token.value;
+            form.appendChild(tokenInput);
+        }
+
+        // Add item ID
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = currentItemId;
+        form.appendChild(idInput);
+
+        // Add returnTab if exists
+        const returnTab = document.querySelector('[name="returnTab"]');
+        if (returnTab) {
+            const tabInput = document.createElement('input');
+            tabInput.type = 'hidden';
+            tabInput.name = 'returnTab';
+            tabInput.value = returnTab.value;
+            form.appendChild(tabInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+        closeConfirmModal();
+    });
+
+    // Cancel Action
+    modalCancelBtn.addEventListener('click', closeConfirmModal);
+
+    // Close on backdrop click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeConfirmModal();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeConfirmModal();
+        }
+    });
+
+    // Initialize confirm buttons with data attributes
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeConfirmButtons();
+    });
+
+    // Separate initialization function for dynamic content
+    function initializeConfirmButtons() {
+        // Edit buttons
+        document.querySelectorAll('[data-confirm-edit]').forEach(btn => {
+            // Remove existing listener if any
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-edit][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openConfirmModal(
+                    'edit',
+                    this.dataset.itemId,
+                    this.dataset.itemName,
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true'
+                    }
+                );
+            });
+        });
+
+        // Delete buttons
+        document.querySelectorAll('[data-confirm-delete]').forEach(btn => {
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-delete][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openConfirmModal(
+                    'delete',
+                    this.dataset.itemId,
+                    this.dataset.itemName,
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true',
+                        callback: window[this.dataset.callback] // Optional callback function
+                    }
+                );
+            });
+        });
+
+        // Permanent delete buttons
+        document.querySelectorAll('[data-confirm-permanent]').forEach(btn => {
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-permanent][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openConfirmModal(
+                    'permanentDelete',
+                    this.dataset.itemId,
+                    this.dataset.itemName,
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true',
+                        callback: window[this.dataset.callback]
+                    }
+                );
+            });
+        });
+
+        // Restore buttons
+        document.querySelectorAll('[data-confirm-restore]').forEach(btn => {
+            btn.replaceWith(btn.cloneNode(true));
+            const newBtn = document.querySelector(`[data-confirm-restore][data-item-id="${btn.dataset.itemId}"]`);
+            
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openConfirmModal(
+                    'restore',
+                    this.dataset.itemId,
+                    this.dataset.itemName,
+                    this.dataset.url,
+                    {
+                        useAjax: this.dataset.useAjax === 'true',
+                        callback: window[this.dataset.callback]
+                    }
+                );
+            });
+        });
+    }
+
+    // Expose function for re-initialization after dynamic content loads
+    window.reinitializeConfirmButtons = initializeConfirmButtons;
+</script>
