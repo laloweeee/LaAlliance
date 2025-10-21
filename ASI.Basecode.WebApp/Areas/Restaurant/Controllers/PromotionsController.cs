@@ -49,6 +49,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             return View();
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePromotion(PromotionViewModel model)

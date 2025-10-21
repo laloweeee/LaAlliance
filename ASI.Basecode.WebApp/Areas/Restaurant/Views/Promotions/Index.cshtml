@@ -235,7 +235,17 @@
     </div>
 </div>
 
-@await Html.PartialAsync("CreatePromotion", new ASI.Basecode.Services.ServiceModels.PromotionViewModel())
+@{
+    var createPromotionModel = new ASI.Basecode.Services.ServiceModels.PromotionViewModel
+    {
+        StartDate = DateTime.Now,
+        EndDate = DateTime.Now.AddDays(30),
+        ExpirationDate = DateTime.Now.AddDays(30),
+        IsActive = true,
+        UsageLimit = 100
+    };
+}
+@await Html.PartialAsync("CreatePromotion", createPromotionModel)
 
 @section Scripts {
     <script>
