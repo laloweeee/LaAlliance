@@ -562,8 +562,8 @@ namespace ASI.Basecode.Services.Services
             {
                 OrderStatus.Pending => "Your order has been received and is awaiting confirmation",
                 OrderStatus.Processing => "Your order is being prepared",
-                OrderStatus.OutForDelivery => "Your order is out for delivery",
                 OrderStatus.ReadyForPickup => "Your order is ready for pickup",
+                OrderStatus.ReadyForDelivery => "Your order is ready for delivery", // ADD THIS
                 OrderStatus.Completed => "Your order has been completed",
                 OrderStatus.Cancelled => "Your order has been cancelled",
                 _ => "Order status updated"

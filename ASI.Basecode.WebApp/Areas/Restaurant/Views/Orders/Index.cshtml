@@ -7,20 +7,22 @@
     // Small helpers for initial render (server-side)
     string StatusLabel(Enums.OrderStatus s) => s switch
     {
-        Enums.OrderStatus.Pending        => "New Order",
-        Enums.OrderStatus.Processing     => "Processing",     // <- was Cooking
-        Enums.OrderStatus.ReadyForPickup => "Ready",          // <- was Ready to serve
-        Enums.OrderStatus.Completed      => "Completed",
-        _                                 => s.ToString()
+        Enums.OrderStatus.Pending           => "New Order",
+        Enums.OrderStatus.Processing        => "Processing",
+        Enums.OrderStatus.ReadyForPickup    => "Ready for Pickup",
+        Enums.OrderStatus.ReadyForDelivery  => "Ready for Delivery",
+        Enums.OrderStatus.Completed         => "Completed",
+        _                                   => s.ToString()
     };
 
     string StatusBadgeClass(Enums.OrderStatus s) => s switch
     {
-        Enums.OrderStatus.Pending        => "bg-purple-100 text-purple-700",
-        Enums.OrderStatus.Processing     => "bg-amber-100 text-amber-700",
-        Enums.OrderStatus.ReadyForPickup => "bg-sky-100 text-sky-700",
-        Enums.OrderStatus.Completed      => "bg-emerald-100 text-emerald-700",
-        _                                 => "bg-gray-100 text-gray-700"
+        Enums.OrderStatus.Pending           => "bg-purple-100 text-purple-700",
+        Enums.OrderStatus.Processing        => "bg-amber-100 text-amber-700",
+        Enums.OrderStatus.ReadyForPickup    => "bg-blue-100 text-blue-700",
+        Enums.OrderStatus.ReadyForDelivery  => "bg-indigo-100 text-indigo-700",
+        Enums.OrderStatus.Completed         => "bg-emerald-100 text-emerald-700",
+        _                                   => "bg-gray-100 text-gray-700"
     };
 }
 
@@ -62,7 +64,10 @@
                     Preparing <span id="count-processing" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
                 </button>
                 <button onclick="filterOrders('ReadyForPickup')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
-                    Ready <span id="count-ready" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
+                    For Pickup <span id="count-ready-pickup" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="filterOrders('ReadyForDelivery')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                    For Delivery <span id="count-ready-delivery" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
                 </button>
                 <button onclick="filterOrders('Completed')" class="order-filter-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
                     Completed <span id="count-completed" class="ml-1 text-xs bg-gray-100 px-2 py-0.5 rounded-full">0</span>
@@ -91,7 +96,7 @@
                                 <div class="min-w-0">
                                     <div class="text-gray-900 font-semibold truncate">@order.FirstName @order.LastName</div>
                                     <div class="mt-1 text-xs text-gray-500 flex items-center gap-3">
-                                        <span title="Contact"><i class="fas fa-phone mr-1"></i>@order.ContactNumber</span>  @* contact number added *@
+                                        <span title="Contact"><i class="fas fa-phone mr-1"></i>@order.ContactNumber</span>
                                         <span class="hidden sm:inline">•</span>
                                         <span><i class="far fa-clock mr-1"></i>@order.OrderDate.ToString("MMM dd, yyyy h:mm tt")</span>
                                         <span class="hidden sm:inline">•</span>
@@ -149,7 +154,7 @@
                                             <div class="flex justify-between"><span>Delivery fee</span><span class="ml-3 font-medium text-gray-700">₱@order.DeliveryFee.ToString("N2")</span></div>
                                         }
                                         <div class="mt-1 text-gray-900 text-sm font-bold flex justify-between">
-                                            <span>Total</span><span class="ml-3 text-lime-600 font-extrabold">₱@order.TotalAmount.ToString("N2")</span> @* yellow-green + bold *@
+                                            <span>Total</span><span class="ml-3 text-lime-600 font-extrabold">₱@order.TotalAmount.ToString("N2")</span>
                                         </div>
                                     </div>
 
@@ -161,6 +166,14 @@
                                             {
                                                 <button onclick="acceptOrder(@order.OrderID)" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">Accept</button>
                                                 <button onclick="rejectOrder(@order.OrderID)" class="flex-1 bg-red-50 text-red-700 py-2 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors">Reject</button>
+                                            }
+                                            else if (order.OrderStatus.ToString() == "Processing")
+                                            {
+                                                <button onclick="markOrderReady(@order.OrderID)" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">Mark Ready</button>
+                                            }
+                                            else if (order.OrderStatus.ToString() == "ReadyForPickup" || order.OrderStatus.ToString() == "ReadyForDelivery")
+                                            {
+                                                <button onclick="completeOrder(@order.OrderID)" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">Complete</button>
                                             }
                                         </div>
                                         <a href="/Restaurant/Orders/ViewOrder/@order.OrderID"
@@ -190,19 +203,21 @@
         // ===== Helpers to keep badge label & color consistent =====
         function labelForStatus(s) {
             switch (s) {
-                case 'Pending':         return 'New Order';
-                case 'Processing':      return 'Processing';     // <- was Cooking
-                case 'ReadyForPickup':  return 'Ready';          // <- was Ready to serve
-                case 'Completed':       return 'Completed';
+                case 'Pending':          return 'New Order';
+                case 'Processing':       return 'Processing';
+                case 'ReadyForPickup':   return 'Ready for Pickup';
+                case 'ReadyForDelivery': return 'Ready for Delivery';
+                case 'Completed':        return 'Completed';
                 default:                return s;
             }
         }
         function badgeClassFor(s) {
             switch (s) {
-                case 'Pending':         return 'bg-purple-100 text-purple-700';
-                case 'Processing':      return 'bg-amber-100 text-amber-700';
-                case 'ReadyForPickup':  return 'bg-sky-100 text-sky-700';
-                case 'Completed':       return 'bg-emerald-100 text-emerald-700';
+                case 'Pending':          return 'bg-purple-100 text-purple-700';
+                case 'Processing':       return 'bg-amber-100 text-amber-700';
+                case 'ReadyForPickup':   return 'bg-blue-100 text-blue-700';
+                case 'ReadyForDelivery': return 'bg-indigo-100 text-indigo-700';
+                case 'Completed':        return 'bg-emerald-100 text-emerald-700';
                 default:                return 'bg-gray-100 text-gray-700';
             }
         }
@@ -350,7 +365,7 @@
                         badge.innerHTML = `<i class="fas fa-circle text-current text-[7px] mr-1.5"></i>${labelForStatus('Processing')}`;
                     }
                     const buttonsDiv = card.querySelector('.w-36 > .flex.gap-2');
-                    if (buttonsDiv) buttonsDiv.innerHTML = '';
+                    if (buttonsDiv) buttonsDiv.innerHTML = '<button onclick="markOrderReady(' + orderId + ')" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">Mark Ready</button>';
                     updateOrderCounts();
                     if (currentFilter === 'Pending') card.style.display = 'none';
                     showSuccessNotification('Order accepted successfully!');
@@ -360,12 +375,54 @@
             }
         }
 
-        function showSuccessNotification(message) {
-            const n = document.createElement('div');
-            n.className = 'fixed top-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-slide-in';
-            n.innerHTML = `<div class="flex items-center gap-2"><i class="fas fa-check-circle"></i><span>${message}</span></div>`;
-            document.body.appendChild(n);
-            setTimeout(() => { n.style.opacity = '0'; n.style.transform = 'translateX(100%)'; setTimeout(() => n.remove(), 300); }, 3000);
+        async function markOrderReady(orderId) {
+            if (!confirm('Mark this order as ready?')) return;
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const response = await fetch(`/Restaurant/Orders/MarkOrderReady?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }
+                });
+                
+                if (!response.ok) throw new Error('Network error');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Refresh the page to show the order in the correct ready tab
+                    location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error marking order as ready');
+            }
+        }
+
+        async function completeOrder(orderId) {
+            if (!confirm('Complete this order?')) return;
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const response = await fetch(`/Restaurant/Orders/CompleteOrder?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }
+                });
+                
+                if (!response.ok) throw new Error('Network error');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const card = document.getElementById(`order-${orderId}`);
+                    if (card) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.96)';
+                        setTimeout(() => card.remove(), 250);
+                    }
+                    updateOrderCounts();
+                    showSuccessNotification('Order completed successfully!');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error completing order');
+            }
         }
 
         async function rejectOrder(orderId) {
@@ -405,14 +462,24 @@
             const allOrders = document.querySelectorAll('.order-card');
             const pending    = document.querySelectorAll('[data-status="Pending"]').length;
             const processing = document.querySelectorAll('[data-status="Processing"]').length;
-            const ready      = document.querySelectorAll('[data-status="ReadyForPickup"]').length;
+            const readyPickup = document.querySelectorAll('[data-status="ReadyForPickup"]').length;
+            const readyDelivery = document.querySelectorAll('[data-status="ReadyForDelivery"]').length;
             const completed  = document.querySelectorAll('[data-status="Completed"]').length;
 
             document.getElementById('count-all').textContent = allOrders.length;
             document.getElementById('count-pending').textContent = pending;
             document.getElementById('count-processing').textContent = processing;
-            document.getElementById('count-ready').textContent = ready;
+            document.getElementById('count-ready-pickup').textContent = readyPickup;
+            document.getElementById('count-ready-delivery').textContent = readyDelivery;
             document.getElementById('count-completed').textContent = completed;
+        }
+
+        function showSuccessNotification(message) {
+            const n = document.createElement('div');
+            n.className = 'fixed top-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-slide-in';
+            n.innerHTML = `<div class="flex items-center gap-2"><i class="fas fa-check-circle"></i><span>${message}</span></div>`;
+            document.body.appendChild(n);
+            setTimeout(() => { n.style.opacity = '0'; n.style.transform = 'translateX(100%)'; setTimeout(() => n.remove(), 300); }, 3000);
         }
 
         function showNotification(message) {

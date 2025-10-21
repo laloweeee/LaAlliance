@@ -144,7 +144,7 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
         }
 
         /// <summary>
-        /// Mark an order as ready for pickup/delivery
+        /// Mark an order as ready for pickup/delivery based on order type
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -153,15 +153,43 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var order = _orderService.GetOrderById(orderId);
+                
+                // Determine the correct ready status based on order type
+                var readyStatus = order.OrderType == Enums.OrderType.Pickup 
+                    ? Enums.OrderStatus.ReadyForPickup 
+                    : Enums.OrderStatus.ReadyForDelivery;
 
-                await _orderService.UpdateOrderStatus(orderId, userId, Enums.OrderStatus.ReadyForPickup);
+                await _orderService.UpdateOrderStatus(orderId, userId, readyStatus);
 
-                TempData["SuccessMessage"] = "Order marked as ready!";
-                return Json(new { success = true, message = "Order marked as ready!" });
+                TempData["SuccessMessage"] = $"Order marked as ready for {order.OrderType.ToString().ToLower()}!";
+                return Json(new { success = true, message = $"Order marked as ready for {order.OrderType.ToString().ToLower()}!" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error marking order {OrderId} as ready", orderId);
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Complete an order (remove from ready tabs)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteOrder(int orderId)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                await _orderService.UpdateOrderStatus(orderId, userId, Enums.OrderStatus.Completed);
+
+                TempData["SuccessMessage"] = "Order completed successfully!";
+                return Json(new { success = true, message = "Order completed successfully!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error completing order {OrderId}", orderId);
                 return Json(new { success = false, message = ex.Message });
             }
         }
