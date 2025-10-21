@@ -28,6 +28,7 @@ namespace ASI.Basecode.Services.Services
         private readonly IMapper _mapper;
         private readonly ICategoryService _categoryService;
         private readonly IOrderRepository _orderRepository;
+        private readonly ILogger<ProductService> _logger;
 
         /// <summary>
         /// Constructor for ProductService.
@@ -36,14 +37,14 @@ namespace ASI.Basecode.Services.Services
         /// <param name="userRepository"></param>
         /// <param name="fileHandlingService"></param>
         /// <param name="mapper"></param>
-        /// <param name="categoryService"></param>
         public ProductService(
                             IProductRepository productRepository,
                             IUserRepository userRepository,
                             IFileHandlingService fileHandlingService,
                             IMapper mapper,
                             ICategoryService categoryService,
-                            IOrderRepository orderRepository )
+                            IOrderRepository orderRepository,
+                            ILogger<ProductService> logger)
         {
             _productRepository = productRepository;
             _userRepository = userRepository;
@@ -51,6 +52,7 @@ namespace ASI.Basecode.Services.Services
             _mapper = mapper;
             _categoryService = categoryService;
             _orderRepository = orderRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -75,13 +77,17 @@ namespace ASI.Basecode.Services.Services
         public ProductViewModel GetProductByID(int productID)
         {
             var product = _productRepository
-                .GetAllIncludingDeleted<Product>().FirstOrDefault(p => p.ProductID == productID);
+                .GetProducts().FirstOrDefault(p => p.ProductID == productID);
 
             if (product == null) throw new ArgumentException("The product does not exist.");
 
             
             var model = _mapper.Map<ProductViewModel>(product);
             model.CategoryName = product.ProductCategory?.CategoryName;
+
+            _logger.LogInformation($"Retrieved product by ID: {productID}");
+            _logger.LogInformation($"Product Name: {model.ProductName}, Category: {model.CategoryName}");
+            _logger.LogInformation($"Product has {model.CustomizationGroups?.Count} customization groups.");
 
             return model;
         }
