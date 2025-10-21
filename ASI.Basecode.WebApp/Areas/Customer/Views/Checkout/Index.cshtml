@@ -411,7 +411,57 @@
                     </div>
                 </div>
             </div> <!-- Close right column -->
+            <!-- Loading Modal -->
+<div id="loadingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+        <!-- Animated Spinner -->
+        <div class="mb-6 flex justify-center">
+            <div class="relative">
+                <!-- Outer rotating ring -->
+                <div class="w-20 h-20 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+                <!-- Inner pulse circle -->
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-full animate-pulse"></div>
+                </div>
+                <!-- Center icon -->
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="fas fa-shopping-bag text-green-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Text -->
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Processing Your Order</h3>
+        <p class="text-gray-600 mb-4">Please wait while we prepare your order...</p>
+        
+        <!-- Progress Steps -->
+        <div class="space-y-2 text-sm text-left bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center gap-3 text-green-600">
+                <i class="fas fa-check-circle"></i>
+                <span>Validating order details</span>
+            </div>
+            <div class="flex items-center gap-3 text-gray-400" id="step2">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                <span>Processing payment</span>
+            </div>
+            <div class="flex items-center gap-3 text-gray-400" id="step3">
+                <i class="fas fa-circle"></i>
+                <span>Confirming order</span>
+            </div>
+        </div>
+        
+        <!-- Warning Message -->
+        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p class="text-xs text-yellow-800 flex items-center justify-center gap-2">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Please do not close or refresh this page</span>
+            </p>
+        </div>
+    </div>
+</div>
         </form>
+
+        
     </div>
 </div>
 
@@ -422,4 +472,79 @@
     <script>
         window.checkoutSubtotal = @subtotal;
     </script>
-}
+
+    <!-- Loading Modal Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutForm = document.getElementById('checkoutForm');
+            const loadingModal = document.getElementById('loadingModal');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            
+            checkoutForm.addEventListener('submit', function(e) {
+                // First, run all client-side validations
+                if (!validateFormBeforeSubmit()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Only show modal if validations pass
+                loadingModal.classList.remove('hidden');
+                
+                // Animate progress steps
+                setTimeout(function() {
+                    step2.querySelector('i').classList.remove('fa-circle-notch', 'fa-spin');
+                    step2.querySelector('i').classList.add('fa-check-circle');
+                    step2.classList.remove('text-gray-400');
+                    step2.classList.add('text-green-600');
+                    
+                    step3.querySelector('i').classList.remove('fa-circle');
+                    step3.querySelector('i').classList.add('fa-circle-notch', 'fa-spin');
+                    step3.classList.remove('text-gray-400');
+                    step3.classList.add('text-blue-600');
+                }, 1000);
+                
+                setTimeout(function() {
+                    step3.querySelector('i').classList.remove('fa-circle-notch', 'fa-spin');
+                    step3.querySelector('i').classList.add('fa-check-circle');
+                    step3.classList.remove('text-blue-600');
+                    step3.classList.add('text-green-600');
+                }, 2000);
+            });
+            
+            function validateFormBeforeSubmit() {
+                // Validate payment method
+                if (!validatePaymentMethod()) {
+                    return false;
+                }
+                
+                // Validate delivery address for delivery orders
+                const orderType = document.querySelector('input[name="OrderType"]:checked');
+                if (orderType && orderType.value === 'Delivery') {
+                    const selectedAddress = document.querySelector('.address-radio:checked');
+                    const customAddress = document.getElementById('customAddressContainer');
+                    
+                    if (!selectedAddress && !customAddress) {
+                        alert('Please select a delivery address for delivery orders.');
+                        return false;
+                    }
+                }
+                
+                // Validate coordinates for custom addresses
+                const customAddress = document.getElementById('customAddressContainer');
+                if (customAddress) {
+                    const latInput = document.getElementById('latitude') || document.getElementById('latitudeInput');
+                    const lngInput = document.getElementById('longitude') || document.getElementById('longitudeInput');
+                    
+                    if (!latInput?.value || !lngInput?.value) {
+                        alert('Please set a location on the map for your custom address.');
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+        });
+    </script>
+
+    }
