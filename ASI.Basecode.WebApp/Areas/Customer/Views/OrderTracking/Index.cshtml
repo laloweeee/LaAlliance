@@ -25,24 +25,55 @@
                         <span class="text-sm text-gray-500">ETA: @Model.CurrentOrder.ETA</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="orderProgress" class="bg-green-600 h-2 rounded-full" style="width: @(Model.CurrentOrder.ProgressPercentage)%"></div>
+                        <div id="orderProgress" class="bg-green-600 h-2 rounded-full" style="width: 75%"></div>
                     </div>
                 </div>
                
                 <!-- Order Steps -->
                 <div class="space-y-4">
-                    @foreach (var step in Model.CurrentOrder.OrderSteps)
-                    {
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 @(step.IsCompleted ? "bg-green-600" : "bg-gray-300") rounded-full flex items-center justify-center">
-                                <i class="@step.IconClass @(step.IsCompleted ? "text-white" : "text-gray-500") text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium @(step.IsCompleted ? "text-gray-800" : "text-gray-500")">@step.StepName</p>
-                                <p class="text-sm @(step.IsCompleted ? "text-gray-500" : "text-gray-400")">@step.Timestamp</p>
-                            </div>
+                    <!-- Order Confirmed - COMPLETED -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-white text-sm"></i>
                         </div>
-                    }
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">Order Confirmed</p>
+                            <p class="text-sm text-green-600 font-semibold">Completed</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Preparing Your Order - COMPLETED -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-utensils text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">Preparing Your Order</p>
+                            <p class="text-sm text-green-600 font-semibold">Completed</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Out for Delivery - CURRENT ACTIVE STEP -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center animate-pulse">
+                            <i class="fas fa-motorcycle text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">Out for Delivery</p>
+                            <p class="text-sm text-green-600 font-semibold">In Progress • ETA: @Model.CurrentOrder.ETA</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivered - PENDING -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i class="fas fa-home text-gray-500 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-500">Delivered</p>
+                            <p class="text-sm text-gray-400">Pending</p>
+                        </div>
+                    </div>
                 </div>
                
                 <!-- Live Tracking Map -->
@@ -68,14 +99,17 @@
                             <span>Real-time tracking • Delivery to: @Model.CurrentOrder.DeliveryLocation.Address</span>
                         </div>
                         
-                        <!-- Cancel Order Button -->
-                        <div class="flex justify-end pt-4">
-                            <button id="cancelOrderBtn" 
-                                    type="button" 
-                                    class="bg-red-500 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
-                                <i class="fas fa-times-circle mr-2"></i>
-                                Cancel Order
-                            </button>
+                        <!-- Status Update Banner -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-motorcycle text-green-600 text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-green-800 text-lg">Your order is out for delivery!</h4>
+                                    <p class="text-green-600 text-sm">Rider is on the way to your location • ETA: @Model.CurrentOrder.ETA</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 }
@@ -89,14 +123,17 @@
                         </div>
                     </div>
                     
-                    <!-- Cancel Order Button (for when map is not available) -->
-                    <div class="flex justify-end pt-4">
-                        <button id="cancelOrderBtn" 
-                                type="button" 
-                                class="bg-red-500 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
-                            <i class="fas fa-times-circle mr-2"></i>
-                            Cancel Order
-                        </button>
+                    <!-- Status Update Banner -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-motorcycle text-green-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-green-800 text-lg">Your order is out for delivery!</h4>
+                                <p class="text-green-600 text-sm">Rider is on the way to your location</p>
+                            </div>
+                        </div>
                     </div>
                 }
             </div>
@@ -105,6 +142,39 @@
     </div>
 </section>
 
+<!-- Delivery Success Modal -->
+<div id="deliverySuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-2xl transform transition-all duration-500 scale-95 opacity-0">
+        <!-- Success Icon -->
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-check text-green-600 text-3xl"></i>
+        </div>
+        
+        <!-- Success Message -->
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Order Delivered!</h3>
+        <p class="text-gray-600 mb-2">Your order has been successfully delivered.</p>
+        <p class="text-gray-600 mb-6">Thank you for choosing LaAlliancé!</p>
+        
+        <!-- Order Details -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <p class="text-sm text-gray-700 font-semibold">Order #@Model.CurrentOrder?.OrderNumber</p>
+            <p class="text-xs text-gray-500 mt-1">Delivered to: @Model.CurrentOrder?.DeliveryLocation?.Address</p>
+        </div>
+        
+        <!-- Countdown and Redirect -->
+        <div class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-4">
+            <i class="fas fa-clock text-green-500"></i>
+            <span>Redirecting to home page in <span id="countdown">5</span> seconds...</span>
+        </div>
+        
+        <!-- Action Button -->
+        <button id="goHomeNow" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <i class="fas fa-home"></i>
+            <span>Go to Home Now</span>
+        </button>
+    </div>
+</div>
+
 @section Scripts {
     @if (Model.CurrentOrder?.DeliveryLocation?.Latitude != 0 && Model.CurrentOrder?.DeliveryLocation?.Longitude != 0)
     {
@@ -112,4 +182,81 @@
         <script src="~/js/order-tracking-map.js"></script>
     }
     
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('deliverySuccessModal');
+            const modalContent = modal.querySelector('.transform');
+            const countdownElement = document.getElementById('countdown');
+            const goHomeButton = document.getElementById('goHomeNow');
+            let countdown = 5;
+            let countdownInterval;
+
+            // Function to show modal with animation
+            function showDeliverySuccessModal() {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 50);
+
+                // Start countdown
+                countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        redirectToHome();
+                    }
+                }, 1000);
+            }
+
+            // Function to redirect to home
+            function redirectToHome() {
+                window.location.href = '@Url.Action("Index", "Home", new { area = "Customer" })';
+            }
+
+            // Show modal after 5 seconds
+            setTimeout(showDeliverySuccessModal, 5000);
+
+            // Manual redirect when button is clicked
+            goHomeButton.addEventListener('click', function() {
+                clearInterval(countdownInterval);
+                redirectToHome();
+            });
+
+            // Optional: Update order progress to show delivered status
+            setTimeout(() => {
+                // Update progress bar to 100%
+                const progressBar = document.getElementById('orderProgress');
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                    progressBar.classList.remove('bg-green-600');
+                    progressBar.classList.add('bg-green-700');
+                }
+
+                // Update status badge
+                const statusBadge = document.querySelector('.bg-green-100');
+                if (statusBadge) {
+                    statusBadge.textContent = 'Delivered';
+                    statusBadge.classList.remove('bg-green-100', 'text-green-800');
+                    statusBadge.classList.add('bg-green-600', 'text-white');
+                }
+
+                // Update order steps to show delivered as completed
+                const deliveredStep = document.querySelectorAll('.flex.items-center.space-x-3')[3];
+                if (deliveredStep) {
+                    const stepIcon = deliveredStep.querySelector('.w-8.h-8');
+                    const stepStatus = deliveredStep.querySelector('.text-sm');
+                    
+                    stepIcon.classList.remove('bg-gray-300');
+                    stepIcon.classList.add('bg-green-600');
+                    
+                    stepStatus.textContent = 'Completed';
+                    stepStatus.classList.remove('text-gray-400');
+                    stepStatus.classList.add('text-green-600', 'font-semibold');
+                }
+            }, 5000);
+        });
+    </script>
 }

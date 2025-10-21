@@ -19,6 +19,10 @@
         <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
             @Html.AntiForgeryToken()
 
+             <input type="hidden" asp-for="FullName" />
+        <input type="hidden" asp-for="Email" />
+        <input type="hidden" asp-for="ContactNumber" />
+
             <!-- Left Column: Order Type, Delivery Address and Personal Details -->
             <div class="lg:col-span-2 space-y-6">
                 
@@ -192,7 +196,7 @@
                             <label class="block text-gray-700 font-medium">Select Payment Method</label>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
-                                    <input type="radio" name="PaymentMethod" value="CashOnDelivery" class="radio-input" />
+                                    <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
                                     <span>Cash on Delivery</span>
                                 </label>
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
@@ -293,6 +297,7 @@
             <!-- Right Column: Order Summary -->
             <div class="lg:col-span-1">
                 <!-- Order Summary -->
+            
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sticky top-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <i class="fas fa-receipt text-green-600"></i>
@@ -405,7 +410,7 @@
                         </p>
                     </div>
                 </div>
-            </div> <!-- Close right column (lg:col-span-1) -->
+            </div> <!-- Close right column -->
         </form>
     </div>
 </div>
