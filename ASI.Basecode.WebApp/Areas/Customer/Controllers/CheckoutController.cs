@@ -74,6 +74,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             return View(model);
         }
 
+        // Replace your PlaceOrder method in CheckoutController.cs with this:
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
@@ -82,7 +84,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
             try
             {
-                        // Validate the model
+                // Validate the model
                 if (!ModelState.IsValid)
                 {
                     // Reload necessary data for the view
@@ -125,15 +127,11 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
                 var orderResult = await _orderService.PlaceOrder(placeOrderRequest);
 
-                // STORE ORDER ID IN TEMPDATA FOR RECEIPT PAGE
-                TempData["OrderID"] = orderResult.OrderID;
-                TempData["SuccessMessage"] = "Order placed successfully! Your order number is #" + orderResult.OrderID;
-
                 // LOAD USER PROFILE AND ADDRESSES FOR THE CONFIRMATION PAGE
                 var userProfile = _userProfileService.GetUserProfile(userId);
                 var addresses = _addressService.GetUserAddresses(userId);
 
-                // UPDATE THE MODEL WITH ALL NECESSARY DATA
+                // UPDATE THE MODEL WITH ALL NECESSARY DATA INCLUDING REAL ORDER INFO
                 model.Cart = currentCart;
                 model.Addresses = _mapper != null
                     ? _mapper.Map<List<UserAddressViewModel>>(addresses)
@@ -141,9 +139,16 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 model.FullName = $"{userProfile?.FirstName} {userProfile?.LastName}";
                 model.Email = userProfile?.Email;
                 model.ContactNumber = userProfile?.ContactNumber;
+                
+                // CRITICAL: Set the real order ID and status from the service result
+                // Make sure OrderID is properly converted to string
+                model.OrderId = orderResult.OrderID.ToString();
+                model.OrderStatus = orderResult.OrderStatus.ToString();
 
-                // CLEAR THE CART ONLY AFTER WE'VE SAVED THE DATA FOR DISPLAY
-                _cartService.ClearCart(userId);
+                // STORE ORDER ID IN TEMPDATA FOR RECEIPT PAGE (backup)
+                TempData["OrderID"] = orderResult.OrderID;
+                TempData["OrderStatus"] = orderResult.OrderStatus.ToString();
+                TempData["SuccessMessage"] = "Order placed successfully! Your order number is #" + orderResult.OrderID;
 
                 // RETURN THE PLACEORDER VIEW WITH THE COMPLETE MODEL
                 return View("PlaceOrder", model);

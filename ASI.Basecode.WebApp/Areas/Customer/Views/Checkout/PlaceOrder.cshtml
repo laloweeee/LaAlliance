@@ -6,7 +6,7 @@
     var deliveryFee = Model.OrderType == "Delivery" ? 50.00m : 0.00m;
     var total = subtotal + deliveryFee;
     
-    // Use real order data from the model
+    // Use real order data from the model - this comes from orderResult.OrderID
     var orderId = Model.OrderId ?? "N/A";
     var orderStatus = Model.OrderStatus ?? "Pending";
     
@@ -691,51 +691,51 @@
     </script>
     
     <style>
-    /* Loading state for buttons */
-    button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    /* Cancel button disabled state */
-    .cancel-order-btn:disabled {
-        opacity: 0.6 !important;
-        cursor: not-allowed !important;
-        transform: none !important;
-    }
-
-    .cancel-order-btn:disabled:hover {
-        background-color: #9CA3AF !important;
-    }
-
-    /* Timeline animation */
-    .flex-1.h-0\.5 {
-        transition: background-color 0.5s ease-in-out;
-    }
-
-    .flex.flex-col.items-center div {
-        transition: all 0.5s ease-in-out;
-    }
-    
-    /* Ensure receipt container looks good when captured */
-    #receiptContainer {
-        position: relative;
-    }
-    
-    /* Toast animations */
-    #toastContainer > div {
-        animation: slideIn 0.3s ease-out;
-    }
-    
-    @@keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
+        /* Loading state for buttons */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+
+        /* Cancel button disabled state */
+        .cancel-order-btn:disabled {
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
         }
-    }
-</style>
+
+        .cancel-order-btn:disabled:hover {
+            background-color: #9CA3AF !important;
+        }
+
+        /* Timeline animation */
+        .flex-1.h-0\.5 {
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        .flex.flex-col.items-center div {
+            transition: all 0.5s ease-in-out;
+        }
+        
+        /* Ensure receipt container looks good when captured */
+        #receiptContainer {
+            position: relative;
+        }
+        
+        /* Toast animations */
+        #toastContainer > div {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @@keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
 }
