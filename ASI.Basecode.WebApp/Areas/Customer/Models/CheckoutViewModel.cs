@@ -24,5 +24,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         public string FullName { get; set; }
         public string ContactNumber { get; set; }
         public string Email { get; set; }
+
+        public string OrderStatus { get; set; } // "Pending", "Preparing", "Ready", "Delivered"
+        public string OrderId { get; set; }
     }
 }

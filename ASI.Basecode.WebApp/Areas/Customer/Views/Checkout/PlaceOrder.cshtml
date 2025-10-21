@@ -3,13 +3,19 @@
 @{
     ViewData["Title"] = "Order Confirmation - LaAlliancé";
     var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * (item.UnitPrice + (item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0))) ?? 0;
-    var deliveryFee = 50.00m;
+    var deliveryFee = Model.OrderType == "Delivery" ? 50.00m : 0.00m;
     var total = subtotal + deliveryFee;
-    var orderId = DateTime.Now.ToString("yyyyMMddHHmmss");
+    
+    // Use real order data from the model
+    var orderId = Model.OrderId ?? "N/A";
+    var orderStatus = Model.OrderStatus ?? "Pending";
     
     // Get the selected address for display
     var selectedAddress = Model.Addresses?.FirstOrDefault(a => a.UserAddressID == Model.SelectedAddressId);
 }
+
+<!-- Anti-forgery token (required for AJAX POST requests) -->
+@Html.AntiForgeryToken()
 
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,19 +35,19 @@
 
                     <!-- Order Timeline -->
                     <div class="mb-10">
-                        <div class="flex items-center justify-between max-w-lg mx-auto">
-                            <!-- Step 1 -->
+                        <div class="flex items-center justify-between max-w-2xl mx-auto">
+                            <!-- Step 1: Pending -->
                             <div class="flex flex-col items-center">
-                                <div class="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center mb-3">
-                                    <i class="fas fa-check text-white text-xl"></i>
+                                <div class="w-14 h-14 border-2 border-green-600 bg-green-50 rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-clock text-green-600 text-xl"></i>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-900">Ordered</span>
-                                <span class="text-xs text-gray-500 mt-1">@DateTime.Now.ToString("MMM dd")</span>
+                                <span class="text-sm font-semibold text-green-600">Pending</span>
+                                <span class="text-xs text-gray-400 mt-1">@DateTime.Now.ToString("MMM dd")</span>
                             </div>
                             
                             <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
                             
-                            <!-- Step 2 -->
+                            <!-- Step 2: Preparing -->
                             <div class="flex flex-col items-center">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-utensils text-gray-400 text-xl"></i>
@@ -52,10 +58,21 @@
                             
                             <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
                             
-                            <!-- Step 3 -->
+                            <!-- Step 3: Ready -->
                             <div class="flex flex-col items-center">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-check text-gray-400 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-500">Ready</span>
+                                <span class="text-xs text-gray-400 mt-1">5-10 min</span>
+                            </div>
+                            
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            
+                            <!-- Step 4: Delivered -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-truck text-gray-400 text-xl"></i>
                                 </div>
                                 <span class="text-sm font-semibold text-gray-500">Delivered</span>
                                 <span class="text-xs text-gray-400 mt-1">30-45 min</span>
@@ -63,12 +80,25 @@
                         </div>
                     </div>
 
-                    <!-- Track Order Button -->
+                    <!-- Cancel Order Button (Only visible in Pending status) -->
                     <div class="text-center mb-10 pb-8 border-b border-gray-200">
-                        <a href="@Url.Action("Index", "OrderTracking", new { area = "Customer" })" 
-                           class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full transition-colors">
-                            Track your order
-                        </a>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <a href="@Url.Action("Index", "OrderTracking", new { area = "Customer" })" 
+                            class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full transition-colors">
+                                Track your order
+                            </a>
+                            <button type="button" 
+                                    id="cancelOrderBtn"
+                                    data-order-id="@orderId"
+                                    data-order-status="@orderStatus"
+                                    class="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-full transition-colors cancel-order-btn">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel Order
+                            </button>
+                        </div>
+                        <p id="cancelMessage" class="text-sm text-gray-500 mt-3 hidden">
+                            Order cancellation is only available while order is still pending.
+                        </p>
                     </div>
 
                     <!-- Order Details Section -->
@@ -78,7 +108,7 @@
                         <div class="flex justify-between text-sm text-gray-600 mb-6 pb-6 border-b border-gray-200">
                             <div>
                                 <p class="font-semibold text-gray-900 mb-1">Order number</p>
-                                <p>@orderId</p>
+                                <p>#@orderId</p>
                             </div>
                             <div class="text-right">
                                 <p class="font-semibold text-gray-900 mb-1">Order date</p>
@@ -96,7 +126,6 @@
                                     var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
                                     
                                     <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
-                                        <!-- Product Image Placeholder Updated to Show Actual Image -->
                                         <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                                             @if (!string.IsNullOrEmpty(item.ProductImage))
                                             {
@@ -104,7 +133,7 @@
                                             }
                                             else
                                             {
-                                                <i class="fas fa-utensils text-gray-400 text-2xl"></i>  <!-- Fallback placeholder -->
+                                                <i class="fas fa-utensils text-gray-400 text-2xl"></i>
                                             }
                                         </div>
                                         
@@ -134,12 +163,19 @@
                             <div>
                                 <h3 class="font-semibold text-gray-900 mb-3">Shipping address</h3>
                                 <div class="text-sm text-gray-600 space-y-1">
-                                    @if (selectedAddress != null)
+                                    <p class="font-medium text-gray-900">@Model.FullName</p>
+                                    @if (selectedAddress != null && Model.OrderType == "Delivery")
                                     {
                                         <p class="font-medium">@selectedAddress.AddressType</p>
                                         <p>@selectedAddress.Street</p>
                                         <p>@selectedAddress.Barangay, @selectedAddress.City</p>
                                         <p>@selectedAddress.Province @selectedAddress.ZipCode</p>
+                                        @if (!string.IsNullOrEmpty(Model.ContactNumber))
+                                        {
+                                            <p class="mt-2 pt-2 border-t border-gray-200">
+                                                <span class="font-medium">Contact:</span> @Model.ContactNumber
+                                            </p>
+                                        }
                                         @if (!string.IsNullOrEmpty(Model.DeliveryNotes))
                                         {
                                             <div class="mt-2 pt-2 border-t border-gray-200">
@@ -154,10 +190,12 @@
                                         <p>Pick up at our store location</p>
                                         <p>LaAlliancé Restaurant</p>
                                         <p>123 Main Street, Cebu City</p>
-                                    }
-                                    else
-                                    {
-                                        <p class="text-gray-400">No address selected</p>
+                                        @if (!string.IsNullOrEmpty(Model.ContactNumber))
+                                        {
+                                            <p class="mt-2 pt-2 border-t border-gray-200">
+                                                <span class="font-medium">Contact:</span> @Model.ContactNumber
+                                            </p>
+                                        }
                                     }
                                 </div>
                             </div>
@@ -183,17 +221,9 @@
                                     }
                                 </p>
                                 
-                                <!-- Order Type -->
                                 <h3 class="font-semibold text-gray-900 mb-3 mt-6">Order Type</h3>
                                 <p class="text-sm text-gray-600">
-                                    @if (Model.OrderType == "Delivery")
-                                    {
-                                        <span>Delivery</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Pickup</span>
-                                    }
+                                    @Model.OrderType
                                 </p>
                             </div>
                         </div>
@@ -220,7 +250,7 @@
 
             <!-- Right Container: Receipt Style Summary -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-8">
+                <div id="receiptContainer" class="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-8">
                     <!-- Receipt Header -->
                     <div class="bg-green-600 text-white p-6 rounded-t-lg">
                         <div class="text-center">
@@ -288,7 +318,7 @@
                         </div>
 
                         <!-- Payment Method -->
-                        <div class="mt-6 pt-4 border-t border-gray-200 no-export">
+                        <div class="mt-6 pt-4 border-t border-gray-200">
                             <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Payment Method</p>
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-credit-card text-green-600"></i>
@@ -314,7 +344,7 @@
                         </div>
 
                         <!-- Delivery Time -->
-                        <div class="mt-4 pt-4 border-t border-gray-200 no-export">
+                        <div class="mt-4 pt-4 border-t border-gray-200">
                             <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Estimated Delivery</p>
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-clock text-green-600"></i>
@@ -323,7 +353,7 @@
                         </div>
 
                         <!-- Download Receipt -->
-                        <div class="mt-6 no-export">
+                        <div class="mt-6">
                             <button type="button" id="downloadPNG" 
                                     class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                                 <i class="fas fa-download"></i>
@@ -333,13 +363,29 @@
                     </div>
 
                     <!-- Receipt Footer -->
-                    <div class="bg-gray-50 p-4 rounded-b-lg text-center border-t border-gray-200 receipt-footer">
+                    <div class="bg-gray-50 p-4 rounded-b-lg text-center border-t border-gray-200">
                         <p class="text-xs text-gray-500">Thank you for your order!</p>
                         <p class="text-xs text-gray-400 mt-1">LaAlliancé Restaurant</p>
                     </div>
                 </div>
             </div>
 
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+        <div id="successToast" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span id="successMessage"></span>
+            </div>
+        </div>
+        <div id="errorToast" class="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span id="errorMessage"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -350,110 +396,346 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Simulate order progress after 10 seconds
-            setTimeout(() => {
-                const steps = document.querySelectorAll('.flex.flex-col.items-center');
-                const preparingStep = steps[1];
-                const line = document.querySelectorAll('.flex-1.h-0\\.5')[0];
+            console.log('Initializing order confirmation page...');
+            
+            // Get order data from button attributes
+            const cancelBtn = document.getElementById('cancelOrderBtn');
+            const cancelMessage = document.getElementById('cancelMessage');
+            
+            if (!cancelBtn) {
+                console.error('Cancel button not found!');
+                return;
+            }
+            
+            const orderId = cancelBtn.getAttribute('data-order-id');
+            let orderStatus = cancelBtn.getAttribute('data-order-status');
+            
+            console.log('Order ID:', orderId, 'Status:', orderStatus);
+            
+            // Download Receipt as PNG
+            const downloadBtn = document.getElementById('downloadPNG');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    const receiptContainer = document.getElementById('receiptContainer');
+                    
+                    // Show loading state
+                    const originalText = downloadBtn.innerHTML;
+                    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+                    downloadBtn.disabled = true;
+                    
+                    // Use html2canvas to capture the receipt
+                    html2canvas(receiptContainer, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff'
+                    }).then(canvas => {
+                        // Convert canvas to blob
+                        canvas.toBlob(function(blob) {
+                            // Create download link
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.download = `receipt-${orderId}.png`;
+                            link.href = url;
+                            link.click();
+                            
+                            // Clean up
+                            URL.revokeObjectURL(url);
+                            
+                            // Reset button
+                            downloadBtn.innerHTML = originalText;
+                            downloadBtn.disabled = false;
+                            
+                            showToast('Receipt downloaded successfully!', 'success');
+                        });
+                    }).catch(error => {
+                        console.error('Error generating receipt:', error);
+                        downloadBtn.innerHTML = originalText;
+                        downloadBtn.disabled = false;
+                        showToast('Error generating receipt. Please try again.', 'error');
+                    });
+                });
+            }
+            
+            // Update UI based on order status
+            function updateCancelButtonUI() {
+                console.log('Updating cancel button for status:', orderStatus);
                 
-                if (preparingStep && line) {
-                    const icon = preparingStep.querySelector('div');
-                    const iconI = icon.querySelector('i');
-                    const label = preparingStep.querySelector('.text-sm');
-                    const time = preparingStep.querySelector('.text-xs');
-                    
-                    icon.classList.remove('border-2', 'border-gray-300', 'bg-white');
-                    icon.classList.add('bg-green-600');
-                    iconI.classList.remove('text-gray-400', 'fa-utensils');
-                    iconI.classList.add('text-white', 'fa-check');
-                    label.classList.remove('text-gray-500');
-                    label.classList.add('text-gray-900');
-                    time.classList.remove('text-gray-400');
-                    time.classList.add('text-gray-600');
-                    
-                    line.classList.remove('bg-gray-300');
-                    line.classList.add('bg-green-600');
+                if (orderStatus === 'Pending') {
+                    // Enable cancel button
+                    cancelBtn.disabled = false;
+                    cancelBtn.classList.remove('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
+                    cancelBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                    cancelMessage.classList.add('hidden');
+                } else {
+                    // Disable cancel button
+                    cancelBtn.disabled = true;
+                    cancelBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    cancelBtn.classList.add('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
+                    cancelMessage.classList.remove('hidden');
                 }
-            }, 10000);
-
-            // Download as PNG
-            document.getElementById('downloadPNG').addEventListener('click', function() {
-                const receiptElement = document.querySelector('.lg\\:col-span-1 > div');
-                const button = this;
-                const originalText = button.innerHTML;
+            }
+            
+            // Initialize cancel button state
+            updateCancelButtonUI();
+            
+            // Cancel Order Handler
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
                 
-                // Hide elements that shouldn't be in the export
-                const noExportElements = receiptElement.querySelectorAll('.no-export');
-                noExportElements.forEach(el => el.style.display = 'none');
-                
-                // Adjust footer positioning
-                const footer = receiptElement.querySelector('.receipt-footer');
-                if (footer) {
-                    footer.style.marginTop = '0';
-                    footer.parentElement.style.paddingBottom = '0';
+                if (orderStatus !== 'Pending') {
+                    showToast('This order can no longer be cancelled. It is already being prepared.', 'error');
+                    return;
                 }
                 
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Generating...</span>';
-                button.disabled = true;
+                if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+                    return;
+                }
                 
-                html2canvas(receiptElement, {
-                    scale: 2,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    useCORS: true
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = 'receipt-' + '@orderId' + '.png';
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    
-                    // Restore hidden elements
-                    noExportElements.forEach(el => el.style.display = '');
-                    if (footer) {
-                        footer.style.marginTop = '';
-                        footer.parentElement.style.paddingBottom = '';
+                console.log('Cancelling order:', orderId);
+                
+                // Show loading state
+                const originalText = cancelBtn.innerHTML;
+                cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cancelling...';
+                cancelBtn.disabled = true;
+                
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                // Call the CancelOrder API
+                fetch('@Url.Action("CancelOrder", "Checkout", new { area = "Customer" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ OrderId: orderId })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Cancel response:', data);
                     
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                }).catch(err => {
-                    console.error('Error generating PNG:', err);
-                    noExportElements.forEach(el => el.style.display = '');
-                    if (footer) {
-                        footer.style.marginTop = '';
-                        footer.parentElement.style.paddingBottom = '';
+                    if (data.success) {
+                        // Update order status
+                        orderStatus = 'Cancelled';
+                        updateCancelButtonUI();
+                        
+                        // Show success message
+                        showToast(data.message || 'Order cancelled successfully!', 'success');
+                        
+                        // Redirect to home after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Index", "Home", new { area = "Customer" })';
+                        }, 2000);
+                    } else {
+                        // Show error message
+                        showToast(data.message || 'Failed to cancel order.', 'error');
+                        
+                        // Reset button
+                        cancelBtn.innerHTML = originalText;
+                        cancelBtn.disabled = false;
                     }
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                    alert('Error generating receipt. Please try again.');
+                })
+                .catch(error => {
+                    console.error('Error cancelling order:', error);
+                    showToast('An error occurred while cancelling the order. Please try again.', 'error');
+                    
+                    // Reset button
+                    cancelBtn.innerHTML = originalText;
+                    cancelBtn.disabled = false;
                 });
             });
+            
+            // Optional: Poll for order status updates
+            function pollOrderStatus() {
+                if (orderStatus === 'Cancelled' || orderStatus === 'Completed') {
+                    return; // Stop polling for finished orders
+                }
+                
+                fetch('@Url.Action("GetOrderStatus", "Checkout", new { area = "Customer" })?orderId=' + orderId, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status && data.status !== orderStatus) {
+                        console.log('Order status changed from', orderStatus, 'to', data.status);
+                        orderStatus = data.status;
+                        updateCancelButtonUI();
+                        updateOrderTimeline(data.status);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling order status:', error);
+                });
+            }
+            
+            // Poll every 10 seconds
+            const pollInterval = setInterval(pollOrderStatus, 10000);
+            
+            // Clean up interval when page is unloaded
+            window.addEventListener('beforeunload', () => {
+                clearInterval(pollInterval);
+            });
+            
+            // Update order timeline visual based on status
+            function updateOrderTimeline(status) {
+                // Get all timeline steps
+                const steps = document.querySelectorAll('.flex.flex-col.items-center');
+                const lines = document.querySelectorAll('.flex-1.h-0\\.5');
+                
+                // Reset all steps to inactive state
+                steps.forEach(step => {
+                    const circle = step.querySelector('div.w-14');
+                    const icon = step.querySelector('i');
+                    const label = step.querySelector('span.text-sm');
+                    
+                    circle.classList.remove('border-green-600', 'bg-green-50');
+                    circle.classList.add('border-gray-300', 'bg-white');
+                    icon.classList.remove('text-green-600');
+                    icon.classList.add('text-gray-400');
+                    label.classList.remove('text-green-600');
+                    label.classList.add('text-gray-500');
+                });
+                
+                lines.forEach(line => {
+                    line.classList.remove('bg-green-600');
+                    line.classList.add('bg-gray-300');
+                });
+                
+                // Activate steps based on current status
+                let activeStepIndex = 0;
+                
+                switch(status) {
+                    case 'Pending':
+                        activeStepIndex = 0;
+                        break;
+                    case 'Processing':
+                        activeStepIndex = 1;
+                        break;
+                    case 'ReadyForPickup':
+                    case 'OutForDelivery':
+                        activeStepIndex = 2;
+                        break;
+                    case 'Completed':
+                        activeStepIndex = 3;
+                        break;
+                    case 'Cancelled':
+                        // Show cancelled state
+                        showToast('Order has been cancelled.', 'error');
+                        return;
+                }
+                
+                // Activate all steps up to and including the current step
+                for (let i = 0; i <= activeStepIndex && i < steps.length; i++) {
+                    const step = steps[i];
+                    const circle = step.querySelector('div.w-14');
+                    const icon = step.querySelector('i');
+                    const label = step.querySelector('span.text-sm');
+                    
+                    circle.classList.remove('border-gray-300', 'bg-white');
+                    circle.classList.add('border-green-600', 'bg-green-50');
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-green-600');
+                    label.classList.remove('text-gray-500');
+                    label.classList.add('text-green-600');
+                    
+                    // Activate connecting line
+                    if (i < activeStepIndex && i < lines.length) {
+                        lines[i].classList.remove('bg-gray-300');
+                        lines[i].classList.add('bg-green-600');
+                    }
+                }
+            }
+            
+            console.log('Order confirmation page initialized successfully');
         });
+        
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = type === 'success' 
+                ? document.getElementById('successToast') 
+                : document.getElementById('errorToast');
+            const messageElement = type === 'success' 
+                ? document.getElementById('successMessage') 
+                : document.getElementById('errorMessage');
+            
+            if (!container || !toast || !messageElement) {
+                console.error('Toast elements not found');
+                return;
+            }
+            
+            messageElement.textContent = message;
+            container.classList.remove('hidden');
+            toast.classList.remove('hidden');
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                // Hide container if all toasts are hidden
+                const visibleToasts = container.querySelectorAll('.bg-green-500:not(.hidden), .bg-red-500:not(.hidden)');
+                if (visibleToasts.length === 0) {
+                    container.classList.add('hidden');
+                }
+            }, 3000);
+        }
     </script>
     
     <style>
-        @@media print {
-            body * {
-                visibility: hidden;
-            }
-            .lg\\:col-span-1, .lg\\:col-span-1 * {
-                visibility: visible;
-            }
-            .lg\\:col-span-1 {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            button {
-                display: none !important;
-            }
+    /* Loading state for buttons */
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Cancel button disabled state */
+    .cancel-order-btn:disabled {
+        opacity: 0.6 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+    }
+
+    .cancel-order-btn:disabled:hover {
+        background-color: #9CA3AF !important;
+    }
+
+    /* Timeline animation */
+    .flex-1.h-0\.5 {
+        transition: background-color 0.5s ease-in-out;
+    }
+
+    .flex.flex-col.items-center div {
+        transition: all 0.5s ease-in-out;
+    }
+    
+    /* Ensure receipt container looks good when captured */
+    #receiptContainer {
+        position: relative;
+    }
+    
+    /* Toast animations */
+    #toastContainer > div {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @@keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
         }
-        
-        /* Loading state for buttons */
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        to {
+            transform: translateX(0);
+            opacity: 1;
         }
-    </style>
+    }
+</style>
 }
