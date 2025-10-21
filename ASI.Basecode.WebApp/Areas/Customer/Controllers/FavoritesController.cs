@@ -1,5 +1,4 @@
 using ASI.Basecode.Services.Interfaces;
-using ASI.Basecode.Services.ServiceModels;
 using ASI.Basecode.WebApp.Areas.Customer.Models;
 using ASI.Basecode.WebApp.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Security.Claims;
+using ASI.Basecode.WebApp.Helpers;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -27,7 +27,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         {
             _favoriteService = favoriteService;
         }
-
+        
         [HttpGet]
         public IActionResult Index()
         {
@@ -62,12 +62,13 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             try
             {
                 _favoriteService.AddToFavorites(productID, UserId);
-                TempData["SuccessMessage"] = "Item added to favorites!";
+                this.ShowSuccessToast("Item added to favorites!");
                 return Json(new { success = true, message = "Added to favorites" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding to favorites");
+                this.ShowErrorToast(ex.Message);
                 return Json(new { success = false, message = "Failed to add to favorites" });
             }
         }
@@ -79,13 +80,13 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             try
             {
                 _favoriteService.RemoveFromFavorites(favoriteItemID, UserId);
-                TempData["SuccessMessage"] = "Item removed from favorites!";
+                this.ShowSuccessToast("Item removed from favorites!");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error removing from favorites");
-                TempData["ErrorMessage"] = "Failed to remove from favorites.";
+                this.ShowErrorToast(ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }

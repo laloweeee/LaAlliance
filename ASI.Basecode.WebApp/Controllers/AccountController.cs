@@ -74,7 +74,7 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
             this._sessionManager.Clear();
-            this._session.SetString("SessionId", System.Guid.NewGuid().ToString());
+            this._session.SetString("SessionId", Guid.NewGuid().ToString());
             return this.View();
         }
 
@@ -97,7 +97,6 @@ namespace ASI.Basecode.WebApp.Controllers
             if (loginResult == LoginResult.Success && user != null)
             {
                 // Check account status before allowing login
-
                 // Check if account is disabled
                 if (user.AccountStatus == AccountStatus.Disabled)
                 {
