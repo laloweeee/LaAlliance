@@ -241,7 +241,7 @@
             updateOrderCounts();
         });
 
-        // Status changed somewhere else
+        // Status changed for other connecting functions
         connection.on("OrderStatusChanged", (data) => {
             const orderCard = document.getElementById(`order-${data.orderId}`);
             if (!orderCard) return;
@@ -253,6 +253,12 @@
             if (badge) {
                 badge.className = 'inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium ' + badgeClassFor(data.newStatus);
                 badge.innerHTML = `<i class="fas fa-circle text-current text-[7px] mr-1.5"></i>${labelForStatus(data.newStatus)}`;
+            }
+
+            // Remove action buttons if order is completed
+            if (data.newStatus === 'Completed') {
+                const buttonsDiv = orderCard.querySelector('.w-36 > .flex.gap-2');
+                if (buttonsDiv) buttonsDiv.innerHTML = '';
             }
 
             updateOrderCounts();
@@ -398,32 +404,50 @@
         }
 
         async function completeOrder(orderId) {
-            if (!confirm('Complete this order?')) return;
-            try {
-                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                const response = await fetch(`/Restaurant/Orders/CompleteOrder?orderId=${orderId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }
-                });
-                
-                if (!response.ok) throw new Error('Network error');
-                const result = await response.json();
-                
-                if (result.success) {
-                    const card = document.getElementById(`order-${orderId}`);
-                    if (card) {
-                        card.style.opacity = '0';
-                        card.style.transform = 'scale(0.96)';
-                        setTimeout(() => card.remove(), 250);
+        if (!confirm('Complete this order?')) return;
+        try {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const response = await fetch(`/Restaurant/Orders/CompleteOrder?orderId=${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }
+            });
+            
+            if (!response.ok) throw new Error('Network error');
+            const result = await response.json();
+            
+            if (result.success) {
+                const card = document.getElementById(`order-${orderId}`);
+                if (card) {
+                    // Update the order status to Completed in the DOM
+                    card.setAttribute('data-status', 'Completed');
+                    
+                    // Update the badge to show "Completed"
+                    const badge = card.querySelector('span.inline-flex.rounded-full');
+                    if (badge) {
+                        badge.className = 'inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium ' + badgeClassFor('Completed');
+                        badge.innerHTML = `<i class="fas fa-circle text-current text-[7px] mr-1.5"></i>${labelForStatus('Completed')}`;
                     }
+                    
+                    // Remove the action buttons since order is completed
+                    const buttonsDiv = card.querySelector('.w-36 > .flex.gap-2');
+                    if (buttonsDiv) buttonsDiv.innerHTML = '';
+                    
+                    // If we're viewing a specific tab (not "all"), hide the card
+                    if (currentFilter !== 'all' && currentFilter !== 'Completed') {
+                        card.style.display = 'none';
+                    }
+                    
+                    // Update the tab counts
                     updateOrderCounts();
+                    
                     showSuccessNotification('Order completed successfully!');
                 }
-            } catch (e) {
-                console.error(e);
-                alert('Error completing order');
             }
+        } catch (e) {
+            console.error(e);
+            alert('Error completing order');
         }
+    }
 
         async function rejectOrder(orderId) {
             if (!confirm('Are you sure you want to reject this order?')) return;
@@ -459,20 +483,20 @@
         }
 
         function updateOrderCounts() {
-            const allOrders = document.querySelectorAll('.order-card');
-            const pending    = document.querySelectorAll('[data-status="Pending"]').length;
-            const processing = document.querySelectorAll('[data-status="Processing"]').length;
-            const readyPickup = document.querySelectorAll('[data-status="ReadyForPickup"]').length;
-            const readyDelivery = document.querySelectorAll('[data-status="ReadyForDelivery"]').length;
-            const completed  = document.querySelectorAll('[data-status="Completed"]').length;
+        const allOrders = document.querySelectorAll('.order-card');
+        const pending    = document.querySelectorAll('[data-status="Pending"]').length;
+        const processing = document.querySelectorAll('[data-status="Processing"]').length;
+        const readyPickup = document.querySelectorAll('[data-status="ReadyForPickup"]').length;
+        const readyDelivery = document.querySelectorAll('[data-status="ReadyForDelivery"]').length;
+        const completed  = document.querySelectorAll('[data-status="Completed"]').length;
 
-            document.getElementById('count-all').textContent = allOrders.length;
-            document.getElementById('count-pending').textContent = pending;
-            document.getElementById('count-processing').textContent = processing;
-            document.getElementById('count-ready-pickup').textContent = readyPickup;
-            document.getElementById('count-ready-delivery').textContent = readyDelivery;
-            document.getElementById('count-completed').textContent = completed;
-        }
+        document.getElementById('count-all').textContent = allOrders.length;
+        document.getElementById('count-pending').textContent = pending;
+        document.getElementById('count-processing').textContent = processing;
+        document.getElementById('count-ready-pickup').textContent = readyPickup;
+        document.getElementById('count-ready-delivery').textContent = readyDelivery;
+        document.getElementById('count-completed').textContent = completed;
+    }
 
         function showSuccessNotification(message) {
             const n = document.createElement('div');
