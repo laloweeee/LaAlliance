@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class ProductOptionGroup
+    public partial class ProductOptionGroup : BaseEntity
     {
         public int ProductOptionGroupID { get; set; }
         public int? ProductID { get; set; }
