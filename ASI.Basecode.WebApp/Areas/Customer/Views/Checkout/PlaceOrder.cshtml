@@ -6,6 +6,9 @@
     var deliveryFee = 50.00m;
     var total = subtotal + deliveryFee;
     var orderId = DateTime.Now.ToString("yyyyMMddHHmmss");
+    
+    // Get the selected address for display
+    var selectedAddress = Model.Addresses?.FirstOrDefault(a => a.UserAddressID == Model.SelectedAddressId);
 }
 
 <div class="min-h-screen bg-gray-50 py-8">
@@ -62,7 +65,7 @@
 
                     <!-- Track Order Button -->
                     <div class="text-center mb-10 pb-8 border-b border-gray-200">
-                        <a asp-area="Customer" asp-controller="OrderTracking" asp-action="Index"
+                        <a href="@Url.Action("Index", "OrderTracking", new { area = "Customer" })" 
                            class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full transition-colors">
                             Track your order
                         </a>
@@ -84,59 +87,114 @@
                         </div>
 
                         <!-- Order Items -->
-                    <div class="space-y-6 mb-8">
-                        @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
-                        {
-                            foreach (var item in Model.Cart.CartItems)
+                        <div class="space-y-6 mb-8">
+                            @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
                             {
-                                var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
-                                var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
-                                
-                                <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
-                                    <!-- Product Image Placeholder Updated to Show Actual Image -->
-                                    <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                        @if (!string.IsNullOrEmpty(item.ProductImage))
-                                        {
-                                            <img src="@item.ProductImage" alt="@item.ProductName" class="w-full h-full object-cover rounded-lg" loading="lazy" />
-                                        }
-                                        else
-                                        {
-                                            <i class="fas fa-utensils text-gray-400 text-2xl"></i>  <!-- Fallback placeholder -->
-                                        }
-                                    </div>
+                                foreach (var item in Model.Cart.CartItems)
+                                {
+                                    var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                    var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
                                     
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
+                                    <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
+                                        <!-- Product Image Placeholder Updated to Show Actual Image -->
+                                        <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                            @if (!string.IsNullOrEmpty(item.ProductImage))
+                                            {
+                                                <img src="@item.ProductImage" alt="@item.ProductName" class="w-full h-full object-cover rounded-lg" loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-utensils text-gray-400 text-2xl"></i>  <!-- Fallback placeholder -->
+                                            }
+                                        </div>
                                         
-                                        @if (item.CartItemOptions != null && item.CartItemOptions.Any())
-                                        {
-                                            <div class="text-sm text-gray-600 space-y-1 mb-2">
-                                                @foreach (var opt in item.CartItemOptions)
-                                                {
-                                                    <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
-                                                }
-                                            </div>
-                                        }
-                                        
-                                        <p class="text-sm text-gray-600">QTY: @item.Quantity</p>
-                                        <p class="font-semibold text-gray-900 mt-2">₱@itemTotalPrice.ToString("F2")</p>
+                                        <div class="flex-1">
+                                            <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
+                                            
+                                            @if (item.CartItemOptions != null && item.CartItemOptions.Any())
+                                            {
+                                                <div class="text-sm text-gray-600 space-y-1 mb-2">
+                                                    @foreach (var opt in item.CartItemOptions)
+                                                    {
+                                                        <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
+                                                    }
+                                                </div>
+                                            }
+                                            
+                                            <p class="text-sm text-gray-600">QTY: @item.Quantity</p>
+                                            <p class="font-semibold text-gray-900 mt-2">₱@itemTotalPrice.ToString("F2")</p>
+                                        </div>
                                     </div>
-                                </div>
+                                }
                             }
-                        }
-                    </div>
+                        </div>
 
                         <!-- Delivery Information -->
                         <div class="grid grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
                             <div>
                                 <h3 class="font-semibold text-gray-900 mb-3">Shipping address</h3>
                                 <div class="text-sm text-gray-600 space-y-1">
+                                    @if (selectedAddress != null)
+                                    {
+                                        <p class="font-medium">@selectedAddress.AddressType</p>
+                                        <p>@selectedAddress.Street</p>
+                                        <p>@selectedAddress.Barangay, @selectedAddress.City</p>
+                                        <p>@selectedAddress.Province @selectedAddress.ZipCode</p>
+                                        @if (!string.IsNullOrEmpty(Model.DeliveryNotes))
+                                        {
+                                            <div class="mt-2 pt-2 border-t border-gray-200">
+                                                <p class="font-medium text-gray-700">Delivery Notes:</p>
+                                                <p class="text-gray-600">@Model.DeliveryNotes</p>
+                                            </div>
+                                        }
+                                    }
+                                    else if (Model.OrderType == "Pickup")
+                                    {
+                                        <p class="font-medium">Pickup Order</p>
+                                        <p>Pick up at our store location</p>
+                                        <p>LaAlliancé Restaurant</p>
+                                        <p>123 Main Street, Cebu City</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-gray-400">No address selected</p>
+                                    }
                                 </div>
                             </div>
                             
                             <div>
                                 <h3 class="font-semibold text-gray-900 mb-3">Paid with</h3>
-                                <p class="text-sm text-gray-600">@Model.PaymentMethod</p>
+                                <p class="text-sm text-gray-600">
+                                    @if (Model.PaymentMethod == "CashOnDelivery")
+                                    {
+                                        <span>Cash on Delivery</span>
+                                    }
+                                    else if (Model.PaymentMethod == "GCash")
+                                    {
+                                        <span>GCash</span>
+                                    }
+                                    else if (Model.PaymentMethod == "Card")
+                                    {
+                                        <span>Credit/Debit Card</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@Model.PaymentMethod</span>
+                                    }
+                                </p>
+                                
+                                <!-- Order Type -->
+                                <h3 class="font-semibold text-gray-900 mb-3 mt-6">Order Type</h3>
+                                <p class="text-sm text-gray-600">
+                                    @if (Model.OrderType == "Delivery")
+                                    {
+                                        <span>Delivery</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Pickup</span>
+                                    }
+                                </p>
                             </div>
                         </div>
 
@@ -234,7 +292,24 @@
                             <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Payment Method</p>
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-credit-card text-green-600"></i>
-                                <span class="text-sm font-medium text-gray-900">@Model.PaymentMethod</span>
+                                <span class="text-sm font-medium text-gray-900">
+                                    @if (Model.PaymentMethod == "CashOnDelivery")
+                                    {
+                                        <span>Cash on Delivery</span>
+                                    }
+                                    else if (Model.PaymentMethod == "GCash")
+                                    {
+                                        <span>GCash</span>
+                                    }
+                                    else if (Model.PaymentMethod == "Card")
+                                    {
+                                        <span>Credit/Debit Card</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@Model.PaymentMethod</span>
+                                    }
+                                </span>
                             </div>
                         </div>
 
@@ -272,7 +347,7 @@
 @section Scripts {
     <!-- html2canvas for PNG export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Simulate order progress after 10 seconds
@@ -354,8 +429,6 @@
                 });
             });
         });
-
-        
     </script>
     
     <style>

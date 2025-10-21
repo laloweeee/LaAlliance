@@ -60,7 +60,11 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 AvailableVouchers = new List<string> { "WELCOME10", "FREESHIP", "SAVE20" },
                 Addresses = _mapper != null
                     ? _mapper.Map<List<ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel>>(addresses)
-                    : addresses.Select(a => new ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel()).ToList()
+                    : addresses.Select(a => new ASI.Basecode.WebApp.Areas.Customer.Models.UserAddressViewModel()).ToList(),
+                // ADD USER INFORMATION
+                FullName = $"{userProfile?.FirstName} {userProfile?.LastName}",
+                Email = userProfile?.Email,
+                ContactNumber = userProfile?.ContactNumber
             };
 
             var googleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
@@ -103,6 +107,9 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     return View("Index", model);
                 }
 
+                // GET THE CART DATA BEFORE CLEARING IT
+                var currentCart = _cartService.GetOrCreateCart(userId);
+                
                 // Create the order request
                 var placeOrderRequest = new PlaceOrderRequest
                 {
@@ -121,7 +128,14 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 TempData["OrderID"] = orderResult.OrderID;
                 TempData["SuccessMessage"] = "Order placed successfully! Your order number is #" + orderResult.OrderID;
                 
-                return RedirectToAction("Receipt", new { orderId = orderResult.OrderID });
+                // SET THE CART DATA FOR THE CONFIRMATION PAGE
+                model.Cart = currentCart;
+                
+                // CLEAR THE CART ONLY AFTER WE'VE SAVED THE DATA FOR DISPLAY
+                _cartService.ClearCart(userId);
+                
+                // Return the PlaceOrder view with the complete model
+                return View("PlaceOrder", model);
             }
             catch (Exception ex)
             {
