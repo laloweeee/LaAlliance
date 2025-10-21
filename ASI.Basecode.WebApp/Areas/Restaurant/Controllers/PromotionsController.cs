@@ -42,12 +42,6 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             return View(promotions);
         }
 
-        public IActionResult CreatePromotion()
-        {
-            var products = _productService.GetActiveProducts();
-            ViewBag.Products = products;
-            return View();
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
