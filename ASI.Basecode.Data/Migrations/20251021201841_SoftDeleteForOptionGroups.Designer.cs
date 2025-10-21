@@ -4,6 +4,7 @@ using ASI.Basecode.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASI.Basecode.Data.Migrations
 {
     [DbContext(typeof(AsiBasecodeDBContext))]
-    partial class AsiBasecodeDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251021201841_SoftDeleteForOptionGroups")]
+    partial class SoftDeleteForOptionGroups
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -418,7 +421,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<DateTime>("ProcessedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("StaffID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("OrderProcessID");
@@ -426,7 +429,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasIndex("OrderID")
                         .IsUnique();
 
-                    b.HasIndex("StaffID");
+                    b.HasIndex("UserID");
 
                     b.ToTable("OrderProcessed", (string)null);
                 });
@@ -1234,7 +1237,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasOne("ASI.Basecode.Data.Models.RestaurantStaff", "HandledBy")
                         .WithMany("OrderProcessed")
-                        .HasForeignKey("StaffID")
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("HandledBy");

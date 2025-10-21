@@ -18,7 +18,12 @@ namespace ASI.Basecode.Data.Configuration
             builder.Property(op => op.ProcessedAt)
                 .IsRequired();
 
-            // Relationships are configured in OrderConfiguration and RestaurantStaffConfiguration
+            // SIMPLIFIED relationship - no back-reference
+            builder.HasOne(op => op.HandledBy)
+                .WithMany()  // No navigation property on the other side
+                .HasForeignKey(op => op.UserID)
+                .HasPrincipalKey(rs => rs.UserID)  // Reference RestaurantStaff.UserID
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Table Name
             builder.ToTable("OrderProcessed");

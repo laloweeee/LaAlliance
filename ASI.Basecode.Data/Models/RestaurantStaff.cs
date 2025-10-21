@@ -19,6 +19,7 @@ namespace ASI.Basecode.Data.Models
 
         //Navigator
         public User User { get; set; } // One restaurant staff is one user
-        public ICollection<OrderProcessed> OrderProcessed { get; set; } = new List<OrderProcessed>(); // One restaurant staff can have multiple order processed
+        
+        // REMOVED: public ICollection<OrderProcessed> OrderProcessed { get; set; }
     }
 }

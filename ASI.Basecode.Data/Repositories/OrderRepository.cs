@@ -32,10 +32,28 @@ namespace ASI.Basecode.Data.Repositories
         /// Update an existing order
         /// </summary>
         /// <param name="order"></param>
+        /// <summary>
+        /// Update an existing order - FIXED VERSION
+        /// </summary>
+        /// <param name="order"></param>
         public void UpdateOrder(Order order)
         {
-            _dbContext.Orders.Update(order);
-            UnitOfWork.SaveChanges();
+            // Attach the entity and mark it as modified
+            var existingOrder = _dbContext.Orders.Find(order.OrderID);
+            
+            if (existingOrder != null)
+            {
+                // Update only the properties that are set
+                _dbContext.Entry(existingOrder).CurrentValues.SetValues(order);
+                UnitOfWork.SaveChanges();
+            }
+            else
+            {
+                // If order doesn't exist in context, attach and update
+                _dbContext.Orders.Attach(order);
+                _dbContext.Entry(order).State = EntityState.Modified;
+                UnitOfWork.SaveChanges();
+            }
         }
 
         /// <summary>
