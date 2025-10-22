@@ -215,10 +215,10 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
                 _logger.LogInformation($"Order Placed with payment method: {orderRequest.PaymentMethod}");
 
-                await _orderService.PlaceOrder(orderRequest);
+                var order = await _orderService.PlaceOrder(orderRequest);
 
                 this.ShowSuccessToast("Your order has been placed successfully!");
-                return RedirectToAction("Index", "Order");
+                return RedirectToAction("Index", "Order", new { area = "Customer", orderId = order.OrderID });
             }
             catch (Exception ex)
             {

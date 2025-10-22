@@ -167,6 +167,7 @@ namespace ASI.Basecode.Services.Services
             _cartRepository.ClearCart(request.UserID);
 
             var orderViewModel = GetOrderById(order.OrderID);
+            
             // Notify restaurant of new order via SignalR        
             await NotifyRestaurantNewOrder(orderViewModel);
 
