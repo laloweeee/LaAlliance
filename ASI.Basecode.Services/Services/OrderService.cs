@@ -277,7 +277,15 @@ namespace ASI.Basecode.Services.Services
                     ProductName = oi.Product?.ProductName ?? "Unknown Product",
                     ProductImage = oi.Product?.ProductImage ?? "",
                     Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice
+                    UnitPrice = oi.UnitPrice,
+                    // ADD THIS SECTION TO INCLUDE OPTIONS:
+                    OrderItemOptions = oi.OrderItemOption?.Select(oio => new OrderItemOptionViewModel
+                    {
+                        OrderItemOptionID = oio.OrderItemOptionID,
+                        OptionGroupName = oio.ProductOptionGroup?.OptionGroupName ?? "",
+                        OptionName = oio.ProductOptionItems?.OptionName ?? "",
+                        AdditionalPrice = oio.ProductOptionItems?.AdditionalPrice ?? 0
+                    }).ToList() ?? new List<OrderItemOptionViewModel>()
                 }).ToList()
             }).ToList();
         }
@@ -311,7 +319,15 @@ namespace ASI.Basecode.Services.Services
                     ProductName = oi.Product?.ProductName ?? "Unknown Product",
                     ProductImage = oi.Product?.ProductImage ?? "",
                     Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice
+                    UnitPrice = oi.UnitPrice,
+                    // ADD THIS SECTION TO INCLUDE OPTIONS:
+                    OrderItemOptions = oi.OrderItemOption?.Select(oio => new OrderItemOptionViewModel
+                    {
+                        OrderItemOptionID = oio.OrderItemOptionID,
+                        OptionGroupName = oio.ProductOptionGroup?.OptionGroupName ?? "",
+                        OptionName = oio.ProductOptionItems?.OptionName ?? "",
+                        AdditionalPrice = oio.ProductOptionItems?.AdditionalPrice ?? 0
+                    }).ToList() ?? new List<OrderItemOptionViewModel>()
                 }).ToList()
             }).ToList();
         }
@@ -521,18 +537,37 @@ namespace ASI.Basecode.Services.Services
         {
             try
             {
+                // Get the order to find user ID
+                var order = _orderRepository.GetOrderById(orderID);
+                if (order == null) return;
+
+                var statusMessage = GetStatusMessage(newStatus);
+
+                // Notify order-specific group (for individual order tracking pages)
                 await _orderHubContext.Clients.Group($"Order-{orderID}")
                     .SendAsync("OrderStatusUpdated", new
                     {
                         orderId = orderID,
                         status = newStatus.ToString(),
-                        statusMessage = GetStatusMessage(newStatus),
+                        statusMessage = statusMessage,
                         timestamp = DateTime.UtcNow
                     });
+
+                // Also notify user's orders group (for order activity page)
+                await _orderHubContext.Clients.Group($"UserOrders-{order.UserID}")
+                    .SendAsync("OrderStatusUpdated", new
+                    {
+                        orderId = orderID,
+                        status = newStatus.ToString(),
+                        statusMessage = statusMessage,
+                        timestamp = DateTime.UtcNow
+                    });
+
+                Console.WriteLine($"✓ Sent real-time update for order {orderID} to user {order.UserID}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending status update notification: {ex.Message}");
+                Console.WriteLine($"✗ Error sending status update notification: {ex.Message}");
             }
         }
 
