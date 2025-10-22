@@ -58,7 +58,9 @@ namespace ASI.Basecode.Data.Configuration
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(rp => rp.PromotionProducts)
-                .WithMany(pp => pp.RestaurantPromotions);
+                .WithOne(pp => pp.RestaurantPromotion)
+                .HasForeignKey(pp => pp.PromotionID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(rp => rp.Order)
                 .WithOne(o => o.RestaurantPromotion)
