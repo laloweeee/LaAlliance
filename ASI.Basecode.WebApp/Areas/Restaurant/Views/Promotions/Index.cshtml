@@ -11,9 +11,9 @@
 @*         <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700" onclick="openModal('createCampaignModal')">
             <i class="fas fa-bullhorn mr-2"></i>Create Campaign
         </button> *@
-        <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" onclick="openModal('createPromotionModal')">
+        <a asp-action="Create" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
             <i class="fas fa-calendar-plus mr-2"></i>Create Promotion
-        </button>
+        </a>
 @*         <button type="button" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700" onclick="openModal('createDiscountModal')">
             <i class="fas fa-tags mr-2"></i>Create Discount
         </button>
@@ -158,9 +158,9 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No promotions yet</h3>
             <p class="text-gray-500 mb-4">Create your first promotion to start attracting customers.</p>
-            <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" onclick="openModal('createPromotionModal')">
+            <a asp-action="Create" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
                 <i class="fas fa-calendar-plus mr-2"></i>Create Promotion
-            </button>
+            </a>
         </div>
     }
 </div>
@@ -235,17 +235,6 @@
     </div>
 </div>
 
-@{
-    var createPromotionModel = new ASI.Basecode.Services.ServiceModels.PromotionViewModel
-    {
-        StartDate = DateTime.Now,
-        EndDate = DateTime.Now.AddDays(30),
-        ExpirationDate = DateTime.Now.AddDays(30),
-        IsActive = true,
-        UsageLimit = 100
-    };
-}
-@await Html.PartialAsync("CreatePromotion", createPromotionModel)
 
 @section Scripts {
     <script>
