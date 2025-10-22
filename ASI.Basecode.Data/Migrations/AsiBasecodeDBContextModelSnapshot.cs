@@ -418,7 +418,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<DateTime>("ProcessedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("StaffID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("OrderProcessID");
@@ -426,7 +426,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasIndex("OrderID")
                         .IsUnique();
 
-                    b.HasIndex("StaffID");
+                    b.HasIndex("UserID");
 
                     b.ToTable("OrderProcessed", (string)null);
                 });
@@ -908,9 +908,6 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasKey("StaffID");
 
-                    b.HasIndex("UserID")
-                        .IsUnique();
-
                     b.ToTable("RestaurantStaff", (string)null);
                 });
 
@@ -1233,8 +1230,9 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ASI.Basecode.Data.Models.RestaurantStaff", "HandledBy")
-                        .WithMany("OrderProcessed")
-                        .HasForeignKey("StaffID")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .HasPrincipalKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("HandledBy");
@@ -1475,11 +1473,6 @@ namespace ASI.Basecode.Data.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("PromotionCodes");
-                });
-
-            modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantStaff", b =>
-                {
-                    b.Navigation("OrderProcessed");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>
