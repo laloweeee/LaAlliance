@@ -1047,23 +1047,6 @@ namespace ASI.Basecode.Data.Migrations
                     b.ToTable("UserProfiles", (string)null);
                 });
 
-            modelBuilder.Entity("PromotionProductsRestaurantPromotions", b =>
-                {
-                    b.Property<int>("RestaurantPromotionsPromotionID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PromotionProductsPromotionID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PromotionProductsProductID")
-                        .HasColumnType("int");
-
-                    b.HasKey("RestaurantPromotionsPromotionID", "PromotionProductsPromotionID", "PromotionProductsProductID");
-
-                    b.HasIndex("PromotionProductsPromotionID", "PromotionProductsProductID");
-
-                    b.ToTable("PromotionProductsRestaurantPromotions");
-                });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Cart", b =>
                 {
@@ -1319,7 +1302,14 @@ namespace ASI.Basecode.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ASI.Basecode.Data.Models.RestaurantPromotions", "RestaurantPromotion")
+                        .WithMany("PromotionProducts")
+                        .HasForeignKey("PromotionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Product");
+                    b.Navigation("RestaurantPromotion");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantAddress", b =>
@@ -1382,20 +1372,6 @@ namespace ASI.Basecode.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PromotionProductsRestaurantPromotions", b =>
-                {
-                    b.HasOne("ASI.Basecode.Data.Models.RestaurantPromotions", null)
-                        .WithMany()
-                        .HasForeignKey("RestaurantPromotionsPromotionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ASI.Basecode.Data.Models.PromotionProducts", null)
-                        .WithMany()
-                        .HasForeignKey("PromotionProductsPromotionID", "PromotionProductsProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Address", b =>
                 {
