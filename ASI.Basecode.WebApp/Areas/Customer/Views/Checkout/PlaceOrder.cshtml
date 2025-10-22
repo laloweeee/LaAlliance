@@ -37,7 +37,7 @@
                     <div class="mb-10">
                         <div class="flex items-center justify-between max-w-2xl mx-auto">
                             <!-- Step 1: Pending -->
-                            <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center" id="timeline-step-pending">
                                 <div class="w-14 h-14 border-2 border-green-600 bg-green-50 rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-clock text-green-600 text-xl"></i>
                                 </div>
@@ -45,10 +45,10 @@
                                 <span class="text-xs text-gray-400 mt-1">@DateTime.Now.ToString("MMM dd")</span>
                             </div>
                             
-                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]" id="timeline-line-1"></div>
                             
                             <!-- Step 2: Preparing -->
-                            <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center" id="timeline-step-preparing">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-utensils text-gray-400 text-xl"></i>
                                 </div>
@@ -56,10 +56,10 @@
                                 <span class="text-xs text-gray-400 mt-1">15-20 min</span>
                             </div>
                             
-                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]" id="timeline-line-2"></div>
                             
                             <!-- Step 3: Ready -->
-                            <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center" id="timeline-step-ready">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-check text-gray-400 text-xl"></i>
                                 </div>
@@ -67,15 +67,15 @@
                                 <span class="text-xs text-gray-400 mt-1">5-10 min</span>
                             </div>
                             
-                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]" id="timeline-line-3"></div>
                             
-                            <!-- Step 4: Delivered -->
-                            <div class="flex flex-col items-center">
+                            <!-- Step 4: Completed -->
+                            <div class="flex flex-col items-center" id="timeline-step-completed">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-truck text-gray-400 text-xl"></i>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-500">Delivered</span>
-                                <span class="text-xs text-gray-400 mt-1">30-45 min</span>
+                                <span class="text-sm font-semibold text-gray-500">@(Model.OrderType == "Delivery" ? "Delivered" : "Completed")</span>
+                                <span class="text-xs text-gray-400 mt-1">@(Model.OrderType == "Delivery" ? "30-45 min" : "Pickup")</span>
                             </div>
                         </div>
                     </div>
@@ -391,16 +391,20 @@
 </div>
 
 @section Scripts {
-    <!-- html2canvas for PNG export -->
+    <!-- SignalR and html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <script>
+        // Global variables
+        let orderStatus = '@orderStatus';
+        let signalRConnection = null;
+
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing order confirmation page...');
+            console.log('Initializing order confirmation page with real-time updates...');
             
             // Get order data from button attributes
             const cancelBtn = document.getElementById('cancelOrderBtn');
-            const cancelMessage = document.getElementById('cancelMessage');
             
             if (!cancelBtn) {
                 console.error('Cancel button not found!');
@@ -408,11 +412,235 @@
             }
             
             const orderId = cancelBtn.getAttribute('data-order-id');
-            let orderStatus = cancelBtn.getAttribute('data-order-status');
+            orderStatus = cancelBtn.getAttribute('data-order-status');
             
             console.log('Order ID:', orderId, 'Status:', orderStatus);
             
+            // Initialize SignalR connection for real-time updates
+            initializeSignalR(orderId);
+            
+            // Initialize UI based on current status
+            updateCancelButtonUI();
+            updateOrderTimeline(orderStatus);
+            
             // Download Receipt as PNG
+            initializeDownloadReceipt(orderId);
+            
+            // Cancel Order Handler
+            initializeCancelOrder(orderId, cancelBtn);
+            
+            // Start polling for status updates (fallback)
+            const pollInterval = setInterval(() => pollOrderStatus(orderId), 10000);
+            
+            // Clean up interval when page is unloaded
+            window.addEventListener('beforeunload', () => {
+                clearInterval(pollInterval);
+                if (signalRConnection) {
+                    signalRConnection.stop();
+                }
+            });
+            
+            console.log('Order confirmation page initialized successfully');
+        });
+
+        // SignalR Connection for Real-time Updates
+        function initializeSignalR(orderId) {
+            // Get the base URL correctly for SignalR
+            const baseUrl = window.location.origin;
+            signalRConnection = new signalR.HubConnectionBuilder()
+                .withUrl(baseUrl + '/orderHub')
+                .withAutomaticReconnect()
+                .build();
+
+            signalRConnection.on('OrderStatusUpdated', (data) => {
+                console.log('Real-time status update received:', data);
+                if (data.orderId == orderId) {
+                    // Update the order status
+                    orderStatus = data.status;
+                    updateOrderTimeline(orderStatus);
+                    updateCancelButtonUI();
+                    
+                    // Show notification
+                    showToast(data.statusMessage || `Order status updated to: ${data.status}`, 'success');
+                    
+                    // If order is completed or cancelled, stop real-time updates
+                    if (data.status === 'Completed' || data.status === 'Cancelled') {
+                        showToast('Order process completed!', 'success');
+                    }
+                }
+            });
+
+            signalRConnection.start()
+                .then(() => {
+                    console.log('SignalR connected successfully');
+                    // Join the order-specific group
+                    return signalRConnection.invoke('JoinOrderGroup', orderId);
+                })
+                .then(() => console.log(`Joined order group: ${orderId}`))
+                .catch(err => console.error('SignalR connection error:', err));
+
+            signalRConnection.onreconnected(() => {
+                console.log('SignalR reconnected, rejoining order group...');
+                signalRConnection.invoke('JoinOrderGroup', orderId);
+            });
+        }
+
+        // Enhanced Order Timeline Update Function
+        function updateOrderTimeline(status) {
+            console.log('Updating timeline for status:', status);
+            
+            // Map your enum status to timeline steps
+            const statusMap = {
+                'Pending': 0,
+                'Processing': 1,        // This maps to "Preparing" in the UI
+                'ReadyForPickup': 2,    // This maps to "Ready" in the UI
+                'ReadyForDelivery': 2,  // This maps to "Ready" in the UI
+                'Completed': 3,         // This maps to "Delivered/Completed" in the UI
+                'Cancelled': -1
+            };
+            
+            const activeStepIndex = statusMap[status] !== undefined ? statusMap[status] : 0;
+            
+            // Reset all steps to inactive
+            resetTimeline();
+            
+            if (status === 'Cancelled') {
+                // Show cancelled state
+                showCancelledTimeline();
+                return;
+            }
+            
+            // Activate steps based on current status
+            for (let i = 0; i <= activeStepIndex; i++) {
+                activateTimelineStep(i);
+            }
+        }
+
+        function resetTimeline() {
+            // Reset all steps
+            const steps = ['pending', 'preparing', 'ready', 'completed'];
+            steps.forEach(step => {
+                const stepElement = document.getElementById(`timeline-step-${step}`);
+                if (!stepElement) return;
+                
+                const circle = stepElement.querySelector('div.w-14');
+                const icon = stepElement.querySelector('i');
+                const label = stepElement.querySelector('.text-sm.font-semibold');
+                
+                if (circle && icon && label) {
+                    circle.classList.remove('border-green-600', 'bg-green-50', 'border-red-300', 'bg-red-50');
+                    circle.classList.add('border-gray-300', 'bg-white');
+                    icon.classList.remove('text-green-600', 'text-red-400');
+                    icon.classList.add('text-gray-400');
+                    label.classList.remove('text-green-600', 'text-red-500');
+                    label.classList.add('text-gray-500');
+                }
+            });
+            
+            // Reset all lines
+            for (let i = 1; i <= 3; i++) {
+                const line = document.getElementById(`timeline-line-${i}`);
+                if (line) {
+                    line.classList.remove('bg-green-600');
+                    line.classList.add('bg-gray-300');
+                }
+            }
+        }
+
+        function activateTimelineStep(stepIndex) {
+            const stepNames = ['pending', 'preparing', 'ready', 'completed'];
+            const stepName = stepNames[stepIndex];
+            
+            const stepElement = document.getElementById(`timeline-step-${stepName}`);
+            if (!stepElement) return;
+            
+            const circle = stepElement.querySelector('div.w-14');
+            const icon = stepElement.querySelector('i');
+            const label = stepElement.querySelector('.text-sm.font-semibold');
+            
+            if (circle && icon && label) {
+                circle.classList.remove('border-gray-300', 'bg-white');
+                circle.classList.add('border-green-600', 'bg-green-50');
+                icon.classList.remove('text-gray-400');
+                icon.classList.add('text-green-600');
+                label.classList.remove('text-gray-500');
+                label.classList.add('text-green-600');
+            }
+            
+            // Activate connecting line to the previous step
+            if (stepIndex > 0) {
+                const line = document.getElementById(`timeline-line-${stepIndex}`);
+                if (line) {
+                    line.classList.remove('bg-gray-300');
+                    line.classList.add('bg-green-600');
+                }
+            }
+        }
+
+        function showCancelledTimeline() {
+            // Show all timeline in red for cancelled orders
+            const steps = ['pending', 'preparing', 'ready', 'completed'];
+            steps.forEach(step => {
+                const stepElement = document.getElementById(`timeline-step-${step}`);
+                if (!stepElement) return;
+                
+                const circle = stepElement.querySelector('div.w-14');
+                const icon = stepElement.querySelector('i');
+                const label = stepElement.querySelector('.text-sm.font-semibold');
+                
+                if (circle && icon && label) {
+                    circle.classList.remove('border-green-600', 'bg-green-50', 'border-gray-300', 'bg-white');
+                    circle.classList.add('border-red-300', 'bg-red-50');
+                    icon.classList.remove('text-green-600', 'text-gray-400');
+                    icon.classList.add('text-red-400');
+                    label.classList.remove('text-green-600', 'text-gray-500');
+                    label.classList.add('text-red-500');
+                }
+            });
+            
+            // Update the cancel button to show cancelled state
+            const cancelBtn = document.getElementById('cancelOrderBtn');
+            if (cancelBtn) {
+                cancelBtn.innerHTML = '<i class="fas fa-ban mr-2"></i>Order Cancelled';
+                cancelBtn.disabled = true;
+                cancelBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                cancelBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            }
+        }
+
+        // Enhanced polling function (fallback mechanism)
+        function pollOrderStatus(orderId) {
+            if (orderStatus === 'Cancelled' || orderStatus === 'Completed') {
+                return; // Stop polling for finished orders
+            }
+            
+            fetch('@Url.Action("GetOrderStatus", "Checkout", new { area = "Customer" })?orderId=' + orderId, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status && data.status !== orderStatus) {
+                    console.log('Order status changed from', orderStatus, 'to', data.status);
+                    orderStatus = data.status;
+                    updateCancelButtonUI();
+                    updateOrderTimeline(orderStatus);
+                }
+            })
+            .catch(error => {
+                console.error('Error polling order status:', error);
+            });
+        }
+
+        // Initialize download receipt functionality
+        function initializeDownloadReceipt(orderId) {
             const downloadBtn = document.getElementById('downloadPNG');
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', function() {
@@ -423,29 +651,24 @@
                     downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
                     downloadBtn.disabled = true;
                     
-                    // Use html2canvas to capture the receipt
                     html2canvas(receiptContainer, {
                         scale: 2,
                         useCORS: true,
                         logging: false,
                         backgroundColor: '#ffffff'
                     }).then(canvas => {
-                        // Convert canvas to blob
                         canvas.toBlob(function(blob) {
-                            // Create download link
                             const url = URL.createObjectURL(blob);
                             const link = document.createElement('a');
                             link.download = `receipt-${orderId}.png`;
                             link.href = url;
+                            document.body.appendChild(link);
                             link.click();
-                            
-                            // Clean up
+                            document.body.removeChild(link);
                             URL.revokeObjectURL(url);
                             
-                            // Reset button
                             downloadBtn.innerHTML = originalText;
                             downloadBtn.disabled = false;
-                            
                             showToast('Receipt downloaded successfully!', 'success');
                         });
                     }).catch(error => {
@@ -456,30 +679,12 @@
                     });
                 });
             }
-            
-            // Update UI based on order status
-            function updateCancelButtonUI() {
-                console.log('Updating cancel button for status:', orderStatus);
-                
-                if (orderStatus === 'Pending') {
-                    // Enable cancel button
-                    cancelBtn.disabled = false;
-                    cancelBtn.classList.remove('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
-                    cancelBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-                    cancelMessage.classList.add('hidden');
-                } else {
-                    // Disable cancel button
-                    cancelBtn.disabled = true;
-                    cancelBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-                    cancelBtn.classList.add('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
-                    cancelMessage.classList.remove('hidden');
-                }
-            }
-            
-            // Initialize cancel button state
-            updateCancelButtonUI();
-            
-            // Cancel Order Handler
+        }
+
+        // Initialize cancel order functionality
+        function initializeCancelOrder(orderId, cancelBtn) {
+            if (!cancelBtn) return;
+
             cancelBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 
@@ -499,10 +704,16 @@
                 cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cancelling...';
                 cancelBtn.disabled = true;
                 
-                // Get anti-forgery token
-                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                // Get anti-forgery token - FIXED SELECTOR
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                if (!token) {
+                    console.error('Anti-forgery token not found');
+                    showToast('Security token missing. Please refresh the page.', 'error');
+                    cancelBtn.innerHTML = originalText;
+                    cancelBtn.disabled = false;
+                    return;
+                }
                 
-                // Call the CancelOrder API
                 fetch('@Url.Action("CancelOrder", "Checkout", new { area = "Customer" })', {
                     method: 'POST',
                     headers: {
@@ -513,31 +724,21 @@
                     body: JSON.stringify({ OrderId: orderId })
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Cancel response:', data);
-                    
                     if (data.success) {
-                        // Update order status
                         orderStatus = 'Cancelled';
                         updateCancelButtonUI();
-                        
-                        // Show success message
+                        updateOrderTimeline('Cancelled');
                         showToast(data.message || 'Order cancelled successfully!', 'success');
                         
-                        // Redirect to home after 2 seconds
                         setTimeout(() => {
                             window.location.href = '@Url.Action("Index", "Home", new { area = "Customer" })';
                         }, 2000);
                     } else {
-                        // Show error message
                         showToast(data.message || 'Failed to cancel order.', 'error');
-                        
-                        // Reset button
                         cancelBtn.innerHTML = originalText;
                         cancelBtn.disabled = false;
                     }
@@ -545,120 +746,32 @@
                 .catch(error => {
                     console.error('Error cancelling order:', error);
                     showToast('An error occurred while cancelling the order. Please try again.', 'error');
-                    
-                    // Reset button
                     cancelBtn.innerHTML = originalText;
                     cancelBtn.disabled = false;
                 });
             });
+        }
+
+        // Update cancel button UI based on order status
+        function updateCancelButtonUI() {
+            const cancelBtn = document.getElementById('cancelOrderBtn');
+            const cancelMessage = document.getElementById('cancelMessage');
             
-            // Optional: Poll for order status updates
-            function pollOrderStatus() {
-                if (orderStatus === 'Cancelled' || orderStatus === 'Completed') {
-                    return; // Stop polling for finished orders
-                }
-                
-                fetch('@Url.Action("GetOrderStatus", "Checkout", new { area = "Customer" })?orderId=' + orderId, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status && data.status !== orderStatus) {
-                        console.log('Order status changed from', orderStatus, 'to', data.status);
-                        orderStatus = data.status;
-                        updateCancelButtonUI();
-                        updateOrderTimeline(data.status);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error polling order status:', error);
-                });
+            if (!cancelBtn) return;
+            
+            if (orderStatus === 'Pending') {
+                cancelBtn.disabled = false;
+                cancelBtn.classList.remove('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
+                cancelBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                if (cancelMessage) cancelMessage.classList.add('hidden');
+            } else {
+                cancelBtn.disabled = true;
+                cancelBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                cancelBtn.classList.add('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
+                if (cancelMessage) cancelMessage.classList.remove('hidden');
             }
-            
-            // Poll every 10 seconds
-            const pollInterval = setInterval(pollOrderStatus, 10000);
-            
-            // Clean up interval when page is unloaded
-            window.addEventListener('beforeunload', () => {
-                clearInterval(pollInterval);
-            });
-            
-            // Update order timeline visual based on status
-            function updateOrderTimeline(status) {
-                // Get all timeline steps
-                const steps = document.querySelectorAll('.flex.flex-col.items-center');
-                const lines = document.querySelectorAll('.flex-1.h-0\\.5');
-                
-                // Reset all steps to inactive state
-                steps.forEach(step => {
-                    const circle = step.querySelector('div.w-14');
-                    const icon = step.querySelector('i');
-                    const label = step.querySelector('span.text-sm');
-                    
-                    circle.classList.remove('border-green-600', 'bg-green-50');
-                    circle.classList.add('border-gray-300', 'bg-white');
-                    icon.classList.remove('text-green-600');
-                    icon.classList.add('text-gray-400');
-                    label.classList.remove('text-green-600');
-                    label.classList.add('text-gray-500');
-                });
-                
-                lines.forEach(line => {
-                    line.classList.remove('bg-green-600');
-                    line.classList.add('bg-gray-300');
-                });
-                
-                // Activate steps based on current status
-                let activeStepIndex = 0;
-                
-                switch(status) {
-                    case 'Pending':
-                        activeStepIndex = 0;
-                        break;
-                    case 'Processing':
-                        activeStepIndex = 1;
-                        break;
-                    case 'ReadyForPickup':
-                    case 'OutForDelivery':
-                        activeStepIndex = 2;
-                        break;
-                    case 'Completed':
-                        activeStepIndex = 3;
-                        break;
-                    case 'Cancelled':
-                        // Show cancelled state
-                        showToast('Order has been cancelled.', 'error');
-                        return;
-                }
-                
-                // Activate all steps up to and including the current step
-                for (let i = 0; i <= activeStepIndex && i < steps.length; i++) {
-                    const step = steps[i];
-                    const circle = step.querySelector('div.w-14');
-                    const icon = step.querySelector('i');
-                    const label = step.querySelector('span.text-sm');
-                    
-                    circle.classList.remove('border-gray-300', 'bg-white');
-                    circle.classList.add('border-green-600', 'bg-green-50');
-                    icon.classList.remove('text-gray-400');
-                    icon.classList.add('text-green-600');
-                    label.classList.remove('text-gray-500');
-                    label.classList.add('text-green-600');
-                    
-                    // Activate connecting line
-                    if (i < activeStepIndex && i < lines.length) {
-                        lines[i].classList.remove('bg-gray-300');
-                        lines[i].classList.add('bg-green-600');
-                    }
-                }
-            }
-            
-            console.log('Order confirmation page initialized successfully');
-        });
-        
+        }
+
         // Toast notification function
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -678,10 +791,8 @@
             container.classList.remove('hidden');
             toast.classList.remove('hidden');
             
-            // Auto hide after 3 seconds
             setTimeout(() => {
                 toast.classList.add('hidden');
-                // Hide container if all toasts are hidden
                 const visibleToasts = container.querySelectorAll('.bg-green-500:not(.hidden), .bg-red-500:not(.hidden)');
                 if (visibleToasts.length === 0) {
                     container.classList.add('hidden');
@@ -689,6 +800,7 @@
             }, 3000);
         }
     </script>
+}
     
     <style>
         /* Loading state for buttons */
