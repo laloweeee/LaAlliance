@@ -26,14 +26,14 @@ using ASI.Basecode.Data.Models;
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    public class CheckoutController : ControllerBase<CheckoutController>
+    public class OrderController : ControllerBase<OrderController>
     {
         private readonly IUserProfileService _userProfileService;
         private readonly IAddressService _addressService;
         private readonly IOrderService _orderService;
         private readonly IPromotionService _promotionService;
 
-        public CheckoutController(IHttpContextAccessor httpContextAccessor,
+        public OrderController(IHttpContextAccessor httpContextAccessor,
                                     ILoggerFactory loggerFactory,
                                     IConfiguration configuration,
                                     IAddressService addressService,
@@ -50,85 +50,38 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         }
 
         /// <summary>
-        /// Checkout page
+        /// Order Index
         /// </summary>
+        /// <param name="orderId"></param>
         /// <returns></returns>
-        public async Task<IActionResult> Index()
+        /// GET: Customer/Order
+        [HttpGet]
+        public async Task<IActionResult> Index(int? orderId)
         {
-            var googleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
-            ViewBag.GoogleMapsApiKey = googleMapsApiKey;
-
-            try
+            if (UserId == 0)
             {
-                var userCart = _cartService.GetOrCreateCart(UserId);
-                var userAddress = _addressService.GetUserAddresses(UserId);
-                var voucherCodes = _promotionService.GetActivePromotions().ToList();
-
-                var model = new CheckoutViewModel
-                {
-                    Cart = userCart,
-                    Addresses = _mapper.Map<List<UserAddressViewModel>>(userAddress),
-                    AvailableVouchers = voucherCodes.Select(v => v.PromotionCodes.ToString()).ToList()
-                };
-
-                return View(model);
+                return RedirectToAction("Login", "Account");
             }
-            catch (ArgumentException argEx)
-            {
-                _logger.LogWarning(argEx, "Invalid argument while retrieving cart for user {UserId}", UserId);
-                this.ShowErrorToast(argEx.Message);
-                return RedirectToAction("Index", "Cart");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving cart for user {UserId}", UserId);
-                this.ShowErrorToast("Unable to retrieve cart. Please try again later.");
-                return RedirectToAction("Index", "Cart");
-            }
-        }
 
-
-        /// <summary>
-        /// Place Order
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
-        {
-            if (model == null)
+            if (orderId == null)
             {
-                this.ShowErrorToast("Invalid order data.");
-                return RedirectToAction("Index");
+                this.ShowErrorToast("Order not found.");
+                return RedirectToAction("Index", "Home");
             }
 
             try
             {
+                var order = _orderService.GetOrderById(orderId.Value);
 
-                var userProfile = _userProfileService.GetUserProfile(UserId);
-                var cart = _cartService.GetOrCreateCart(UserId);
-                var voucherCodes = _promotionService.GetActivePromotions().ToList();
-                var userAddress = _mapper.Map<UserAddressViewModel>(_addressService.GetUserAddresses(UserId));
+                var orderViewModel = _mapper.Map<OrderViewModel>(order);
 
-                var orderRequest = new PlaceOrderRequest
-                {
-                    UserID = UserId,
-                    OrderType = model.OrderType,
-                    PaymentMethod = model.PaymentMethod,
-                    AddressID = OrderType.Delivery == model.OrderType ? model.SelectedAddressId ?? 0 : 0,
-                    DeliveryNotes = model.DeliveryNotes,
-                    VoucherCode = voucherCodes.Any(v => v.PromotionCodes.ToString() == model.VoucherCode) ? model.VoucherCode : null
-                };
-
-                var orderResult = await _orderService.PlaceOrder(orderRequest);
-                return RedirectToAction("Receipt", new { orderId = orderResult.OrderID });
+                return View(orderViewModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error placing order for user {UserId}: {ex.Message}");
-                this.ShowErrorToast(ex.Message);
-                return View("Index");
+                this.ShowErrorToast("Unable to retrieve order details." + ex.Message);
+                _logger.LogError(ex, "Error retrieving order details for user {UserId}", UserId);
+                return RedirectToAction("Home", "Index");
             }
         }
 

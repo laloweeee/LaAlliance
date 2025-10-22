@@ -1,5 +1,4 @@
-@model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel;
-@using static ASI.Basecode.Resources.Constants.Enums;
+@model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
 
 @{
     ViewData["Title"] = "Checkout | LaAlliance";
@@ -16,7 +15,6 @@
 
         <form asp-action="PlaceOrder" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkoutForm">
             @Html.AntiForgeryToken()
-
             <!-- Left Column: Order Type, Delivery Address and Personal Details -->
             <div class="lg:col-span-2 space-y-6">
                 
@@ -28,8 +26,7 @@
                     </h2>
                     <div class="grid grid-cols-2 gap-4">
                         <label class="relative cursor-pointer">
-                            <input type="radio" name="OrderType" value="@(OrderType.Delivery)" class="peer sr-only"
-                                @(Model.OrderType == OrderType.Delivery ? "checked" : "") />
+                            <input type="radio" asp-for="OrderType" value="Delivery" class="peer sr-only" checked />
                             <div class="p-4 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300">
                                 <div class="flex flex-col items-center gap-2">
                                     <i class="fas fa-truck text-3xl text-gray-400 peer-checked:text-green-600"></i>
@@ -39,8 +36,7 @@
                             </div>
                         </label>
                         <label class="relative cursor-pointer">
-                            <input type="radio" name="OrderType" value="@(OrderType.Pickup)" class="peer sr-only"
-                                @(Model.OrderType == OrderType.Pickup ? "checked" : "") />
+                            <input type="radio" asp-for="OrderType" value="Pickup" class="peer sr-only" />
                             <div class="p-4 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300">
                                 <div class="flex flex-col items-center gap-2">
                                     <i class="fas fa-store text-3xl text-gray-400 peer-checked:text-green-600"></i>
@@ -50,7 +46,7 @@
                             </div>
                         </label>
                     </div>
-                    <span asp-validation-for="OrderType" class="text-red-500 text-sm mt-2"></span>
+                    <span asp-validation-for="OrderType" class="text-red-500 text-sm mt-2 block"></span>
                 </div>
 
                 <!-- Section 1: Delivery Address (Hidden for Pickup) -->
@@ -66,7 +62,7 @@
                         <!-- Address Display and Actions -->
                             <div id="addressDisplay" class="space-y-3">
                                 <div class="grid-2 gap-3">
-                                    <a asp-area="Customer" asp-action="AddressForm" asp-controller="Account" asp-route-returnUrl="@Url.Action("Index", "Checkout", new { area = "Customer" })" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                                    <a asp-area="Customer" asp-action="AddressForm" asp-controller="Account" asp-route-returnUrl="@Url.Action("CheckOut", "Cart", new { area = "Customer" })" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
                                         <i class="fas fa-plus"></i>
                                         <span>Add New Address</span>
                                     </a>
@@ -80,8 +76,11 @@
                                     foreach (var address in Model.Addresses)
                                     {
                                         <label class="relative cursor-pointer">
-                                            <input type="radio" name="SelectedAddressId" value="@address.UserAddressID" 
-                                                class="peer sr-only address-radio" 
+                                            @{
+                                                var isChecked = (Model.SelectedAddressId == address.UserAddressID || (Model.SelectedAddressId == null && address.IsDefault));
+                                            }
+                                            <input type="radio" name="SelectedAddressId" value="@address.UserAddressID"
+                                                class="peer sr-only address-radio"
                                                 data-street="@address.Street"
                                                 data-barangay="@address.Barangay"
                                                 data-city="@address.City"
@@ -89,7 +88,7 @@
                                                 data-zipcode="@address.ZipCode"
                                                 data-latitude="@address.Latitude"
                                                 data-longitude="@address.Longitude"
-                                                @(Model.SelectedAddressId == address.UserAddressID || (Model.SelectedAddressId == null && address.IsDefault) ? "checked" : "") />
+                                                @(isChecked ? "checked" : "") />
                                             <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-green-600 peer-checked:bg-green-50 transition-all hover:border-green-300 mb-2">
                                                 <div class="flex items-start gap-3">
                                                     <div class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-green-600 peer-checked:bg-green-600 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -113,6 +112,12 @@
                                             </div>
                                         </label>
                                     }
+                                }
+                                else
+                                {
+                                    <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                        <p class="text-sm text-yellow-800">No addresses found. Please add a delivery address.</p>
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -168,16 +173,18 @@
                     </div>
                 </div>
 
-                <!-- Section 2: Personal Details -->
+                <!-- Section 2: Delivery Notes -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-truck text-green-600"></i>
+                        <i class="fas fa-sticky-note text-green-600"></i>
                         Delivery Notes
                     </h2>
                     <div>
-                        <div>
-                            <input asp-for="DeliveryNotes" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" />
-                        </div>
+                        <textarea asp-for="DeliveryNotes" 
+                                  rows="3" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none" 
+                                  placeholder="Add any special instructions for delivery (e.g., gate code, landmarks, delivery time preferences)"></textarea>
+                        <p class="text-xs text-gray-500 mt-2">Optional: Add delivery instructions or notes</p>
                     </div>
                 </div>
 
@@ -189,105 +196,51 @@
                     </h2>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-gray-700 font-medium">Select Payment Method</label>
+                            <label class="block text-gray-700 font-medium mb-3">Select Payment Method</label>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
-                                    <input type="radio" name="PaymentMethod" value="Cash" class="radio-input" />
-                                    <span>Cash on Delivery</span>
-                                </label>
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
-                                    <input type="radio" name="PaymentMethod" value="GCash" class="radio-input" />
+                                    <input type="radio" asp-for="PaymentMethod" value="GCash" class="radio-input" />
+                                    <i class="fas fa-mobile-alt text-blue-600"></i>
                                     <span>GCash</span>
                                 </label>
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
-                                    <input type="radio" name="PaymentMethod" value="Card" class="radio-input" />
+                                    <input type="radio" asp-for="PaymentMethod" value="CreditCard" class="radio-input" />
+                                    <i class="fas fa-credit-card text-purple-600"></i>
                                     <span>Credit/Debit Card</span>
                                 </label>
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer">
+                                    <input type="radio" asp-for="PaymentMethod" value="CashOnDelivery" class="radio-input" />
+                                    <i class="fas fa-money-bill-wave text-green-600"></i>
+                                    <span>Cash on Delivery</span>
+                                </label>
                             </div>
-                            <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm"></span>
-                        </div>
-                        
-                        <!-- GCash Number Field -->
-                        <div id="gcashFields" class="hidden space-y-4">
-                            <div>
-                                <label class="block text-gray-700 font-medium">GCash Number</label>
-                                <input type="text" 
-                                    name="GcashNumber" 
-                                    id="gcashNumberInput"
-                                    maxlength="11"
-                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors"
-                                    placeholder="09XXXXXXXXX" 
-                                    autocomplete="off" 
-                                    inputmode="numeric" />
-                                <span class="text-xs text-gray-500 mt-1">Enter 11-digit mobile number (09XXXXXXXXX)</span>
-                                <span id="gcashError" class="text-red-500 text-xs hidden">Please enter exactly 11 digits</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Card Payment Fields -->
-                        <div id="cardFields" class="hidden space-y-4">
-                            <!-- Card Number -->
-                            <div>
-                                <label class="block text-gray-700 font-medium">Card Number</label>
-                                <input type="text" 
-                                    name="CardNumber" 
-                                    id="cardNumberInput"
-                                    maxlength="19"
-                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
-                                    placeholder="1234 5678 9012 3456" 
-                                    autocomplete="cc-number"
-                                    inputmode="numeric" />
-                                <span class="text-xs text-gray-500 mt-1">Enter 16-digit card number</span>
-                                <span id="cardNumberError" class="text-red-500 text-xs hidden">Please enter exactly 16 digits</span>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-4">
-                                <!-- Expiry Date -->
-                                <div>
-                                    <label class="block text-gray-700 font-medium">Expiry Date</label>
-                                    <input type="text" 
-                                        name="CardExpiry" 
-                                        id="cardExpiryInput"
-                                        maxlength="5"
-                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
-                                        placeholder="MM/YY" 
-                                        autocomplete="cc-exp"
-                                        inputmode="numeric" />
-                                    <span class="text-xs text-gray-500 mt-1">MM/YY format</span>
-                                    <span id="expiryError" class="text-red-500 text-xs hidden">Please enter valid expiry date</span>
-                                </div>
-                                
-                                <!-- CVV -->
-                                <div>
-                                    <label class="block text-gray-700 font-medium">CVV</label>
-                                    <input type="text" 
-                                        name="CardCVV" 
-                                        id="cardCvvInput"
-                                        maxlength="3"
-                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
-                                        placeholder="123" 
-                                        autocomplete="cc-csc"
-                                        inputmode="numeric" />
-                                    <span class="text-xs text-gray-500 mt-1">3-digit security code</span>
-                                    <span id="cvvError" class="text-red-500 text-xs hidden">Please enter exactly 3 digits</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Cardholder Name -->
-                            <div>
-                                <label class="block text-gray-700 font-medium">Cardholder Name</label>
-                                <input type="text" 
-                                    name="CardholderName" 
-                                    id="cardholderNameInput"
-                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 transition-colors" 
-                                    placeholder="John Doe" 
-                                    autocomplete="cc-name" />
-                                <span class="text-xs text-gray-500 mt-1">Name as it appears on card</span>
-                                <span id="nameError" class="text-red-500 text-xs hidden">Please enter cardholder name</span>
-                            </div>
+                            <span asp-validation-for="PaymentMethod" class="text-red-500 text-sm mt-2 block"></span>
                         </div>
                     </div>
                 </div>
+
+                <!-- Section 4: Voucher Code (Optional) -->
+                @if (!string.IsNullOrEmpty(Model.VoucherCode) || true)
+                {
+                    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-ticket-alt text-green-600"></i>
+                            Voucher Code
+                        </h2>
+                        <div class="flex gap-3">
+                            <input asp-for="VoucherCode" 
+                                   type="text" 
+                                   class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors uppercase" 
+                                   placeholder="Enter voucher code" />
+                            <button type="button" 
+                                    id="applyVoucherBtn"
+                                    class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                                Apply
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Optional: Enter a valid voucher code for discounts</p>
+                    </div>
+                }
             </div> 
 
             <!-- Right Column: Order Summary -->
@@ -304,7 +257,7 @@
                     <div class="mb-4 p-3 bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl">
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-gray-700">Order Type:</span>
-                            <span class="font-bold text-green-700" id="orderTypeBadge">Delivery</span>
+                            <span class="font-bold text-green-700" id="orderTypeBadge">@Model.OrderType</span>
                         </div>
                     </div>
 
@@ -321,7 +274,7 @@
                             }
                             else
                             {
-                                <span class="text-gray-400">Please enter your address</span>
+                                <span class="text-gray-400">Please select an address</span>
                             }
                         </p>
                     </div>
@@ -373,17 +326,17 @@
                     <div class="space-y-3 pt-4 border-t border-gray-200">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Subtotal</span>
-                            <span class="text-gray-900">₱@Model.SubTotal.ToString("F2")</span>
+                            <span class="text-gray-900" id="subtotalAmount">₱@Model.SubTotal.ToString("F2")</span>
                         </div>
                         <div class="flex justify-between text-sm" id="deliveryFeeRow">
                             <span class="text-gray-600">Delivery Fee</span>
                             <span class="text-gray-900" id="deliveryFeeAmount">₱@Model.DeliveryFee.ToString("F2")</span>
                         </div>
-                        @if (!string.IsNullOrEmpty(Model.VoucherCode))
+                        @if (Model.DiscountAmount > 0)
                         {
-                            <div class="flex justify-between text-sm text-green-600">
+                            <div class="flex justify-between text-sm text-green-600" id="discountRow">
                                 <span>Voucher Discount</span>
-                                <span>-₱0.00</span>
+                                <span id="discountAmount">-₱@Model.DiscountAmount.ToString("F2")</span>
                             </div>
                         }
                         <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
@@ -395,6 +348,7 @@
                     <!-- Place Order Button -->
                     <button type="submit" 
                             class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 mt-6 shadow-lg shadow-green-200">
+                        <i class="fas fa-check-circle"></i>
                         <span>Place Order</span>
                     </button>
 
@@ -407,56 +361,55 @@
                     </div>
                 </div>
             </div>
+            <!-- Loading Modal -->
+            <div id="loadingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+                    <!-- Animated Spinner -->
+                    <div class="mb-6 flex justify-center">
+                        <div class="relative">
+                            <!-- Outer rotating ring -->
+                            <div class="w-20 h-20 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+                            <!-- Inner pulse circle -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-12 h-12 bg-green-100 rounded-full animate-pulse"></div>
+                            </div>
+                            <!-- Center icon -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-shopping-bag text-green-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Text -->
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Processing Your Order</h3>
+                    <p class="text-gray-600 mb-4">Please wait while we prepare your order...</p>
+                    
+                    <!-- Progress Steps -->
+                    <div class="space-y-2 text-sm text-left bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center gap-3 text-green-600">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Validating order details</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-400" id="step2">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                            <span>Processing payment</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-400" id="step3">
+                            <i class="fas fa-circle"></i>
+                            <span>Confirming order</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Warning Message -->
+                    <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-xs text-yellow-800 flex items-center justify-center gap-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Please do not close or refresh this page</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </form>
-    </div>
-</div>
-
-<!-- Loading Modal -->
-<div id="loadingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
-        <!-- Animated Spinner -->
-        <div class="mb-6 flex justify-center">
-            <div class="relative">
-                <!-- Outer rotating ring -->
-                <div class="w-20 h-20 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
-                <!-- Inner pulse circle -->
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="w-12 h-12 bg-green-100 rounded-full animate-pulse"></div>
-                </div>
-                <!-- Center icon -->
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <i class="fas fa-shopping-bag text-green-600 text-2xl"></i>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Loading Text -->
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Processing Your Order</h3>
-        <p class="text-gray-600 mb-4">Please wait while we prepare your order...</p>
-        
-        <!-- Progress Steps -->
-        <div class="space-y-2 text-sm text-left bg-gray-50 rounded-lg p-4">
-            <div class="flex items-center gap-3 text-green-600">
-                <i class="fas fa-check-circle"></i>
-                <span>Validating order details</span>
-            </div>
-            <div class="flex items-center gap-3 text-gray-400" id="step2">
-                <i class="fas fa-circle-notch fa-spin"></i>
-                <span>Processing payment</span>
-            </div>
-            <div class="flex items-center gap-3 text-gray-400" id="step3">
-                <i class="fas fa-circle"></i>
-                <span>Confirming order</span>
-            </div>
-        </div>
-        
-        <!-- Warning Message -->
-        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p class="text-xs text-yellow-800 flex items-center justify-center gap-2">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>Please do not close or refresh this page</span>
-            </p>
-        </div>
     </div>
 </div>
 
@@ -466,6 +419,7 @@
     <script src="~/js/place-order.js"></script>
     <script>
         window.checkoutSubtotal = @Model.SubTotal;
+        window.deliveryFee = @Model.DeliveryFee;
     </script>
 
     <!-- Loading Modal Script -->
@@ -509,7 +463,9 @@
             
             function validateFormBeforeSubmit() {
                 // Validate payment method
-                if (!validatePaymentMethod()) {
+                const paymentMethod = document.querySelector('input[name="PaymentMethod"]:checked');
+                if (!paymentMethod) {
+                    alert('Please select a payment method.');
                     return false;
                 }
                 
@@ -517,27 +473,12 @@
                 const orderType = document.querySelector('input[name="OrderType"]:checked');
                 if (orderType && orderType.value === 'Delivery') {
                     const selectedAddress = document.querySelector('.address-radio:checked');
-                    const customAddress = document.getElementById('customAddressContainer');
                     
-                    if (!selectedAddress && !customAddress) {
+                    if (!selectedAddress) {
                         alert('Please select a delivery address for delivery orders.');
                         return false;
                     }
                 }
-                
-                // Validate coordinates for custom addresses
-                const customAddress = document.getElementById('customAddressContainer');
-                if (customAddress) {
-                    const latInput = document.getElementById('latitude') || document.getElementById('latitudeInput');
-                    const lngInput = document.getElementById('longitude') || document.getElementById('longitudeInput');
-                    
-                    if (!latInput?.value || !lngInput?.value) {
-                        alert('Please set a location on the map for your custom address.');
-                        return false;
-                    }
-                }
-                
-                return true;
             }
         });
     </script>

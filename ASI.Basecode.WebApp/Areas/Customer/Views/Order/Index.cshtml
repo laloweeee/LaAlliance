@@ -1,10 +1,8 @@
-@model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
 @using static ASI.Basecode.Resources.Constants.Enums;
+@model ASI.Basecode.Services.ServiceModels.OrderViewModel;
 
 @{
-    ViewData["Title"] = "Order Confirmation - LaAlliancé";
-    // Get the selected address for display
-    var selectedAddress = Model.Addresses?.FirstOrDefault(a => a.UserAddressID == Model.SelectedAddressId);
+    ViewData["Title"] = "Order | LaAlliancé";
 }
 
 <!-- Anti-forgery token (required for AJAX POST requests) -->
@@ -82,7 +80,7 @@
                             </a>
                             <button type="button" 
                                     id="cancelOrderBtn"
-                                    data-order-id="@Model.OrderId"
+                                    data-order-id="@Model.OrderID"
                                     data-order-status="@Model.OrderStatus.ToString()"
                                     class="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-full transition-colors cancel-order-btn">
                                 <i class="fas fa-times mr-2"></i>
@@ -101,7 +99,7 @@
                         <div class="flex justify-between text-sm text-gray-600 mb-6 pb-6 border-b border-gray-200">
                             <div>
                                 <p class="font-semibold text-gray-900 mb-1">Order number</p>
-                                <p>#@Model.OrderId</p>
+                                <p>#@Model.OrderID</p>
                             </div>
                             <div class="text-right">
                                 <p class="font-semibold text-gray-900 mb-1">Order date</p>
@@ -111,13 +109,10 @@
 
                         <!-- Order Items -->
                         <div class="space-y-6 mb-8">
-                            @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                            @if (Model.OrderItems != null && Model.OrderItems.Any())
                             {
-                                foreach (var item in Model.Cart.CartItems)
+                                foreach (var item in Model.OrderItems)
                                 {
-                                    var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
-                                    var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
-                                    
                                     <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
                                         <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                                             @if (!string.IsNullOrEmpty(item.ProductImage))
@@ -132,11 +127,11 @@
                                         
                                         <div class="flex-1">
                                             <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
-                                            
-                                            @if (item.CartItemOptions != null && item.CartItemOptions.Any())
+
+                                            @if (item.OrderItemOptions != null && item.OrderItemOptions.Any())
                                             {
                                                 <div class="text-sm text-gray-600 space-y-1 mb-2">
-                                                    @foreach (var opt in item.CartItemOptions)
+                                                    @foreach (var opt in item.OrderItemOptions)
                                                     {
                                                         <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
                                                     }
@@ -144,7 +139,7 @@
                                             }
                                             
                                             <p class="text-sm text-gray-600">QTY: @item.Quantity</p>
-                                            <p class="font-semibold text-gray-900 mt-2">₱@itemTotalPrice.ToString("F2")</p>
+                                            <p class="font-semibold text-gray-900 mt-2">₱@item.TotalPrice.ToString("F2")</p>
                                         </div>
                                     </div>
                                 }
@@ -156,13 +151,12 @@
                             <div>
                                 <h3 class="font-semibold text-gray-900 mb-3">Shipping address</h3>
                                 <div class="text-sm text-gray-600 space-y-1">
-                                    <p class="font-medium text-gray-900">@Model.FullName</p>
-                                    @if (selectedAddress != null && Model.OrderType == OrderType.Delivery)
+                                    <p class="font-medium text-gray-900">@Model.FirstName @Model.LastName</p>
+                                    @if (@Model.DeliveryAddress.FullAddress != null && Model.OrderType == OrderType.Delivery)
                                     {
-                                        <p class="font-medium">@selectedAddress.AddressType</p>
-                                        <p>@selectedAddress.Street</p>
-                                        <p>@selectedAddress.Barangay, @selectedAddress.City</p>
-                                        <p>@selectedAddress.Province @selectedAddress.ZipCode</p>
+                                        <p>@Model.DeliveryAddress.Street</p>
+                                        <p>@Model.DeliveryAddress.Barangay, @Model.DeliveryAddress.City</p>
+                                        <p>@Model.DeliveryAddress.Province @Model.DeliveryAddress.ZipCode</p>
                                         @if (!string.IsNullOrEmpty(Model.ContactNumber))
                                         {
                                             <p class="mt-2 pt-2 border-t border-gray-200">
@@ -200,11 +194,11 @@
                                     {
                                         <span>Cash on Delivery</span>
                                     }
-                                    else if (Model.PaymentMethod == PaymentMethod.EWallet)
+                                    else if (Model.PaymentMethod == PaymentMethod.GCash)
                                     {
                                         <span>GCash</span>
                                     }
-                                    else if (Model.PaymentMethod == PaymentMethod.Card)
+                                    else if (Model.PaymentMethod == PaymentMethod.CreditCard)
                                     {
                                         <span>Credit/Debit Card</span>
                                     }
@@ -257,19 +251,19 @@
                         <!-- Order ID -->
                         <div class="text-center mb-6 pb-4 border-b-2 border-dashed border-gray-300">
                             <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Order ID</p>
-                            <p class="font-mono font-bold text-gray-900">#@Model.OrderId</p>
+                            <p class="font-mono font-bold text-gray-900">#@Model.OrderID</p>
                         </div>
 
                         <!-- Items List -->
                         <div class="space-y-4 mb-6">
                             <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-3">Items</p>
-                            @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                            @if (Model.OrderItems != null && Model.OrderItems.Any())
                             {
-                                foreach (var item in Model.Cart.CartItems)
+                                foreach (var item in Model.OrderItems)
                                 {
-                                    var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                    var itemAddOnsTotal = item.OrderItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
                                     var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
-                                    
+
                                     <div class="text-sm">
                                         <div class="flex justify-between mb-1">
                                             <span class="text-gray-900 font-medium">@item.ProductName</span>
@@ -278,10 +272,10 @@
                                             <span>Qty: @item.Quantity × ₱@((item.UnitPrice + itemAddOnsTotal).ToString("F2"))</span>
                                             <span class="font-semibold text-gray-900">₱@itemTotalPrice.ToString("F2")</span>
                                         </div>
-                                        @if (item.CartItemOptions != null && item.CartItemOptions.Any())
+                                        @if (item.OrderItemOptions != null && item.OrderItemOptions.Any())
                                         {
                                             <div class="text-xs text-gray-500 ml-2 space-y-0.5">
-                                                @foreach (var opt in item.CartItemOptions)
+                                                @foreach (var opt in item.OrderItemOptions)
                                                 {
                                                     <p>+ @opt.OptionName @(opt.AdditionalPrice > 0 ? $"(₱{opt.AdditionalPrice:F2})" : "")</p>
                                                 }
@@ -307,7 +301,7 @@
                         <!-- Total -->
                         <div class="flex justify-between text-lg font-bold pt-4 mt-4 border-t-2 border-gray-900">
                             <span>TOTAL</span>
-                            <span class="text-green-600">₱@Model.Total.ToString("F2")</span>
+                            <span class="text-green-600">₱@Model.TotalAmount.ToString("F2")</span>
                         </div>
 
                         <!-- Delivery Time -->

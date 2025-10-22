@@ -64,8 +64,8 @@ namespace ASI.Basecode.Services.ServiceModels
     {
         public int UserID { get; set; }
         public int? SelectedAddressId { get; set; }
-        public string OrderType { get; set; }
-        public string PaymentMethod { get; set; } 
+        public OrderType OrderType { get; set; }
+        public PaymentMethod PaymentMethod { get; set; } 
         public string DeliveryNotes { get; set; }
         public string VoucherCode { get; set; }
     }

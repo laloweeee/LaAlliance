@@ -12,15 +12,19 @@ using System.Security.Claims;
 using System;
 using ASI.Basecode.WebApp.Helpers;
 using System.Threading.Tasks;
+using AutoMapper;
+using ASI.Basecode.Data.Models;
+using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [AutoValidateAntiforgeryToken]
     public class CartController : ControllerBase<CartController>
     {
         private readonly IUserProfileService _userProfileService;
         private readonly IAddressService _addressService;
+        private readonly IOrderService _orderService;
+        private readonly IPromotionService _promotionService;
 
         public CartController(
                                 IHttpContextAccessor httpContextAccessor,
@@ -28,13 +32,22 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                                 IConfiguration configuration,
                                 ICartService cartService,
                                 IUserProfileService userProfileService,
-                                IAddressService addressService
-                            ) : base(httpContextAccessor, loggerFactory, configuration, null, cartService)
+                                IAddressService addressService,
+                                IOrderService orderService,
+                                IPromotionService promotionService,
+                                IMapper mapper
+                            ) : base(httpContextAccessor, loggerFactory, configuration, mapper, cartService)
         {
             _userProfileService = userProfileService;
             _addressService = addressService;
+            _orderService = orderService;
+            _promotionService = promotionService;
         }
 
+        /// <summary>
+        /// Displays the cart page
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult Index()
         {
@@ -42,7 +55,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
             // Get or create cart for the user
             var cart = _cartService.GetOrCreateCart(UserId);
-            return View();
+            return View(cart);
         }
 
         /// <summary>
@@ -120,13 +133,72 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-    
+
+        /// <summary>
+        /// Displays the checkout page
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> CheckOut()
+        {
+            var googleApiKey = _configuration["GoogleMaps:ApiKey"];
+            ViewBag.GoogleMapsApiKey = googleApiKey;
+
+            if (UserId == 0)
+            {
+                _logger.LogError("USER ID IS NULL or ZERO");
+                this.ShowErrorToast("Please log in to continue checkout.");
+                return RedirectToAction("Login", "Account");
+            }
+
+            try
+            {
+                var cart = _cartService.GetOrCreateCart(UserId);
+
+                // Check if cart is empty
+                if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
+                {
+                    this.ShowWarningToast("Your cart is empty.");
+                    return RedirectToAction("Index", "Cart");
+                }
+
+                // Get user addresses with null check
+                var addresses = _addressService.GetUserAddresses(UserId) ?? new List<UserAddressServiceModel>();
+                var userAddresses = _mapper.Map<List<UserAddressViewModel>>(addresses);
+
+                //var vouchers = _promotionService.GetActivePromotions()?.ToList() ?? new List<RestaurantPromotions>();
+
+                var model = new CheckoutViewModel
+                {
+                    Cart = cart,
+                    Addresses = userAddresses,
+                    // Initialize other properties as needed
+                    OrderType = OrderType.Delivery // Set default
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                this.ShowErrorToast("Failed to load checkout page.");
+                _logger.LogError(ex, "Error in CheckOut: {Message}", ex.Message);
+                return RedirectToAction("Index", "Cart");
+            }
+        }
+
+        /// <summary>
+        /// Places an order based on the checkout model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 this.ShowErrorToast("Please correct the errors in the form.");
-                return View("CheckOut", model);
+                return RedirectToAction("CheckOut");
             }
 
             try
@@ -141,13 +213,17 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     VoucherCode = model.VoucherCode
                 };
 
+                _logger.LogInformation($"Order Placed with payment method: {orderRequest.PaymentMethod}");
+
+                await _orderService.PlaceOrder(orderRequest);
+
                 this.ShowSuccessToast("Your order has been placed successfully!");
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Order");
             }
             catch (Exception ex)
             {
                 this.ShowErrorToast("Failed to place order: " + ex.Message);
-                return View("CheckOut", model);
+                return RedirectToAction("CheckOut");
             }
         }
     }

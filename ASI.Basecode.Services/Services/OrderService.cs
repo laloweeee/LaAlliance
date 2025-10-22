@@ -61,7 +61,7 @@ namespace ASI.Basecode.Services.Services
 
             // Validate and get address for delivery orders
             int? addressId = null;
-            if (Enum.Parse<OrderType>(request.OrderType) == OrderType.Delivery)
+            if (request.OrderType == OrderType.Delivery)
             {
                 if (!request.SelectedAddressId.HasValue)
                 {
@@ -83,8 +83,8 @@ namespace ASI.Basecode.Services.Services
             decimal subtotal = cart.CartItem.Sum(item =>
                 item.Quantity * (item.UnitPrice + (item.CartItemOption?.Sum(opt => opt.ProductOptionItems?.AdditionalPrice ?? 0) ?? 0)));
 
-            decimal deliveryFee = Enum.Parse<OrderType>(request.OrderType) == OrderType.Delivery ? 50.00m : 0.00m;
-            decimal discountAmount = 0.00m; // TODO: Implement voucher/promotion logic
+            decimal deliveryFee = request.OrderType == OrderType.Delivery ? 50.00m : 0.00m;
+            decimal discountAmount = 0.00m;
             decimal totalAmount = subtotal + deliveryFee - discountAmount;
 
             // Create the order
@@ -96,9 +96,9 @@ namespace ASI.Basecode.Services.Services
                 SubTotal = subtotal,
                 DiscountAmount = discountAmount,
                 TotalAmount = totalAmount,
-                OrderType = Enum.Parse<OrderType>(request.OrderType),
+                OrderType = request.OrderType,
                 OrderStatus = OrderStatus.Pending,
-                PaymentMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod),
+                PaymentMethod = request.PaymentMethod,
                 OrderItems = new List<OrderItems>()
             };
 
@@ -134,7 +134,7 @@ namespace ASI.Basecode.Services.Services
             var paymentLog = new PaymentLog
             {
                 UserID = request.UserID,
-                PaymentMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod),
+                PaymentMethod = request.PaymentMethod,
                 TransactionReference = GenerateTransactionReference(),
                 PaymentAmount = totalAmount,
                 PaymentDate = DateTime.UtcNow,
@@ -143,7 +143,7 @@ namespace ASI.Basecode.Services.Services
             };
 
             // Set payment status based on payment method
-            if (request.PaymentMethod == "CashOnDelivery" && order.OrderType == OrderType.Delivery)
+            if (request.PaymentMethod == PaymentMethod.CashOnDelivery && order.OrderType == OrderType.Delivery)
             {
                 // Set payment status to pending for cash on delivery
                 paymentLog.PaymentStatus = PaymentStatus.Pending;

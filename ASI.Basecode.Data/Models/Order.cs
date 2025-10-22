@@ -22,7 +22,7 @@ namespace ASI.Basecode.Data.Models
 
         public OrderType OrderType { get; set; } = OrderType.Delivery;
         public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.CreditCard;
+        public PaymentMethod PaymentMethod { get; set; }
 
         //Navigator
         public User? User { get; set; } // One order is placed by one user
