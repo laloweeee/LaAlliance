@@ -27,6 +27,12 @@ namespace ASI.Basecode.Services.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, $"Order-{orderID}");
         }
 
+        public async Task JoinUserOrdersGroup(string userId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"UserOrders-{userId}");
+            await Clients.Caller.SendAsync("JoinedGroup", $"Successfully joined user orders group: {userId}");
+        }
+
         public async Task LeaveOrderGroup(string orderID)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Order-{orderID}");

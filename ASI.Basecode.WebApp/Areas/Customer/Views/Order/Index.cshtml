@@ -1,0 +1,429 @@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.OrderHistoryViewModel
+
+@{
+    ViewData["Title"] = "My Orders - LaAlliancé";
+}
+
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header (matches PlaceOrder tone: simple, left-aligned) -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-semibold text-gray-900">My Orders</h1>
+            <p class="mt-1 text-sm text-gray-600">Manage active orders and view past purchases.</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white border border-gray-200 rounded-lg">
+            <div class="flex border-b border-gray-200">
+                <button id="ongoingTab"
+                        class="flex-1 px-4 py-3 text-sm font-medium text-center border-b-2 @(Model.ActiveTab == "ongoing" ? "border-green-600 text-green-700" : "border-transparent text-gray-600 hover:text-gray-800")">
+                    Ongoing (@Model.OngoingOrders.Count)
+                </button>
+                <button id="historyTab"
+                        class="flex-1 px-4 py-3 text-sm font-medium text-center border-b-2 @(Model.ActiveTab == "history" ? "border-green-600 text-green-700" : "border-transparent text-gray-600 hover:text-gray-800")">
+                    History (@Model.OrderHistory.Count)
+                </button>
+            </div>
+
+            <!-- Ongoing -->
+            <div id="ongoingContent" class="@(Model.ActiveTab == "ongoing" ? "block" : "hidden")">
+                @if (Model.OngoingOrders.Any())
+                {
+                    <div class="p-4 space-y-3" id="ongoingOrdersContainer">
+                        @foreach (var order in Model.OngoingOrders)
+                        {
+                            <div class="border border-gray-200 rounded-lg p-4" data-order-id="@order.OrderID">
+                                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                                    <!-- Left -->
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <h3 class="text-base font-semibold text-gray-900">Order #@order.OrderID</h3>
+                                            <span class="order-status-badge inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border
+                                                @(order.OrderStatus.ToString() == "Pending" ? "bg-yellow-50 text-yellow-800 border-yellow-200" :
+                                                  order.OrderStatus.ToString() == "Processing" ? "bg-blue-50 text-blue-800 border-blue-200" :
+                                                  order.OrderStatus.ToString() == "ReadyForPickup" ? "bg-green-50 text-green-800 border-green-200" :
+                                                  order.OrderStatus.ToString() == "ReadyForDelivery" ? "bg-green-50 text-green-800 border-green-200" :
+                                                  "bg-gray-50 text-gray-800 border-gray-200")">
+                                                <i class="fas @GetStatusIcon(order.OrderStatus) text-[10px]"></i>
+                                                @order.OrderStatus
+                                            </span>
+                                        </div>
+
+                                        <!-- Meta (compact, PlaceOrder-like) -->
+                                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-y-1 gap-x-6 text-sm text-gray-700">
+                                            <div class="inline-flex items-center">
+                                                <i class="fas fa-calendar mr-2 text-gray-400"></i>
+                                                @order.OrderDate.ToString("MMM dd, yyyy 'at' h:mm tt")
+                                            </div>
+                                            <div class="inline-flex items-center">
+                                                <i class="fas @(order.OrderType.ToString() == "Delivery" ? "fa-truck" : "fa-store") mr-2 text-gray-400"></i>
+                                                @order.OrderType
+                                            </div>
+                                            <div class="inline-flex items-center">
+                                                <i class="fas fa-cube mr-2 text-gray-400"></i>
+                                                @order.OrderItems.Count item@(order.OrderItems.Count != 1 ? "s" : "")
+                                            </div>
+                                        </div>
+
+                                        <!-- Progress (thin, neutral) -->
+                                        <div class="mt-3">
+                                            <div class="flex items-center justify-between text-xs text-gray-700">
+                                                <span>Progress</span>
+                                                <span class="progress-percentage font-semibold text-green-700">@GetProgressPercentage(order.OrderStatus)%</span>
+                                            </div>
+                                            <div class="mt-1 h-1.5 w-full bg-gray-200 rounded">
+                                                <div class="progress-bar-fill h-1.5 rounded bg-green-600" style="width:@GetProgressPercentage(order.OrderStatus)%"></div>
+                                            </div>
+                                            <div class="mt-1 flex justify-between text-[11px] text-gray-500">
+                                                <span>Placed</span>
+                                                <span class="next-status-text">@GetNextStatusText(order.OrderStatus)</span>
+                                                <span>Completed</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right: Amount + single primary CTA -->
+                                    <div class="min-w-[160px] text-right">
+                                        <p class="text-lg font-semibold text-gray-900">₱@order.TotalAmount.ToString("F2")</p>
+                                        <p class="text-xs text-gray-500">Total</p>
+                                        <div class="mt-3 flex md:flex-col gap-2 justify-end">
+                                            <a href="@Url.Action("OrderDetails", "Order", new { area = "Customer", orderId = order.OrderID })"
+                                               class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700">
+                                                <i class="fas fa-eye mr-2"></i>Details
+                                            </a>
+                                            <!-- Support button removed -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="p-8 text-center">
+                        <h3 class="text-lg font-semibold text-gray-900">No Active Orders</h3>
+                        <p class="mt-1 text-sm text-gray-600">Start a new order to see it here.</p>
+                        <a href="@Url.Action("Index", "Menu", new { area = "Customer" })"
+                           class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700">
+                            <i class="fas fa-utensils mr-2"></i>Explore Menu
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- History -->
+            <div id="historyContent" class="@(Model.ActiveTab == "history" ? "block" : "hidden")">
+                @if (Model.OrderHistory.Any())
+                {
+                    <div class="p-4 space-y-3">
+                        @foreach (var order in Model.OrderHistory)
+                        {
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <h3 class="text-base font-semibold text-gray-900">Order #@order.OrderID</h3>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border
+                                                @(order.OrderStatus.ToString() == "Completed" ? "bg-green-50 text-green-800 border-green-200" :
+                                                  order.OrderStatus.ToString() == "Cancelled" ? "bg-red-50 text-red-800 border-red-200" :
+                                                  "bg-gray-50 text-gray-800 border-gray-200")">
+                                                <i class="fas @GetStatusIcon(order.OrderStatus) text-[10px]"></i>
+                                                @order.OrderStatus
+                                            </span>
+                                        </div>
+
+                                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-y-1 gap-x-6 text-sm text-gray-700">
+                                            <div class="inline-flex items-center">
+                                                <i class="fas fa-calendar mr-2 text-gray-400"></i>
+                                                @order.OrderDate.ToString("MMM dd, yyyy 'at' h:mm tt")
+                                            </div>
+                                            <div class="inline-flex items-center">
+                                                <i class="fas @(order.OrderType.ToString() == "Delivery" ? "fa-truck" : "fa-store") mr-2 text-gray-400"></i>
+                                                @order.OrderType
+                                            </div>
+                                            <div class="inline-flex items-center">
+                                                <i class="fas fa-cube mr-2 text-gray-400"></i>
+                                                @order.OrderItems.Count item@(order.OrderItems.Count != 1 ? "s" : "")
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="min-w-[160px] text-right">
+                                        <p class="text-lg font-semibold @(order.OrderStatus.ToString() == "Cancelled" ? "text-red-600" : "text-gray-900")">
+                                            ₱@order.TotalAmount.ToString("F2")
+                                        </p>
+                                        <p class="text-xs text-gray-500">Total</p>
+                                        <div class="mt-3 flex md:flex-col gap-2 justify-end">
+                                            <a href="@Url.Action("OrderDetails", "Order", new { area = "Customer", orderId = order.OrderID })"
+                                               class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded bg-gray-800 text-white hover:bg-gray-900">
+                                                <i class="fas fa-receipt mr-2"></i>Receipt
+                                            </a>
+                                            @if (order.OrderStatus.ToString() != "Cancelled")
+                                            {
+                                                <button type="button" onclick="reorder(@order.OrderID)"
+                                                        class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700">
+                                                    <i class="fas fa-redo mr-2"></i>Reorder
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="p-8 text-center">
+                        <h3 class="text-lg font-semibold text-gray-900">No Order History</h3>
+                        <p class="mt-1 text-sm text-gray-600">Place an order to see it listed here.</p>
+                        <a href="@Url.Action("Index", "Menu", new { area = "Customer" })"
+                           class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700">
+                            <i class="fas fa-utensils mr-2"></i>Start Ordering
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Quick Stats (flat, PlaceOrder-like) -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <p class="text-sm text-gray-600">Active Orders</p>
+                <p class="mt-1 text-xl font-semibold text-gray-900">@Model.OngoingOrders.Count</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <p class="text-sm text-gray-600">Completed</p>
+                <p class="mt-1 text-xl font-semibold text-gray-900">
+                    @Model.OrderHistory.Count(o => o.OrderStatus.ToString() == "Completed")
+                </p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <p class="text-sm text-gray-600">Total Spent</p>
+                <p class="mt-1 text-xl font-semibold text-gray-900">
+                    ₱@Model.OrderHistory.Where(o => o.OrderStatus.ToString() == "Completed").Sum(o => o.TotalAmount).ToString("F2")
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .progress-bar-fill { transition: width .3s ease; }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+    <script>
+        let signalRConnection = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('ongoingTab')?.addEventListener('click', () => switchTab('ongoing'));
+            document.getElementById('historyTab')?.addEventListener('click', () => switchTab('history'));
+            initializeSignalR();
+        });
+
+        function initializeSignalR() {
+            const baseUrl = window.location.origin;
+            signalRConnection = new signalR.HubConnectionBuilder()
+                .withUrl(baseUrl + '/orderHub')
+                .withAutomaticReconnect()
+                .build();
+
+            signalRConnection.on('OrderStatusUpdated', (data) => updateOrderStatus(data.orderId, data.status));
+            signalRConnection.on('OrderReady', (data) => updateOrderStatus(data.orderId, data.status));
+
+            signalRConnection.start()
+                .then(() => {
+                    const userId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+                    if (userId) return signalRConnection.invoke('JoinUserOrdersGroup', userId);
+                })
+                .catch(err => console.error('SignalR connection error:', err));
+
+            signalRConnection.onreconnected(() => {
+                const userId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+                if (userId) signalRConnection.invoke('JoinUserOrdersGroup', userId);
+            });
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const card = document.querySelector(`[data-order-id="${orderId}"]`);
+            if (!card) return;
+
+            // Update badge
+            const badge = card.querySelector('.order-status-badge');
+            if (badge) {
+                badge.classList.remove(
+                    'bg-yellow-50','text-yellow-800','border-yellow-200',
+                    'bg-blue-50','text-blue-800','border-blue-200',
+                    'bg-green-50','text-green-800','border-green-200',
+                    'bg-gray-50','text-gray-800','border-gray-200',
+                    'bg-red-50','text-red-800','border-red-200'
+                );
+                const m = getStatusClasses(newStatus);
+                badge.classList.add(...m.classes);
+                badge.innerHTML = `<i class="fas ${getStatusIconFromStatus(newStatus)} text-[10px]"></i> ${m.displayText}`;
+            }
+
+            // Progress
+            const pct = getProgressPercentage(newStatus);
+            const bar = card.querySelector('.progress-bar-fill');
+            const pctText = card.querySelector('.progress-percentage');
+            const next = card.querySelector('.next-status-text');
+            if (bar) bar.style.width = pct + '%';
+            if (pctText) pctText.textContent = pct + '%';
+            if (next) next.textContent = getNextStatusText(newStatus);
+
+            if (newStatus === 'Completed' || newStatus === 'Cancelled') {
+                setTimeout(() => moveOrderToHistory(orderId, card), 400);
+            }
+        }
+
+        function moveOrderToHistory(orderId, card) {
+            const ongoingContainer = document.getElementById('ongoingOrdersContainer');
+            if (!ongoingContainer || !card) return;
+
+            card.remove();
+            updateOrderCounts();
+
+            if (!ongoingContainer.querySelector('[data-order-id]')) {
+                document.getElementById('ongoingContent').innerHTML = `
+                    <div class="p-8 text-center">
+                        <h3 class="text-lg font-semibold text-gray-900">No Active Orders</h3>
+                        <p class="mt-1 text-sm text-gray-600">Start a new order to see it here.</p>
+                        <a href="@Url.Action("Index", "Menu", new { area = "Customer" })"
+                           class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700">
+                            <i class="fas fa-utensils mr-2"></i>Explore Menu
+                        </a>
+                    </div>`;
+            }
+        }
+
+        function updateOrderCounts() {
+            const ongoingTab = document.getElementById('ongoingTab');
+            const historyTab = document.getElementById('historyTab');
+            const ongoingCount = document.querySelectorAll('#ongoingOrdersContainer [data-order-id]').length;
+
+            if (ongoingTab) {
+                if (/\(\d+\)/.test(ongoingTab.textContent)) {
+                    ongoingTab.textContent = ongoingTab.textContent.replace(/\(\d+\)/, `(${ongoingCount})`);
+                } else {
+                    ongoingTab.textContent += ` (${ongoingCount})`;
+                }
+            }
+
+            if (historyTab) {
+                const m = historyTab.textContent.match(/\(\d+\)/);
+                const current = m ? parseInt(m[0].replace(/[()]/g, ''), 10) : 0;
+                if (/\(\d+\)/.test(historyTab.textContent)) {
+                    historyTab.textContent = historyTab.textContent.replace(/\(\d+\)/, `(${current + 1})`);
+                } else {
+                    historyTab.textContent += ` (${current + 1})`;
+                }
+            }
+        }
+
+        function switchTab(tab) {
+            const ongoingTab = document.getElementById('ongoingTab');
+            const historyTab = document.getElementById('historyTab');
+            const ongoing = document.getElementById('ongoingContent');
+            const history = document.getElementById('historyContent');
+
+            if (tab === 'ongoing') {
+                ongoingTab.classList.add('border-green-600','text-green-700');
+                ongoingTab.classList.remove('border-transparent');
+                historyTab.classList.remove('border-green-600','text-green-700');
+                historyTab.classList.add('border-transparent');
+                ongoing.classList.remove('hidden'); history.classList.add('hidden');
+            } else {
+                historyTab.classList.add('border-green-600','text-green-700');
+                historyTab.classList.remove('border-transparent');
+                ongoingTab.classList.remove('border-green-600','text-green-700');
+                ongoingTab.classList.add('border-transparent');
+                history.classList.remove('hidden'); ongoing.classList.add('hidden');
+            }
+
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tab);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Helpers (unchanged)
+        function getStatusClasses(status) {
+            const map = {
+                'Pending': { classes: ['bg-yellow-50','text-yellow-800','border-yellow-200'], displayText: 'Pending' },
+                'Processing': { classes: ['bg-blue-50','text-blue-800','border-blue-200'], displayText: 'Preparing' },
+                'ReadyForPickup': { classes: ['bg-green-50','text-green-800','border-green-200'], displayText: 'Ready for Pickup' },
+                'ReadyForDelivery': { classes: ['bg-green-50','text-green-800','border-green-200'], displayText: 'Ready for Delivery' },
+                'Completed': { classes: ['bg-green-50','text-green-800','border-green-200'], displayText: 'Completed' },
+                'Cancelled': { classes: ['bg-red-50','text-red-800','border-red-200'], displayText: 'Cancelled' }
+            };
+            return map[status] || { classes: ['bg-gray-50','text-gray-800','border-gray-200'], displayText: status };
+        }
+
+        function getStatusIconFromStatus(status) {
+            const icons = {
+                'Pending': 'fa-clock',
+                'Processing': 'fa-utensils',
+                'ReadyForPickup': 'fa-box',
+                'ReadyForDelivery': 'fa-truck',
+                'Completed': 'fa-check-circle',
+                'Cancelled': 'fa-times-circle'
+            };
+            return icons[status] || 'fa-question-circle';
+        }
+
+        function getProgressPercentage(status) {
+            const map = { 'Pending': 25, 'Processing': 50, 'ReadyForPickup': 75, 'ReadyForDelivery': 75, 'Completed': 100, 'Cancelled': 0 };
+            return map[status] ?? 0;
+        }
+
+        function getNextStatusText(status) {
+            const map = { 'Pending': 'Preparation', 'Processing': 'Ready Soon', 'ReadyForPickup': 'Pickup', 'ReadyForDelivery': 'Delivery', 'Completed': 'Completed', 'Cancelled': 'Cancelled' };
+            return map[status] || 'Processing';
+        }
+
+        window.addEventListener('beforeunload', () => { if (signalRConnection) signalRConnection.stop(); });
+    </script>
+}
+
+@functions {
+    private int GetProgressPercentage(ASI.Basecode.Resources.Constants.Enums.OrderStatus status)
+        => status switch
+        {
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Pending => 25,
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Processing => 50,
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.ReadyForPickup => 75,
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.ReadyForDelivery => 75,
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Completed => 100,
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Cancelled => 0,
+            _ => 0
+        };
+
+    private string GetStatusIcon(ASI.Basecode.Resources.Constants.Enums.OrderStatus status)
+        => status switch
+        {
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Pending => "fa-clock",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Processing => "fa-utensils",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.ReadyForPickup => "fa-box",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.ReadyForDelivery => "fa-truck",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Completed => "fa-check-circle",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Cancelled => "fa-times-circle",
+            _ => "fa-question-circle"
+        };
+
+    private string GetNextStatusText(ASI.Basecode.Resources.Constants.Enums.OrderStatus status)
+        => status switch
+        {
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Pending => "Preparation",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Processing => "Ready Soon",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.ReadyForPickup => "Pickup",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.ReadyForDelivery => "Delivery",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Completed => "Completed",
+            ASI.Basecode.Resources.Constants.Enums.OrderStatus.Cancelled => "Cancelled",
+            _ => "Processing"
+        };
+}

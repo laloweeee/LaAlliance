@@ -303,6 +303,84 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         {
             public string OrderId { get; set; }
         }
+
+        public IActionResult ViewOrder(int orderId)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+
+            try
+            {
+                // Get the order details
+                var order = _orderService.GetOrderById(orderId);
+
+                // Verify that the order belongs to the current user
+                if (order.UserID != userId)
+                {
+                    TempData["ErrorMessage"] = "Unauthorized access to order.";
+                    return RedirectToAction("Index", "Order");
+                }
+
+                var userProfile = _userProfileService.GetUserProfile(userId);
+                var addresses = _addressService.GetUserAddresses(userId);
+
+                // Convert to CheckoutViewModel for the PlaceOrder view
+                var model = new CheckoutViewModel
+                {
+                    OrderId = order.OrderID.ToString(),
+                    OrderStatus = order.OrderStatus.ToString(),
+                    OrderType = order.OrderType.ToString(),
+                    PaymentMethod = order.PaymentMethod.ToString(),
+                    FullName = $"{userProfile?.FirstName} {userProfile?.LastName}",
+                    ContactNumber = userProfile?.ContactNumber,
+                    Email = userProfile?.Email,
+                    // For viewing existing orders, we don't need the cart data from session
+                    // We'll use the order items directly
+                    Cart = new Services.ServiceModels.CartViewModel
+                    {
+                        CartItems = order.OrderItems.Select(oi => new Services.ServiceModels.CartItemViewModel
+                        {
+                            ProductName = oi.ProductName,
+                            ProductImage = oi.ProductImage,
+                            Quantity = oi.Quantity,
+                            UnitPrice = oi.UnitPrice,
+                            CartItemOptions = oi.OrderItemOptions?.Select(opt => new Services.ServiceModels.CartItemOptionViewModel
+                            {
+                                OptionName = opt.OptionName,
+                                AdditionalPrice = opt.AdditionalPrice
+                            }).ToList()
+                        }).ToList()
+                    },
+                    Addresses = _mapper != null
+                        ? _mapper.Map<List<UserAddressViewModel>>(addresses)
+                        : addresses.Select(a => new UserAddressViewModel()).ToList()
+                };
+
+                // If it's a delivery order and we have delivery address info, try to find the selected address
+                if (order.OrderType == OrderType.Delivery && order.DeliveryAddress != null)
+                {
+                    // Try to find a matching address from user's addresses
+                    var matchingAddress = addresses.FirstOrDefault(a => 
+                        a.Street == order.DeliveryAddress.Street &&
+                        a.Barangay == order.DeliveryAddress.Barangay &&
+                        a.City == order.DeliveryAddress.City);
+                    
+                    if (matchingAddress != null)
+                    {
+                        model.SelectedAddressId = matchingAddress.UserAddressID;
+                    }
+                }
+
+                return View("PlaceOrder", model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error viewing order {OrderId} for user {UserId}", orderId, userId);
+                TempData["ErrorMessage"] = "Unable to load order details.";
+                return RedirectToAction("Index", "Order");
+            }
+        }
+
+
             }
     
 }
