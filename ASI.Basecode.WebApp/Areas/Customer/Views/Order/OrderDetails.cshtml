@@ -6,9 +6,8 @@
     ViewData["Title"] = "Order | LaAlliancé";
 }
 
-<!-- Anti-forgery token (required for AJAX POST requests) -->
-@Html.AntiForgeryToken()
 
+@Html.AntiForgeryToken()
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -29,7 +28,7 @@
                     <div class="mb-10">
                         <div class="flex items-center justify-between max-w-2xl mx-auto">
                             <!-- Step 1: Pending -->
-                            <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center" id="timeline-step-pending">
                                 <div class="w-14 h-14 border-2 border-green-600 bg-green-50 rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-clock text-green-600 text-xl"></i>
                                 </div>
@@ -40,7 +39,7 @@
                             <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]" id="timeline-line-1"></div>
                             
                             <!-- Step 2: Preparing -->
-                            <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center" id="timeline-step-preparing">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-utensils text-gray-400 text-xl"></i>
                                 </div>
@@ -51,7 +50,7 @@
                             <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]" id="timeline-line-2"></div>
                             
                             <!-- Step 3: Ready -->
-                            <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center" id="timeline-step-ready">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-check text-gray-400 text-xl"></i>
                                 </div>
@@ -62,7 +61,7 @@
                             <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]" id="timeline-line-3"></div>
                             
                             <!-- Step 4: Delivered -->
-                            <div class="flex flex-col items-center">
+                            <div class="flex flex-col items-center" id="timeline-step-completed">
                                 <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-truck text-gray-400 text-xl"></i>
                                 </div>
@@ -412,7 +411,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
         // Global variables
-        let orderStatus = @Model.OrderStatus.ToString();
+        let orderStatus = '@Model.OrderStatus';
         let signalRConnection = null;
 
         document.addEventListener('DOMContentLoaded', function() {

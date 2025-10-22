@@ -72,13 +72,9 @@ namespace ASI.Basecode.Data.Repositories
         /// </summary>
         /// <param name="orderID"></param>
         /// <returns></returns>
-        public IEnumerable<PaymentLog> GetPaymentLogsByOrderId(int orderID)
+        public IQueryable<PaymentLog> GetPaymentLogsByOrderId(int orderID)
         {
-            return _dbContext.PaymentLogs
-                .Include(pl => pl.User)
-                .Where(pl => pl.OrderID == orderID)
-                .OrderByDescending(pl => pl.PaymentDate)
-                .ToList();
+            return _dbContext.PaymentLogs.Where(pl => pl.OrderID == orderID).AsQueryable();
         }
 
         /// <summary>

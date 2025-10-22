@@ -23,6 +23,7 @@ namespace ASI.Basecode.Services.Services
         private readonly ICartRepository _cartRepository;
         private readonly IAddressService _addressService;
         private readonly IUserRepository _userRepository;
+        private readonly IPaymentLogRepository _paymentLogRepository;
         private readonly IHubContext<OrderHub> _orderHubContext;
 
 
@@ -34,7 +35,8 @@ namespace ASI.Basecode.Services.Services
             IAddressService addressService,
             IUserRepository userRepository,
             IOrderProcessedRepository orderProcessedRepository,
-            IHubContext<OrderHub> orderHubContext
+            IHubContext<OrderHub> orderHubContext,
+            IPaymentLogRepository paymentLogRepository
             )
         {
             _orderRepository = orderRepository;
@@ -43,6 +45,7 @@ namespace ASI.Basecode.Services.Services
             _userRepository = userRepository;
             _orderProcessedRepository = orderProcessedRepository;
             _orderHubContext = orderHubContext;
+            _paymentLogRepository = paymentLogRepository;
         }
 
         /// <summary>
@@ -462,6 +465,20 @@ namespace ASI.Basecode.Services.Services
                 }
             }
 
+            if (newStatus == OrderStatus.Completed && order.PaymentMethod == PaymentMethod.CashOnDelivery)
+            {
+                var paymentLog = _paymentLogRepository.GetPaymentLogsByOrderId(orderID).AsQueryable().FirstOrDefault();
+                
+                if (paymentLog == null)
+                {
+                    Console.WriteLine($"✗ Payment log not found for Order {orderID}");
+                    return;
+                }
+
+                paymentLog.PaymentStatus = PaymentStatus.Completed;
+                _paymentLogRepository.UpdatePaymentLog(paymentLog);
+            }
+
             // Notifications
             try
             {
@@ -569,27 +586,6 @@ namespace ASI.Basecode.Services.Services
             {
                 Console.WriteLine($"✗ Error sending status update notification: {ex.Message}");
             }
-        }
-
-        /// <summary>
-        /// Notify all restaurant staff about order status change
-        /// </summary>
-        private async Task NotifyRestaurantOrderStatusChange(int orderID, OrderStatus newStatus)
-        {
-            /*try
-            {
-                await _orderHubContext.Clients.Group("Restaurant")
-                    .SendAsync("OrderStatusChanged", new
-                    {
-                        orderId = orderID,
-                        newStatus = newStatus.ToString(),
-                        timestamp = DateTime.UtcNow
-                    });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending restaurant status update: {ex.Message}");
-            }*/
         }
         
         /// <summary>
