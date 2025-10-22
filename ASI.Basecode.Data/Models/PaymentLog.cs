@@ -9,7 +9,7 @@ namespace ASI.Basecode.Data.Models
         public int PaymentLogID { get; set; }
         public int OrderID { get; set; }
         public int? UserID { get; set; }
-        public PaymentMethod PaymentMethod { get; set; }
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.GCash;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
         public string TransactionReference { get; set; } = null!;
         public decimal PaymentAmount { get; set; }

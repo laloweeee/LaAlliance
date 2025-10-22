@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using static ASI.Basecode.Resources.Constants.Enums;
 using System.Threading.Tasks;
+using ASI.Basecode.Resources.Constants;
 
 namespace ASI.Basecode.Services.Services
 {
@@ -87,6 +88,8 @@ namespace ASI.Basecode.Services.Services
             decimal discountAmount = 0.00m;
             decimal totalAmount = subtotal + deliveryFee - discountAmount;
 
+            Console.WriteLine($"Order Placed with payment method: {request.PaymentMethod}");
+
             // Create the order
             var order = new Order
             {
@@ -135,10 +138,10 @@ namespace ASI.Basecode.Services.Services
             {
                 UserID = request.UserID,
                 PaymentMethod = request.PaymentMethod,
-                TransactionReference = GenerateTransactionReference(),
+                TransactionReference = request.PaymentMethod != PaymentMethod.CashOnDelivery ? GenerateTransactionReference() : "N/A",
                 PaymentAmount = totalAmount,
                 PaymentDate = DateTime.UtcNow,
-                Remarks = request.DeliveryNotes ?? "No remarks",
+                Remarks = "No Remarks",
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -388,13 +391,6 @@ namespace ASI.Basecode.Services.Services
             // Notify customer about order status change
             await NotifyOrderStatusChange(orderID, newStatus);
         }
-
-
-
-
-
-
-
 
         /// <summary>
         /// Notify restaurant of new order via SignalR

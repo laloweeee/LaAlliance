@@ -1,6 +1,7 @@
 using ASI.Basecode.Data.Interfaces;
 using ASI.Basecode.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static ASI.Basecode.Resources.Constants.Enums;
@@ -26,7 +27,7 @@ namespace ASI.Basecode.Data.Repositories
         public void AddPaymentLog(PaymentLog paymentLog)
         {
             _dbContext.PaymentLogs.Add(paymentLog);
-            UnitOfWork.SaveChanges();
+            _dbContext.SaveChanges();
         }
 
         /// <summary>

@@ -459,27 +459,9 @@
                     step3.classList.remove('text-blue-600');
                     step3.classList.add('text-green-600');
                 }, 2000);
+
+                return true;
             });
-            
-            function validateFormBeforeSubmit() {
-                // Validate payment method
-                const paymentMethod = document.querySelector('input[name="PaymentMethod"]:checked');
-                if (!paymentMethod) {
-                    alert('Please select a payment method.');
-                    return false;
-                }
-                
-                // Validate delivery address for delivery orders
-                const orderType = document.querySelector('input[name="OrderType"]:checked');
-                if (orderType && orderType.value === 'Delivery') {
-                    const selectedAddress = document.querySelector('.address-radio:checked');
-                    
-                    if (!selectedAddress) {
-                        alert('Please select a delivery address for delivery orders.');
-                        return false;
-                    }
-                }
-            }
         });
     </script>
 }
