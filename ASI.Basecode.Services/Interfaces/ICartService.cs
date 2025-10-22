@@ -11,5 +11,6 @@ namespace ASI.Basecode.Services.Interfaces
         void RemoveCartItem(int cartItemID, int userID);
         void UpdateCartItemQuantity(int cartItemID, int quantity, int userID);
         void AddItemToCart(AddToCartRequest request, int userID);
+        
     }
 }

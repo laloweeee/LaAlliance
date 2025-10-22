@@ -186,26 +186,6 @@
                 }
             </div>
         </div>
-
-        <!-- Quick Stats (flat, PlaceOrder-like) -->
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white border border-gray-200 rounded-lg p-4">
-                <p class="text-sm text-gray-600">Active Orders</p>
-                <p class="mt-1 text-xl font-semibold text-gray-900">@Model.OngoingOrders.Count</p>
-            </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-4">
-                <p class="text-sm text-gray-600">Completed</p>
-                <p class="mt-1 text-xl font-semibold text-gray-900">
-                    @Model.OrderHistory.Count(o => o.OrderStatus.ToString() == "Completed")
-                </p>
-            </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-4">
-                <p class="text-sm text-gray-600">Total Spent</p>
-                <p class="mt-1 text-xl font-semibold text-gray-900">
-                    ₱@Model.OrderHistory.Where(o => o.OrderStatus.ToString() == "Completed").Sum(o => o.TotalAmount).ToString("F2")
-                </p>
-            </div>
-        </div>
     </div>
 </div>
 

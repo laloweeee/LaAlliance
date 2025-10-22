@@ -273,7 +273,15 @@ namespace ASI.Basecode.Services.Services
                     ProductName = oi.Product?.ProductName ?? "Unknown Product",
                     ProductImage = oi.Product?.ProductImage ?? "",
                     Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice
+                    UnitPrice = oi.UnitPrice,
+                    // ADD THIS SECTION TO INCLUDE OPTIONS:
+                    OrderItemOptions = oi.OrderItemOption?.Select(oio => new OrderItemOptionViewModel
+                    {
+                        OrderItemOptionID = oio.OrderItemOptionID,
+                        OptionGroupName = oio.ProductOptionGroup?.OptionGroupName ?? "",
+                        OptionName = oio.ProductOptionItems?.OptionName ?? "",
+                        AdditionalPrice = oio.ProductOptionItems?.AdditionalPrice ?? 0
+                    }).ToList() ?? new List<OrderItemOptionViewModel>()
                 }).ToList()
             }).ToList();
         }
@@ -307,7 +315,15 @@ namespace ASI.Basecode.Services.Services
                     ProductName = oi.Product?.ProductName ?? "Unknown Product",
                     ProductImage = oi.Product?.ProductImage ?? "",
                     Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice
+                    UnitPrice = oi.UnitPrice,
+                    // ADD THIS SECTION TO INCLUDE OPTIONS:
+                    OrderItemOptions = oi.OrderItemOption?.Select(oio => new OrderItemOptionViewModel
+                    {
+                        OrderItemOptionID = oio.OrderItemOptionID,
+                        OptionGroupName = oio.ProductOptionGroup?.OptionGroupName ?? "",
+                        OptionName = oio.ProductOptionItems?.OptionName ?? "",
+                        AdditionalPrice = oio.ProductOptionItems?.AdditionalPrice ?? 0
+                    }).ToList() ?? new List<OrderItemOptionViewModel>()
                 }).ToList()
             }).ToList();
         }

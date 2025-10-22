@@ -75,7 +75,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         }
 
         // Replace your PlaceOrder method in CheckoutController.cs with this:
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
@@ -87,7 +86,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 // Validate the model
                 if (!ModelState.IsValid)
                 {
-                    // Reload necessary data for the view
+                    // Use GetCartByUserID which includes all options with proper navigation properties
                     model.Cart = _cartService.GetOrCreateCart(userId);
                     model.AvailableVouchers = new List<string> { "WELCOME10", "FREESHIP", "SAVE20" };
                     model.Addresses = _mapper != null
@@ -111,8 +110,30 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                     return View("Index", model);
                 }
 
-                // GET THE CART DATA BEFORE CLEARING IT
+                // GET THE CART DATA WITH COMPLETE OPTIONS
                 var currentCart = _cartService.GetOrCreateCart(userId);
+
+                // DEBUG: Log cart data to see what's actually being loaded
+                _logger.LogInformation("Cart loaded for user {UserId}. Items count: {ItemsCount}", 
+                    userId, currentCart?.CartItems?.Count ?? 0);
+                
+                if (currentCart?.CartItems != null)
+                {
+                    foreach (var item in currentCart.CartItems)
+                    {
+                        _logger.LogInformation("Cart Item: {ProductName}, Options Count: {OptionsCount}", 
+                            item.ProductName, item.CartItemOptions?.Count ?? 0);
+                        
+                        if (item.CartItemOptions != null)
+                        {
+                            foreach (var option in item.CartItemOptions)
+                            {
+                                _logger.LogInformation("Option: Group='{OptionGroupName}', Name='{OptionName}', Price={AdditionalPrice}", 
+                                    option.OptionGroupName, option.OptionName, option.AdditionalPrice);
+                            }
+                        }
+                    }
+                }
 
                 // CREATE THE ORDER REQUEST AND PLACE ORDER
                 var placeOrderRequest = new PlaceOrderRequest
@@ -141,7 +162,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 model.ContactNumber = userProfile?.ContactNumber;
                 
                 // CRITICAL: Set the real order ID and status from the service result
-                // Make sure OrderID is properly converted to string
                 model.OrderId = orderResult.OrderID.ToString();
                 model.OrderStatus = orderResult.OrderStatus.ToString();
 
@@ -166,40 +186,6 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
                 TempData["ErrorMessage"] = ex.Message;
                 return View("Index", model);
-            }
-        }
-        public IActionResult Receipt(int? orderId)
-        {
-            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
-
-            try
-            {
-                // Get the order ID from parameter or TempData
-                int orderIdToView = orderId ?? (TempData["OrderID"] != null ? (int)TempData["OrderID"] : 0);
-
-                if (orderIdToView == 0)
-                {
-                    this.ShowErrorToast("Order not found.");
-                    return RedirectToAction("Index", "Home");
-                }
-
-                // Get the order details
-                var order = _orderService.GetOrderById(orderIdToView);
-
-                // Verify that the order belongs to the current user
-                if (order.UserID != userId)
-                {
-                    this.ShowErrorToast("Unauthorized access to order.");
-                    return RedirectToAction("Index", "Home");
-                }
-
-                return RedirectToAction("Index", "Home");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving order receipt for user {UserId}", userId);
-                this.ShowErrorToast("Unable to retrieve order details." + ex.Message);
-                return RedirectToAction("Index", "Home");
             }
         }
 
