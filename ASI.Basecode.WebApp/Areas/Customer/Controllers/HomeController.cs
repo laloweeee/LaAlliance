@@ -21,6 +21,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private readonly ICategoryService _categoryService;
         private new readonly ICartService _cartService;
         private readonly IFavoriteService _favoriteService; // ADDED
+        private readonly IPromotionService _promotionService;
 
         public HomeController(
             IHttpContextAccessor httpContextAccessor,
@@ -30,6 +31,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             ICategoryService categoryService,
             ICartService cartService,
             IFavoriteService favoriteService, // ADDED THIS PARAMETER
+            IPromotionService promotionService,
             IMapper mapper = null)
             : base(httpContextAccessor, loggerFactory, configuration, mapper, cartService)
         {
@@ -37,6 +39,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             _categoryService = categoryService;
             _cartService = cartService;
             _favoriteService = favoriteService; // ADDED THIS ASSIGNMENT
+            _promotionService = promotionService;
         }
 
         /// <summary>
@@ -48,7 +51,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             var model = new Models.HomeViewModel
             {
                 Categories = _categoryService.GetAllCategories().ToList().AsQueryable(),
-                Products = _productService.GetActiveProducts()
+                Products = _productService.GetActiveProducts(),
+                Promotions = _promotionService.GetActivePromotions()
             };
 
             // ADDED: Safely load favorites with null check
