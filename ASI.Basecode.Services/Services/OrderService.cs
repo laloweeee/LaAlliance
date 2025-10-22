@@ -371,25 +371,89 @@ namespace ASI.Basecode.Services.Services
                 throw new InvalidDataException("User is not a restaurant.");
             }
 
-            if (newStatus == OrderStatus.Pending)
+            // Update order status FIRST
+            order.OrderStatus = newStatus;
+            _orderRepository.UpdateOrder(order);
+            
+            Console.WriteLine($"✓ Order {orderID} status updated to {newStatus}");
+
+            // Add OrderProcessed record when order is accepted
+            if (newStatus == OrderStatus.Processing)
             {
-                _orderProcessedRepository.AddOrderProcessed(new OrderProcessed
+                Console.WriteLine($"→ Attempting to create OrderProcessed for Order {orderID}");
+                
+                try
                 {
-                    OrderID = orderID,
-                    UserID = userID,
-                    ProcessedAt = DateTime.UtcNow,
-                });
+                    // Get the StaffID from RestaurantStaff table using the UserID
+                    var staff = user.RestaurantStaff; // Assuming User has RestaurantStaff navigation property
+                    
+                    if (staff == null)
+                    {
+                        Console.WriteLine($"✗ No RestaurantStaff found for UserID {userID}");
+                        // Don't fail the entire operation
+                        return;
+                    }
+                    
+                    Console.WriteLine($"→ Found StaffID: {staff.StaffID} for UserID: {userID}");
+                    
+                    // Check if record already exists
+                    var existingProcessed = _orderProcessedRepository.GetAllOrderProcesseds()
+                        .FirstOrDefault(op => op.OrderID == orderID);
+
+                    if (existingProcessed == null)
+                    {
+                        Console.WriteLine("→ Creating new OrderProcessed record...");
+                        
+                        var orderProcessed = new OrderProcessed
+                        {
+                            OrderID = orderID,
+                            UserID = staff.StaffID,  // ← CHANGED: Use StaffID instead of UserID
+                            ProcessedAt = DateTime.UtcNow,
+                            ElapsedTime = TimeOnly.FromDateTime(DateTime.UtcNow)
+                        };
+
+                        _orderProcessedRepository.AddOrderProcessed(orderProcessed);
+                        
+                        Console.WriteLine($"✓ OrderProcessed created successfully for OrderID: {orderID}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("→ Updating existing OrderProcessed record...");
+                        
+                        existingProcessed.UserID = staff.StaffID;  // ← CHANGED: Use StaffID
+                        existingProcessed.ProcessedAt = DateTime.UtcNow;
+                        existingProcessed.ElapsedTime = TimeOnly.FromDateTime(DateTime.UtcNow);
+                        
+                        _orderProcessedRepository.UpdateOrderProcessed(existingProcessed);
+                        
+                        Console.WriteLine($"✓ OrderProcessed updated for OrderID: {orderID}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"✗✗✗ ERROR saving OrderProcessed ✗✗✗");
+                    Console.WriteLine($"Error Message: {ex.Message}");
+                    Console.WriteLine($"Error Type: {ex.GetType().Name}");
+                    Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                    
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                    }
+                    
+                    // Don't throw - order was already accepted successfully
+                }
             }
 
-            // Update order status
-            _orderRepository.UpdateOrder(new Order
+            // Notifications
+            try
             {
-                OrderID = orderID,
-                OrderStatus = newStatus
-            });
-
-            // Notify customer about order status change
-            await NotifyOrderStatusChange(orderID, newStatus);
+                await NotifyOrderStatusChange(orderID, newStatus);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error notifying customer: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -472,6 +536,27 @@ namespace ASI.Basecode.Services.Services
         }
 
         /// <summary>
+        /// Notify all restaurant staff about order status change
+        /// </summary>
+        private async Task NotifyRestaurantOrderStatusChange(int orderID, OrderStatus newStatus)
+        {
+            /*try
+            {
+                await _orderHubContext.Clients.Group("Restaurant")
+                    .SendAsync("OrderStatusChanged", new
+                    {
+                        orderId = orderID,
+                        newStatus = newStatus.ToString(),
+                        timestamp = DateTime.UtcNow
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending restaurant status update: {ex.Message}");
+            }*/
+        }
+        
+        /// <summary>
         /// Gets user-friendly status message
         /// </summary>
         private string GetStatusMessage(OrderStatus status)
@@ -480,8 +565,8 @@ namespace ASI.Basecode.Services.Services
             {
                 OrderStatus.Pending => "Your order has been received and is awaiting confirmation",
                 OrderStatus.Processing => "Your order is being prepared",
-                OrderStatus.OutForDelivery => "Your order is out for delivery",
                 OrderStatus.ReadyForPickup => "Your order is ready for pickup",
+                OrderStatus.ReadyForDelivery => "Your order is ready for delivery", // ADD THIS
                 OrderStatus.Completed => "Your order has been completed",
                 OrderStatus.Cancelled => "Your order has been cancelled",
                 _ => "Order status updated"

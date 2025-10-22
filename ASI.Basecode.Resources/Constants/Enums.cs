@@ -40,9 +40,8 @@
         {
             Pending,
             Processing,
-            Ready,
-            OutForDelivery,
             ReadyForPickup,
+            ReadyForDelivery,
             Completed,
             Cancelled,
         }

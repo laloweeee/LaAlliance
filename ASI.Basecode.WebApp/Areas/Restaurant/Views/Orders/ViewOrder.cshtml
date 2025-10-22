@@ -1,112 +1,223 @@
 @model ASI.Basecode.Services.ServiceModels.OrderViewModel
 
 @{
-    ViewData["Title"] = $"Order Details - #{Model.OrderID}";
+    ViewData["Title"] = $"Order #@Model.OrderID";
 }
 
-<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8 mt-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Order #@Model.OrderID</h2>
-    <div class="mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <p class="font-semibold text-gray-700">Customer:</p>
-                <p class="text-lg">@Model.FirstName @Model.LastName</p>
-                <p class="text-sm text-gray-500">Contact: @Model.ContactNumber</p>
-            </div>
-            <div>
-                <p class="font-semibold text-gray-700">Order Date:</p>
-                <p>@Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</p>
-                <p class="font-semibold text-gray-700 mt-2">Status:</p>
-                <span class="px-2 py-1 rounded-full text-xs font-medium @GetStatusClass(Model.OrderStatus)">@Model.OrderStatus</span>
-            </div>
-        </div>
-    </div>
-    <div class="mb-6">
-        <p class="font-semibold text-gray-700 mb-2">Delivery Address:</p>
-        @if (Model.DeliveryAddress != null)
+<!-- Success/Error Notifications (placed at top) -->
+<div id="notification-container" class="fixed top-4 right-4 z-50"></div>
+
+<div class="max-w-7xl mx-auto p-4 space-y-4">
+    <!-- Header with Back Button and Action Buttons -->
+    <div class="flex items-center justify-between">
+        <a href="/Restaurant/Orders" 
+           class="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium text-sm shadow-sm hover:shadow-md">
+            <i class="fas fa-arrow-left text-xs"></i>
+            Back to Orders
+        </a>
+        
+        <!-- Action Buttons (Conditional) -->
+        @if (Model.OrderStatus.ToString() != "Completed" && Model.OrderStatus.ToString() != "Cancelled")
         {
-            <p>@Model.DeliveryAddress.FullAddress</p>
-        }
-        else
-        {
-            <p class="text-gray-500">Pickup order</p>
-        }
-    </div>
-    <div class="mb-6">
-        <p class="font-semibold text-gray-700 mb-2">Products:</p>
-        <table class="min-w-full bg-white border rounded-lg">
-            <thead>
-                <tr>
-                    <th class="py-2 px-4 border-b text-left">Product</th>
-                    <th class="py-2 px-4 border-b text-left">Options</th>
-                    <th class="py-2 px-4 border-b text-right">Qty</th>
-                    <th class="py-2 px-4 border-b text-right">Unit Price</th>
-                    <th class="py-2 px-4 border-b text-right">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.OrderItems)
+            <div class="flex flex-wrap gap-2">
+                @if (Model.OrderStatus.ToString() == "Pending")
                 {
-                    <tr>
-                        <td class="py-2 px-4 border-b">
-                            <span class="font-medium">@item.ProductName</span>
-                            @if (!string.IsNullOrEmpty(item.ProductImage))
-                            {
-                                <img src="@item.ProductImage" alt="@item.ProductName" class="inline-block h-8 w-8 ml-2 rounded" />
-                            }
-                        </td>
-                        <td class="py-2 px-4 border-b">
-                            @if (item.OrderItemOptions != null && item.OrderItemOptions.Any())
-                            {
-                                <ul class="list-disc ml-4">
-                                    @foreach (var opt in item.OrderItemOptions)
-                                    {
-                                        <li>@opt.OptionGroupName: @opt.OptionName (+@opt.AdditionalPrice.ToString("C"))</li>
-                                    }
-                                </ul>
-                            }
-                            else
-                            {
-                                <span class="text-gray-500">None</span>
-                            }
-                        </td>
-                        <td class="py-2 px-4 border-b text-right">@item.Quantity</td>
-                        <td class="py-2 px-4 border-b text-right">@item.UnitPrice.ToString("C")</td>
-                        <td class="py-2 px-4 border-b text-right">@item.TotalPrice.ToString("C")</td>
-                    </tr>
+                    <button onclick="acceptOrder(@Model.OrderID)" 
+                            class="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition-all duration-200 font-medium text-xs shadow-sm hover:shadow-md">
+                        <i class="fas fa-check text-xs"></i>
+                        Accept
+                    </button>
+                    <button onclick="rejectOrder(@Model.OrderID)" 
+                            class="inline-flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-all duration-200 font-medium text-xs shadow-sm hover:shadow-md">
+                        <i class="fas fa-times text-xs"></i>
+                        Reject
+                    </button>
                 }
-            </tbody>
-        </table>
+                else if (Model.OrderStatus.ToString() == "Processing")
+                {
+                    <button onclick="markOrderReady(@Model.OrderID)" 
+                            class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium text-xs shadow-sm hover:shadow-md">
+                        <i class="fas fa-check-circle text-xs"></i>
+                        Mark Ready
+                    </button>
+                }
+                else if (Model.OrderStatus.ToString() == "ReadyForPickup" || Model.OrderStatus.ToString() == "ReadyForDelivery")
+                {
+                    <button onclick="completeOrder(@Model.OrderID)" 
+                            class="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition-all duration-200 font-medium text-xs shadow-sm hover:shadow-md">
+                        <i class="fas fa-check-double text-xs"></i>
+                        Complete
+                    </button>
+                }
+            </div>
+        }
     </div>
-    <div class="mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <p class="font-semibold text-gray-700">Payment Method:</p>
-                <p>@Model.PaymentMethod</p>
-                <p class="font-semibold text-gray-700 mt-2">Voucher Code:</p>
-                <p>@Model.VoucherCode ?? "None"</p>
+
+    <!-- Compact Header with Status Inside -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-100 p-2 rounded-lg">
+                    <i class="fas fa-receipt text-emerald-600 text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900">Order #@Model.OrderID</h1>
+                    <p class="text-sm text-gray-500">@Model.OrderDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                </div>
             </div>
-            <div>
-                <p class="font-semibold text-gray-700">Order Type:</p>
-                <p>@Model.OrderType</p>
-                <p class="font-semibold text-gray-700 mt-2">Delivery Notes:</p>
-                <p>@Model.DeliveryNotes</p>
-            </div>
+            <!-- Order Status Badge Inside Panel -->
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium @GetStatusClass(Model.OrderStatus)">
+                <i class="fas fa-circle text-current text-[6px] mr-1.5"></i>
+                @GetStatusDisplayText(Model.OrderStatus)
+            </span>
         </div>
     </div>
-    <div class="border-t pt-4 mt-6">
-        <div class="flex justify-end gap-8">
-            <div>
-                <p class="text-gray-700">Subtotal:</p>
-                <p class="text-gray-700">Discount:</p>
-                <p class="text-gray-700">Delivery Fee:</p>
-                <p class="font-bold text-lg mt-2">Total:</p>
+
+    <!-- Compact Grid Layout -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <!-- Left Column - Customer, Order Info & Summary -->
+        <div class="space-y-4">
+            <!-- Customer Info Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-user text-blue-500 text-sm"></i>
+                    <h3 class="font-semibold text-gray-900 text-sm">CUSTOMER</h3>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div>
+                        <p class="text-gray-500">Name</p>
+                        <p class="font-medium text-gray-900">@Model.FirstName @Model.LastName</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Contact</p>
+                        <p class="font-medium text-gray-900">@Model.ContactNumber</p>
+                    </div>
+                    @if (Model.DeliveryAddress != null)
+                    {
+                        <div>
+                            <p class="text-gray-500">Address</p>
+                            <p class="font-medium text-gray-900 text-xs leading-tight">@Model.DeliveryAddress.FullAddress</p>
+                        </div>
+                    }
+                </div>
             </div>
-            <div class="text-right">
-                <p>@Model.SubTotal.ToString("C")</p>
-                <p>-@Model.DiscountAmount.ToString("C")</p>
-                <p>@Model.DeliveryFee.ToString("C")</p>
-                <p class="font-bold text-lg mt-2">@Model.TotalAmount.ToString("C")</p>
+
+            <!-- Order Details Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-info-circle text-purple-500 text-sm"></i>
+                    <h3 class="font-semibold text-gray-900 text-sm">ORDER DETAILS</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <p class="text-gray-500">Type</p>
+                        <p class="font-medium text-gray-900">@Model.OrderType</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Payment</p>
+                        <p class="font-medium text-gray-900">@Model.PaymentMethod</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Voucher</p>
+                        <p class="font-medium text-gray-900">@(Model.VoucherCode ?? "None")</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Notes</p>
+                        <p class="font-medium text-gray-900">@(Model.DeliveryNotes ?? "None")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-calculator text-emerald-500 text-sm"></i>
+                    <h3 class="font-semibold text-gray-900 text-sm">ORDER SUMMARY</h3>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-medium text-gray-900">@Model.SubTotal.ToString("C")</span>
+                    </div>
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Discount</span>
+                            <span class="font-medium text-red-600">-@Model.DiscountAmount.ToString("C")</span>
+                        </div>
+                    }
+                    @if (Model.DeliveryFee > 0)
+                    {
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Delivery Fee</span>
+                            <span class="font-medium text-gray-900">@Model.DeliveryFee.ToString("C")</span>
+                        </div>
+                    }
+                    <div class="border-t border-gray-200 pt-2 mt-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold text-gray-900">Total</span>
+                            <span class="text-lg font-bold text-emerald-600">@Model.TotalAmount.ToString("C")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Column - Order Items (Full Height) -->
+        <div class="xl:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col">
+                <div class="flex items-center gap-2 p-4 border-b border-gray-200">
+                    <i class="fas fa-shopping-bag text-orange-500 text-sm"></i>
+                    <h3 class="font-semibold text-gray-900 text-sm">ORDER ITEMS</h3>
+                    <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs font-medium ml-auto">
+                        @Model.OrderItems.Count item@(Model.OrderItems.Count != 1 ? "s" : "")
+                    </span>
+                </div>
+                <div class="p-4 flex-1">
+                    <div class="space-y-4 h-full overflow-y-auto">
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                                @if (!string.IsNullOrEmpty(item.ProductImage))
+                                {
+                                    <img src="@item.ProductImage" alt="@item.ProductName" class="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                                }
+                                else
+                                {
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-image text-gray-400 text-base"></i>
+                                    </div>
+                                }
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-900 text-base">@item.ProductName</h4>
+                                            @if (item.OrderItemOptions != null && item.OrderItemOptions.Any())
+                                            {
+                                                <div class="mt-2 flex flex-wrap gap-2">
+                                                    @foreach (var opt in item.OrderItemOptions)
+                                                    {
+                                                        <span class="inline-flex items-center px-2 py-1 rounded text-sm bg-white border border-gray-200 text-gray-600">
+                                                            @opt.OptionName
+                                                            @if (opt.AdditionalPrice > 0)
+                                                            {
+                                                                <span class="ml-1 text-emerald-600 text-sm">+@opt.AdditionalPrice.ToString("C")</span>
+                                                            }
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="text-right ml-4">
+                                            <p class="font-semibold text-gray-900 text-base">@item.TotalPrice.ToString("C")</p>
+                                            <p class="text-sm text-gray-500">@item.Quantity x @item.UnitPrice.ToString("C")</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -119,17 +230,203 @@
         switch (status)
         {
             case Enums.OrderStatus.Pending:
-                return "bg-green-100 text-green-800";
+                return "bg-purple-100 text-purple-800 border border-purple-200";
             case Enums.OrderStatus.Processing:
-                return "bg-orange-100 text-orange-800";
-            case Enums.OrderStatus.Ready:
-                return "bg-blue-100 text-blue-800";
+                return "bg-amber-100 text-amber-800 border border-amber-200";
+            case Enums.OrderStatus.ReadyForPickup:
+                return "bg-blue-100 text-blue-800 border border-blue-200";
+            case Enums.OrderStatus.ReadyForDelivery:
+                return "bg-indigo-100 text-indigo-800 border border-indigo-200";
             case Enums.OrderStatus.Completed:
-                return "bg-gray-100 text-gray-800";
+                return "bg-emerald-100 text-emerald-800 border border-emerald-200";
             case Enums.OrderStatus.Cancelled:
-                return "bg-red-100 text-red-800";
+                return "bg-red-100 text-red-800 border border-red-200";
             default:
-                return "bg-gray-100 text-gray-800";
+                return "bg-gray-100 text-gray-800 border border-gray-200";
         }
     }
+
+    private string GetStatusDisplayText(Enums.OrderStatus status)
+    {
+        switch (status)
+        {
+            case Enums.OrderStatus.Pending:
+                return "New Order";
+            case Enums.OrderStatus.Processing:
+                return "Processing";
+            case Enums.OrderStatus.ReadyForPickup:
+                return "Ready for Pickup";
+            case Enums.OrderStatus.ReadyForDelivery:
+                return "Ready for Delivery";
+            case Enums.OrderStatus.Completed:
+                return "Completed";
+            case Enums.OrderStatus.Cancelled:
+                return "Cancelled";
+            default:
+                return status.ToString();
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+        async function acceptOrder(orderId) {
+            if (!confirm('Accept this order?')) return;
+            
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                
+                const response = await fetch(`/Restaurant/Orders/AcceptOrder?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Order accepted successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/Restaurant/Orders';
+                    }, 1500);
+                } else {
+                    showNotification('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error accepting order:', error);
+                showNotification('Error accepting order. Please try again.', 'error');
+            }
+        }
+
+        async function rejectOrder(orderId) {
+            if (!confirm('Are you sure you want to reject this order?')) return;
+            
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                
+                const response = await fetch(`/Restaurant/Orders/RejectOrder?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Order rejected successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/Restaurant/Orders';
+                    }, 1500);
+                } else {
+                    showNotification('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error rejecting order:', error);
+                showNotification('Error rejecting order. Please try again.', 'error');
+            }
+        }
+
+        async function markOrderReady(orderId) {
+            if (!confirm('Mark this order as ready for pickup/delivery?')) return;
+            
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                
+                const response = await fetch(`/Restaurant/Orders/MarkOrderReady?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Order marked as ready successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/Restaurant/Orders';
+                    }, 1500);
+                } else {
+                    showNotification('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error marking order as ready:', error);
+                showNotification('Error marking order as ready. Please try again.', 'error');
+            }
+        }
+
+        async function completeOrder(orderId) {
+            if (!confirm('Complete this order?')) return;
+            
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                
+                const response = await fetch(`/Restaurant/Orders/CompleteOrder?orderId=${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Order completed successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/Restaurant/Orders';
+                    }, 1500);
+                } else {
+                    showNotification('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error completing order:', error);
+                showNotification('Error completing order. Please try again.', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            
+            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            const notification = document.createElement('div');
+            notification.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg animate-slide-in flex items-center gap-2 text-sm mb-2`;
+            notification.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span class="font-medium">${message}</span>
+            `;
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+    </script>
+    
+    <style>
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @@keyframes slideIn {
+            from { 
+                transform: translateX(100%); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+        }
+    </style>
+    
+    @Html.AntiForgeryToken()
 }

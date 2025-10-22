@@ -24,7 +24,6 @@ namespace ASI.Basecode.Data.Repositories
         {
             return _dbContext.OrderProcesseds.ToList();
         }
-
         /// <summary>
         /// Get OrderProcessed by ID
         /// </summary>
@@ -41,8 +40,29 @@ namespace ASI.Basecode.Data.Repositories
         /// <param name="orderProcessed"></param>
         public void AddOrderProcessed(OrderProcessed orderProcessed)
         {
-            _dbContext.OrderProcesseds.Add(orderProcessed);
-            _dbContext.SaveChanges();
+            Console.WriteLine($"→ Repository: Adding OrderProcessed for Order {orderProcessed.OrderID}");
+            
+            try
+            {
+                _dbContext.OrderProcesseds.Add(orderProcessed);
+                Console.WriteLine($"→ Repository: Entity added to context");
+                
+                _dbContext.SaveChanges();
+                Console.WriteLine($"✓ Repository: Changes saved to database");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"✗✗✗ Repository ERROR ✗✗✗");
+                Console.WriteLine($"Error Message: {ex.Message}");
+                Console.WriteLine($"Error Type: {ex.GetType().Name}");
+                
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                
+                throw; // Re-throw to be caught by the service layer
+            }
         }
 
         /// <summary>
