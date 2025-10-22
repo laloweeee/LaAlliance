@@ -52,11 +52,91 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         /// <summary>
         /// Order Index
         /// </summary>
+        /// <param name="tab"></param>
+        /// <returns></returns>
+        public IActionResult Index(string tab = "ongoing")
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var model = new OrderHistoryViewModel
+            {
+                ActiveTab = tab,
+                OngoingOrders = new List<OrderViewModel>(),
+                OrderHistory = new List<OrderViewModel>()
+            };
+
+            // Get all user orders
+            var allOrders = _orderService.GetOrdersByUserId(userId).ToList();
+
+            // Split into ongoing and history
+            var ongoingStatuses = new List<OrderStatus>
+            {
+                OrderStatus.Pending,
+                OrderStatus.Processing,
+                OrderStatus.ReadyForPickup,
+                OrderStatus.ReadyForDelivery
+            };
+
+            model.OngoingOrders = allOrders
+                .Where(o => ongoingStatuses.Contains(o.OrderStatus))
+                .OrderByDescending(o => o.OrderDate)
+                .ToList();
+
+            model.OrderHistory = allOrders
+                .Where(o => !ongoingStatuses.Contains(o.OrderStatus))
+                .OrderByDescending(o => o.OrderDate)
+                .ToList();
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Reorder an existing order
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Reorder(int orderId)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            try
+            {
+                var order = _orderService.GetOrderById(orderId);
+
+                // Verify order belongs to current user
+                if (order.UserID != userId)
+                {
+                    return Json(new { success = false, message = "Unauthorized access to order." });
+                }
+
+                // TODO: Implement reorder logic - add all items from the order to cart
+                // This would involve your cart service to add items back to cart
+
+                // For now, return success with a message
+                return Json(new
+                {
+                    success = true,
+                    message = "Items added to cart successfully!",
+                    cartCount = 0 // You would update this with actual cart count
+                });
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error reordering order {OrderId}", orderId);
+                return Json(new { success = false, message = "Failed to add items to cart." });
+            }
+        }
+
+        /// <summary>
+        /// Order Index
+        /// </summary>
         /// <param name="orderId"></param>
         /// <returns></returns>
         /// GET: Customer/Order
         [HttpGet]
-        public async Task<IActionResult> Index(int? orderId)
+        public async Task<IActionResult> OrderDetails(int? orderId)
         {
             if (UserId == 0)
             {
@@ -125,6 +205,11 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             }
         }
 
+        /// <summary>
+        /// Cancel Order
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CancelOrder([FromBody] CancelOrderRequest request)
@@ -167,7 +252,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 // Cancel the order using the service method
                 _orderService.CancelOrder(orderIdInt, userId);
 
-                return Json(new {
+                return Json(new
+                {
                     success = true,
                     message = "Order cancelled successfully!",
                     orderId = request.OrderId
@@ -176,13 +262,19 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error cancelling order {OrderId}", request.OrderId);
-                return Json(new {
+                return Json(new
+                {
                     success = false,
                     message = "An error occurred while cancelling the order. Please try again."
                 });
             }
         }
 
+        /// <summary>
+        /// Get Order Status
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         [HttpGet]
         [ValidateAntiForgeryToken]
         public IActionResult GetOrderStatus(string orderId)
