@@ -15,5 +15,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
         // Add these properties for favorites
         public FavoriteServiceModel Favorites { get; set; }
         public int FavoriteCount => Favorites?.TotalItems ?? 0;
+
+        // Add promotions for the banner
+        public IEnumerable<RestaurantPromotions> Promotions { get; set; } = new List<RestaurantPromotions>();
     }
 }
