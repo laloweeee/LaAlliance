@@ -1,0 +1,880 @@
+@model ASI.Basecode.WebApp.Areas.Customer.Models.CheckoutViewModel
+@using static ASI.Basecode.Resources.Constants.Enums;
+
+@{
+    ViewData["Title"] = "Order Confirmation - LaAlliancé";
+    // Get the selected address for display
+    var selectedAddress = Model.Addresses?.FirstOrDefault(a => a.UserAddressID == Model.SelectedAddressId);
+}
+
+<!-- Anti-forgery token (required for AJAX POST requests) -->
+@Html.AntiForgeryToken()
+
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Container: Order Status & Details -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                    
+                    <!-- Success Header -->
+                    <div class="text-center mb-10">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-3">Your order is confirmed.</h1>
+                        <p class="text-gray-600 mb-2">Thank you for your order. We'll send tracking</p>
+                        <p class="text-gray-600">info when your order is ready.</p>
+                    </div>
+
+                    <!-- Order Timeline -->
+                    <div class="mb-10">
+                        <div class="flex items-center justify-between max-w-2xl mx-auto">
+                            <!-- Step 1: Pending -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 border-2 border-green-600 bg-green-50 rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-clock text-green-600 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-green-600">Pending</span>
+                                <span class="text-xs text-gray-400 mt-1">@DateTime.Now.ToString("MMM dd")</span>
+                            </div>
+                            
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            
+                            <!-- Step 2: Preparing -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-utensils text-gray-400 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-500">Preparing</span>
+                                <span class="text-xs text-gray-400 mt-1">15-20 min</span>
+                            </div>
+                            
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            
+                            <!-- Step 3: Ready -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-check text-gray-400 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-500">Ready</span>
+                                <span class="text-xs text-gray-400 mt-1">5-10 min</span>
+                            </div>
+                            
+                            <div class="flex-1 h-0.5 bg-gray-300 mx-4 relative top-[-20px]"></div>
+                            
+                            <!-- Step 4: Delivered -->
+                            <div class="flex flex-col items-center">
+                                <div class="w-14 h-14 border-2 border-gray-300 bg-white rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-truck text-gray-400 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-500">Delivered</span>
+                                <span class="text-xs text-gray-400 mt-1">30-45 min</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cancel Order Button (Only visible in Pending status) -->
+                    <div class="text-center mb-10 pb-8 border-b border-gray-200">
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <a href="@Url.Action("Index", "OrderTracking", new { area = "Customer" })" 
+                            class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full transition-colors">
+                                Track your order
+                            </a>
+                            <button type="button" 
+                                    id="cancelOrderBtn"
+                                    data-order-id="@Model.OrderId"
+                                    data-order-status="@Model.OrderStatus.ToString()"
+                                    class="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-full transition-colors cancel-order-btn">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel Order
+                            </button>
+                        </div>
+                        <p id="cancelMessage" class="text-sm text-gray-500 mt-3 hidden">
+                            Order cancellation is only available while order is still pending.
+                        </p>
+                    </div>
+
+                    <!-- Order Details Section -->
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Order details</h2>
+                        
+                        <div class="flex justify-between text-sm text-gray-600 mb-6 pb-6 border-b border-gray-200">
+                            <div>
+                                <p class="font-semibold text-gray-900 mb-1">Order number</p>
+                                <p>#@Model.OrderId</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-gray-900 mb-1">Order date</p>
+                                <p>@DateTime.Now.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="space-y-6 mb-8">
+                            @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                            {
+                                foreach (var item in Model.Cart.CartItems)
+                                {
+                                    var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                    var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+                                    
+                                    <div class="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
+                                        <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                            @if (!string.IsNullOrEmpty(item.ProductImage))
+                                            {
+                                                <img src="@item.ProductImage" alt="@item.ProductName" class="w-full h-full object-cover rounded-lg" loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-utensils text-gray-400 text-2xl"></i>
+                                            }
+                                        </div>
+                                        
+                                        <div class="flex-1">
+                                            <h3 class="font-semibold text-gray-900 mb-2">@item.ProductName</h3>
+                                            
+                                            @if (item.CartItemOptions != null && item.CartItemOptions.Any())
+                                            {
+                                                <div class="text-sm text-gray-600 space-y-1 mb-2">
+                                                    @foreach (var opt in item.CartItemOptions)
+                                                    {
+                                                        <p>@opt.OptionName @(opt.AdditionalPrice > 0 ? $"(+₱{opt.AdditionalPrice:F2})" : "")</p>
+                                                    }
+                                                </div>
+                                            }
+                                            
+                                            <p class="text-sm text-gray-600">QTY: @item.Quantity</p>
+                                            <p class="font-semibold text-gray-900 mt-2">₱@itemTotalPrice.ToString("F2")</p>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Delivery Information -->
+                        <div class="grid grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-3">Shipping address</h3>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p class="font-medium text-gray-900">@Model.FullName</p>
+                                    @if (selectedAddress != null && Model.OrderType == OrderType.Delivery)
+                                    {
+                                        <p class="font-medium">@selectedAddress.AddressType</p>
+                                        <p>@selectedAddress.Street</p>
+                                        <p>@selectedAddress.Barangay, @selectedAddress.City</p>
+                                        <p>@selectedAddress.Province @selectedAddress.ZipCode</p>
+                                        @if (!string.IsNullOrEmpty(Model.ContactNumber))
+                                        {
+                                            <p class="mt-2 pt-2 border-t border-gray-200">
+                                                <span class="font-medium">Contact:</span> @Model.ContactNumber
+                                            </p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.DeliveryNotes))
+                                        {
+                                            <div class="mt-2 pt-2 border-t border-gray-200">
+                                                <p class="font-medium text-gray-700">Delivery Notes:</p>
+                                                <p class="text-gray-600">@Model.DeliveryNotes</p>
+                                            </div>
+                                        }
+                                    }
+                                    else if (Model.OrderType == OrderType.Pickup)
+                                    {
+                                        <p class="font-medium">Pickup Order</p>
+                                        <p>Pick up at our store location</p>
+                                        <p>LaAlliancé Restaurant</p>
+                                        <p>123 Main Street, Cebu City</p>
+                                        @if (!string.IsNullOrEmpty(Model.ContactNumber))
+                                        {
+                                            <p class="mt-2 pt-2 border-t border-gray-200">
+                                                <span class="font-medium">Contact:</span> @Model.ContactNumber
+                                            </p>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-semibold text-gray-900 mb-3">Paid with</h3>
+                                <p class="text-sm text-gray-600">
+                                    @if (Model.PaymentMethod == PaymentMethod.CashOnDelivery)
+                                    {
+                                        <span>Cash on Delivery</span>
+                                    }
+                                    else if (Model.PaymentMethod == PaymentMethod.EWallet)
+                                    {
+                                        <span>GCash</span>
+                                    }
+                                    else if (Model.PaymentMethod == PaymentMethod.Card)
+                                    {
+                                        <span>Credit/Debit Card</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@Model.PaymentMethod.ToString()</span>
+                                    }
+                                </p>
+                                
+                                <h3 class="font-semibold text-gray-900 mb-3 mt-6">Order Type</h3>
+                                <p class="text-sm text-gray-600">
+                                    @Model.OrderType
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Info Note -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
+                            <p>Delivery times are estimated. If you're experiencing difficulty with this order, please contact our support team.</p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                            <a href="@Url.Action("Index", "Home", new { area = "Customer" })" 
+                               class="flex-1 bg-white hover:bg-gray-50 text-gray-900 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 transition-colors text-center">
+                                Back to Home
+                            </a>
+                            <a href="@Url.Action("Index", "Menu", new { area = "Customer" })" 
+                               class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center">
+                                Browse Menu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Container: Receipt Style Summary -->
+            <div class="lg:col-span-1">
+                <div id="receiptContainer" class="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-8">
+                    <!-- Receipt Header -->
+                    <div class="bg-green-600 text-white p-6 rounded-t-lg">
+                        <div class="text-center">
+                            <i class="fas fa-receipt text-3xl mb-2"></i>
+                            <h3 class="text-xl font-bold">Order Summary</h3>
+                        </div>
+                    </div>
+
+                    <!-- Receipt Body -->
+                    <div class="p-6">
+                        <!-- Order ID -->
+                        <div class="text-center mb-6 pb-4 border-b-2 border-dashed border-gray-300">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Order ID</p>
+                            <p class="font-mono font-bold text-gray-900">#@Model.OrderId</p>
+                        </div>
+
+                        <!-- Items List -->
+                        <div class="space-y-4 mb-6">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-3">Items</p>
+                            @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                            {
+                                foreach (var item in Model.Cart.CartItems)
+                                {
+                                    var itemAddOnsTotal = item.CartItemOptions?.Sum(opt => opt.AdditionalPrice) ?? 0m;
+                                    var itemTotalPrice = item.Quantity * (item.UnitPrice + itemAddOnsTotal);
+                                    
+                                    <div class="text-sm">
+                                        <div class="flex justify-between mb-1">
+                                            <span class="text-gray-900 font-medium">@item.ProductName</span>
+                                        </div>
+                                        <div class="flex justify-between text-gray-600 text-xs mb-1">
+                                            <span>Qty: @item.Quantity × ₱@((item.UnitPrice + itemAddOnsTotal).ToString("F2"))</span>
+                                            <span class="font-semibold text-gray-900">₱@itemTotalPrice.ToString("F2")</span>
+                                        </div>
+                                        @if (item.CartItemOptions != null && item.CartItemOptions.Any())
+                                        {
+                                            <div class="text-xs text-gray-500 ml-2 space-y-0.5">
+                                                @foreach (var opt in item.CartItemOptions)
+                                                {
+                                                    <p>+ @opt.OptionName @(opt.AdditionalPrice > 0 ? $"(₱{opt.AdditionalPrice:F2})" : "")</p>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Calculations -->
+                        <div class="space-y-3 pt-4 border-t-2 border-dashed border-gray-300">
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>Subtotal</span>
+                                <span>₱@Model.SubTotal.ToString("F2")</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>Delivery Fee</span>
+                                <span>₱@Model.DeliveryFee.ToString("F2")</span>
+                            </div>
+                        </div>
+
+                        <!-- Total -->
+                        <div class="flex justify-between text-lg font-bold pt-4 mt-4 border-t-2 border-gray-900">
+                            <span>TOTAL</span>
+                            <span class="text-green-600">₱@Model.Total.ToString("F2")</span>
+                        </div>
+
+                        <!-- Delivery Time -->
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Estimated Delivery</p>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-clock text-green-600"></i>
+                                <span class="text-sm font-medium text-gray-900">30-45 minutes</span>
+                            </div>
+                        </div>
+
+                        <!-- Download Receipt -->
+                        <div class="mt-6">
+                            <button type="button" id="downloadPNG" 
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-download"></i>
+                                <span>Download Receipt</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Receipt Footer -->
+                    <div class="bg-gray-50 p-4 rounded-b-lg text-center border-t border-gray-200">
+                        <p class="text-xs text-gray-500">Thank you for your order!</p>
+                        <p class="text-xs text-gray-400 mt-1">LaAlliancé Restaurant</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+        <div id="successToast" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span id="successMessage"></span>
+            </div>
+        </div>
+        <div id="errorToast" class="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span id="errorMessage"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+        <style>
+        /* Loading state for buttons */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Cancel button disabled state */
+        .cancel-order-btn:disabled {
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+
+        .cancel-order-btn:disabled:hover {
+            background-color: #9CA3AF !important;
+        }
+
+        /* Timeline animation */
+        .flex-1.h-0\.5 {
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        .flex.flex-col.items-center div {
+            transition: all 0.5s ease-in-out;
+        }
+        
+        /* Ensure receipt container looks good when captured */
+        #receiptContainer {
+            position: relative;
+        }
+        
+        /* Toast animations */
+        #toastContainer > div {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @@keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <!-- html2canvas for PNG export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing order confirmation page...');
+            
+            // Get order data from button attributes
+            const cancelBtn = document.getElementById('cancelOrderBtn');
+            const cancelMessage = document.getElementById('cancelMessage');
+            
+            if (!cancelBtn) {
+                console.error('Cancel button not found!');
+                return;
+            }
+            
+            const orderId = cancelBtn.getAttribute('data-order-id');
+            let orderStatus = cancelBtn.getAttribute('data-order-status');
+            
+            console.log('Order ID:', orderId, 'Status:', orderStatus);
+            
+            // Download Receipt as PNG
+            const downloadBtn = document.getElementById('downloadPNG');
+
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    const receiptContainer = document.getElementById('receiptContainer');
+                    
+                    // Show loading state
+                    const originalText = downloadBtn.innerHTML;
+                    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+                    downloadBtn.disabled = true;
+                    
+                    // Use html2canvas to capture the receipt
+                    html2canvas(receiptContainer, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff'
+                    }).then(canvas => {
+                        // Convert canvas to blob
+                        canvas.toBlob(function(blob) {
+                            // Create download link
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.download = `receipt-${orderId}.png`;
+                            link.href = url;
+                            link.click();
+                            
+                            // Clean up
+                            URL.revokeObjectURL(url);
+                            
+                            // Reset button
+                            downloadBtn.innerHTML = originalText;
+                            downloadBtn.disabled = false;
+                            
+                            showToast('Receipt downloaded successfully!', 'success');
+                        });
+                    }).catch(error => {
+                        console.error('Error generating receipt:', error);
+                        downloadBtn.innerHTML = originalText;
+                        downloadBtn.disabled = false;
+                        showToast('Error generating receipt. Please try again.', 'error');
+                    });
+                });
+            }
+            
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/orderHub")
+                .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            connection.start()
+                .then(() => {
+                    console.log('✅ SignalR connected successfully');
+                    showConnectionStatus('Connected', 'success');
+                    return connection.invoke("JoinOrderGroup", orderId.toString());
+                })
+                .then(() => {
+                    console.log(`✅ Joined order group: Order-${orderId}`);
+                })
+                .catch(err => {
+                    console.error('❌ SignalR connection error:', err);
+                    showConnectionStatus('Connection failed', 'error');
+                });
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("LeaveOrderGroup", orderId.toString())
+                        .catch(err => console.error('Error leaving group:', err));
+                    connection.stop();
+                }
+            });
+
+            // ============================================
+            // UI UPDATE FUNCTIONS
+            // ============================================
+            
+            function updateStatusBadge(status, label) {
+                const badge = document.querySelector('span.inline-flex.items-center.px-3.py-1.rounded-full.text-xs.font-medium');
+                if (badge) {
+                    // Remove all existing status classes
+                    badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium';
+                    
+                    // Add appropriate class based on status
+                    const statusClass = getStatusBadgeClass(status);
+                    badge.className += ' ' + statusClass;
+                    
+                    // Update text with icon
+                    badge.innerHTML = `<i class="fas fa-circle text-current text-[6px] mr-1.5"></i>${label}`;
+                    
+                    // Add pulse animation
+                    badge.classList.add('animate-pulse');
+                    setTimeout(() => badge.classList.remove('animate-pulse'), 2000);
+                    
+                    console.log('✅ Status badge updated to:', label);
+                }
+            }
+
+            function getStatusBadgeClass(status) {
+                const classes = {
+                    'Pending': 'bg-purple-100 text-purple-800 border border-purple-200',
+                    'Processing': 'bg-amber-100 text-amber-800 border border-amber-200',
+                    'ReadyForPickup': 'bg-blue-100 text-blue-800 border border-blue-200',
+                    'ReadyForDelivery': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+                    'Completed': 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+                    'Cancelled': 'bg-red-100 text-red-800 border border-red-200'
+                };
+                return classes[status] || 'bg-gray-100 text-gray-800 border border-gray-200';
+            }
+
+            function updateOrderTimeline(status) {
+                console.log('🔄 Updating timeline for status:', status);
+                
+                const steps = document.querySelectorAll('.flex.flex-col.items-center');
+                const lines = document.querySelectorAll('.flex-1.h-0\\.5');
+                
+                if (!steps.length) {
+                    console.warn('⚠️ Timeline steps not found');
+                    return;
+                }
+                
+                // Reset all steps to inactive state
+                steps.forEach(step => {
+                    const circle = step.querySelector('div.w-14');
+                    const icon = step.querySelector('i');
+                    const label = step.querySelector('span.text-sm');
+
+                    if (circle) {
+                        circle.classList.remove('border-green-600', 'bg-green-50');
+                        circle.classList.add('border-gray-300', 'bg-white');
+                    }
+                    if (icon) {
+                        icon.classList.remove('text-green-600');
+                        icon.classList.add('text-gray-400');
+                    }
+                    if (label) {
+                        label.classList.remove('text-green-600');
+                        label.classList.add('text-gray-500');
+                    }
+                });
+                
+                lines.forEach(line => {
+                    line.classList.remove('bg-green-600');
+                    line.classList.add('bg-gray-300');
+                });
+                
+                // Determine active step index
+                let activeStepIndex = -1;
+                
+                switch(status) {
+                    case 'Pending':
+                        activeStepIndex = 0;
+                        break;
+                    case 'Processing':
+                        activeStepIndex = 1;
+                        break;
+                    case 'ReadyForPickup':
+                    case 'ReadyForDelivery':
+                        activeStepIndex = 2;
+                        break;
+                    case 'Completed':
+                        activeStepIndex = 3;
+                        break;
+                    case 'Cancelled':
+                        console.log('❌ Order cancelled');
+                        showToast('Order has been cancelled', 'error');
+                        return;
+                }
+                
+                console.log(`✅ Activating steps 0 to ${activeStepIndex}`);
+                
+                // Activate all steps up to and including the current step
+                for (let i = 0; i <= activeStepIndex && i < steps.length; i++) {
+                    const step = steps[i];
+                    const circle = step.querySelector('div.w-14');
+                    const icon = step.querySelector('i');
+                    const label = step.querySelector('span.text-sm');
+
+                    if (circle) {
+                        circle.classList.remove('border-gray-300', 'bg-white');
+                        circle.classList.add('border-green-600', 'bg-green-50');
+                    }
+                    if (icon) {
+                        icon.classList.remove('text-gray-400');
+                        icon.classList.add('text-green-600');
+                    }
+                    if (label) {
+                        label.classList.remove('text-gray-500');
+                        label.classList.add('text-green-600');
+                    }
+                    // Activate connecting line
+                    if (i < activeStepIndex && i < lines.length) {
+                        lines[i].classList.remove('bg-gray-300');
+                        lines[i].classList.add('bg-green-600');
+                    }
+                }
+            }
+
+            function updateCancelButtonUI() {
+                console.log('🔄 Updating cancel button for status:', orderStatus);
+                
+                if (orderStatus === 'Pending') {
+                    // Enable cancel button
+                    cancelBtn.disabled = false;
+                    cancelBtn.classList.remove('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
+                    cancelBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                    cancelMessage.classList.add('hidden');
+                } else {
+                    // Disable cancel button
+                    cancelBtn.disabled = true;
+                    cancelBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    cancelBtn.classList.add('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
+                    cancelMessage.classList.remove('hidden');
+                }
+            }
+
+            function showConnectionStatus(message, type) {
+                // Optional: Show connection status indicator
+                console.log(`Connection status: ${message} (${type})`);
+            }
+
+            function playNotificationSound() {
+                // Optional: Play a subtle notification sound
+                try {
+                    const audio = new Audio('/sounds/notification.mp3');
+                    audio.volume = 0.3;
+                    audio.play().catch(e => console.log('Sound play prevented:', e));
+                } catch (e) {
+                    console.log('No notification sound available');
+                }
+            }
+
+            // Initialize UI state
+            updateCancelButtonUI();
+            
+            // Cancel Order Handler
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (orderStatus !== 'Pending') {
+                    showToast('This order can no longer be cancelled. It is already being prepared.', 'error');
+                    return;
+                }
+                
+                if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+                    return;
+                }
+                
+                console.log('Cancelling order:', orderId);
+                
+                // Show loading state
+                const originalText = cancelBtn.innerHTML;
+                cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cancelling...';
+                cancelBtn.disabled = true;
+                
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                // Call the CancelOrder API
+                fetch('@Url.Action("CancelOrder", "Checkout", new { area = "Customer" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ OrderId: orderId })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Cancel response:', data);
+                    
+                    if (data.success) {
+                        // Update order status
+                        orderStatus = 'Cancelled';
+                        updateCancelButtonUI();
+                        
+                        // Show success message
+                        showToast(data.message || 'Order cancelled successfully!', 'success');
+                        
+                        // Redirect to home after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Index", "Home", new { area = "Customer" })';
+                        }, 2000);
+                    } else {
+                        // Show error message
+                        showToast(data.message || 'Failed to cancel order.', 'error');
+                        
+                        // Reset button
+                        cancelBtn.innerHTML = originalText;
+                        cancelBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cancelling order:', error);
+                    showToast('An error occurred while cancelling the order. Please try again.', 'error');
+                    
+                    // Reset button
+                    cancelBtn.innerHTML = originalText;
+                    cancelBtn.disabled = false;
+                });
+            });
+            
+            // Optional: Poll for order status updates
+            function pollOrderStatus() {
+                if (orderStatus === 'Cancelled' || orderStatus === 'Completed') {
+                    return;
+                }
+                
+                fetch('@Url.Action("GetOrderStatus", "Checkout", new { area = "Customer" })?orderId=' + orderId, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status && data.status !== orderStatus) {
+                        console.log('Order status changed from', orderStatus, 'to', data.status);
+                        orderStatus = data.status;
+                        updateCancelButtonUI();
+                        updateOrderTimeline(data.status);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling order status:', error);
+                });
+            }
+            
+            // Poll every 10 seconds
+            const pollInterval = setInterval(pollOrderStatus, 10000);
+            
+            // Clean up interval when page is unloaded
+            window.addEventListener('beforeunload', () => {
+                clearInterval(pollInterval);
+            });
+            
+            // Update order timeline visual based on status
+            function updateOrderTimeline(status) {
+                // Get all timeline steps
+                const steps = document.querySelectorAll('.flex.flex-col.items-center');
+                const lines = document.querySelectorAll('.flex-1.h-0\\.5');
+                
+                // Reset all steps to inactive state
+                steps.forEach(step => {
+                    const circle = step.querySelector('div.w-14');
+                    const icon = step.querySelector('i');
+                    const label = step.querySelector('span.text-sm');
+                    
+                    circle.classList.remove('border-green-600', 'bg-green-50');
+                    circle.classList.add('border-gray-300', 'bg-white');
+                    icon.classList.remove('text-green-600');
+                    icon.classList.add('text-gray-400');
+                    label.classList.remove('text-green-600');
+                    label.classList.add('text-gray-500');
+                });
+                
+                lines.forEach(line => {
+                    line.classList.remove('bg-green-600');
+                    line.classList.add('bg-gray-300');
+                });
+                
+                // Activate steps based on current status
+                let activeStepIndex = 0;
+                
+                switch(status) {
+                    case 'Pending':
+                        activeStepIndex = 0;
+                        break;
+                    case 'Processing':
+                        activeStepIndex = 1;
+                        break;
+                    case 'ReadyForPickup':
+                    case 'OutForDelivery':
+                        activeStepIndex = 2;
+                        break;
+                    case 'Completed':
+                        activeStepIndex = 3;
+                        break;
+                    case 'Cancelled':
+                        // Show cancelled state
+                        showToast('Order has been cancelled.', 'error');
+                        return;
+                }
+                
+                // Activate all steps up to and including the current step
+                for (let i = 0; i <= activeStepIndex && i < steps.length; i++) {
+                    const step = steps[i];
+                    const circle = step.querySelector('div.w-14');
+                    const icon = step.querySelector('i');
+                    const label = step.querySelector('span.text-sm');
+                    
+                    circle.classList.remove('border-gray-300', 'bg-white');
+                    circle.classList.add('border-green-600', 'bg-green-50');
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-green-600');
+                    label.classList.remove('text-gray-500');
+                    label.classList.add('text-green-600');
+                    
+                    // Activate connecting line
+                    if (i < activeStepIndex && i < lines.length) {
+                        lines[i].classList.remove('bg-gray-300');
+                        lines[i].classList.add('bg-green-600');
+                    }
+                }
+            }
+            
+            console.log('Order confirmation page initialized successfully');
+        });
+        
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = type === 'success' 
+                ? document.getElementById('successToast') 
+                : document.getElementById('errorToast');
+            const messageElement = type === 'success' 
+                ? document.getElementById('successMessage') 
+                : document.getElementById('errorMessage');
+            
+            if (!container || !toast || !messageElement) {
+                console.error('Toast elements not found');
+                return;
+            }
+            
+            messageElement.textContent = message;
+            container.classList.remove('hidden');
+            toast.classList.remove('hidden');
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                // Hide container if all toasts are hidden
+                const visibleToasts = container.querySelectorAll('.bg-green-500:not(.hidden), .bg-red-500:not(.hidden)');
+                if (visibleToasts.length === 0) {
+                    container.classList.add('hidden');
+                }
+            }, 3000);
+        }
+    </script>
+}

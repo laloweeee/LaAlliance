@@ -278,7 +278,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasIndex("UserID", "IsUsed");
 
-                    b.ToTable("EmailVerificationTokens");
+                    b.ToTable("EmailVerificationTokens", (string)null);
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Order", b =>
@@ -467,7 +467,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasIndex("UserID", "IsUsed");
 
-                    b.ToTable("PasswordResetTokens");
+                    b.ToTable("PasswordResetTokens", (string)null);
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.PaymentLog", b =>
@@ -1047,7 +1047,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasIndex("PromotionProductsPromotionID", "PromotionProductsProductID");
 
-                    b.ToTable("PromotionProductsRestaurantPromotions");
+                    b.ToTable("PromotionProductsRestaurantPromotions", (string)null);
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Cart", b =>

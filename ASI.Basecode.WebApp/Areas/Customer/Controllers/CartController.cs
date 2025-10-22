@@ -11,6 +11,7 @@ using System.Linq;
 using System.Security.Claims;
 using System;
 using ASI.Basecode.WebApp.Helpers;
+using System.Threading.Tasks;
 
 namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 {
@@ -41,12 +42,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
             // Get or create cart for the user
             var cart = _cartService.GetOrCreateCart(UserId);
-
-            // Get customer profile using UserProfileService
-            var customerProfile = GetCustomerProfile();
-
-            ViewData["CustomerProfile"] = customerProfile;
-            return View(cart);
+            return View();
         }
 
         /// <summary>
@@ -107,7 +103,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         [HttpPost]
         public IActionResult Remove(int id)
         {
-            try 
+            try
             {
                 var cart = _cartService.GetOrCreateCart(UserId);
                 var itemToRemove = cart.CartItems.FirstOrDefault(i => i.CartItemID == id);
@@ -124,56 +120,34 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
-        /// <summary>
-        /// Gets the customer profile including addresses
-        /// </summary>
-        /// <returns></returns>
-        private AccountViewModel GetCustomerProfile()
+    
+        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                this.ShowErrorToast("Please correct the errors in the form.");
+                return View("CheckOut", model);
+            }
+
             try
             {
-                var userProfile = _userProfileService.GetUserProfile(UserId);
-                if (userProfile == null) return null;
-
-                var accountViewModel = new AccountViewModel
+                var orderRequest = new PlaceOrderRequest
                 {
-                    UserID = userProfile.UserID,
-                    Email = userProfile.Email,
-                    FirstName = userProfile.FirstName,
-                    LastName = userProfile.LastName,
-                    ContactNumber = userProfile.ContactNumber,
-                    Addresses = new List<UserAddressViewModel>()
+                    UserID = UserId,
+                    SelectedAddressId = model.SelectedAddressId,
+                    OrderType = model.OrderType,
+                    PaymentMethod = model.PaymentMethod,
+                    DeliveryNotes = model.DeliveryNotes,
+                    VoucherCode = model.VoucherCode
                 };
 
-                // Get User Addresses
-                var userAddresses = _addressService.GetUserAddresses(UserId);
-
-                foreach (var userAddress in userAddresses)
-                {
-                    accountViewModel.Addresses.Add(new UserAddressViewModel
-                    {
-                        UserAddressID = userAddress.UserAddressID,
-                        AddressID = userAddress.AddressID,
-                        IsDefault = userAddress.IsDefault,
-                        AddressType = userAddress.AddressType,
-                        AddressNote = userAddress.AddressNote,
-                        Street = userAddress.Street,
-                        Barangay = userAddress.Barangay,
-                        City = userAddress.City,
-                        Province = userAddress.Province,
-                        ZipCode = userAddress.ZipCode,
-                        Longitude = userAddress.Longitude,
-                        Latitude = userAddress.Latitude
-                    });
-                }
-
-                return accountViewModel;
+                this.ShowSuccessToast("Your order has been placed successfully!");
+                return RedirectToAction("Index", "Home");
             }
-            catch
+            catch (Exception ex)
             {
-                // Return null if there's an error getting the profile
-                return null;
+                this.ShowErrorToast("Failed to place order: " + ex.Message);
+                return View("CheckOut", model);
             }
         }
     }

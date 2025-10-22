@@ -63,21 +63,11 @@ namespace ASI.Basecode.Services.ServiceModels
     public class PlaceOrderRequest
     {
         public int UserID { get; set; }
-        
-        [Required(ErrorMessage = "Order type is required.")]
-        public string OrderType { get; set; }
-        
-        [Required(ErrorMessage = "Payment method is required.")]
-        public string PaymentMethod { get; set; }
-        
         public int? SelectedAddressId { get; set; }
-        
-        [Required(ErrorMessage = "Delivery notes are required.")]
+        public string OrderType { get; set; }
+        public string PaymentMethod { get; set; } 
         public string DeliveryNotes { get; set; }
-        
         public string VoucherCode { get; set; }
-        
-        // Cart information will be retrieved from the service
     }
 
     /// <summary>
