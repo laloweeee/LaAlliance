@@ -1,6 +1,7 @@
 using ASI.Basecode.Data.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Data.Interfaces
@@ -40,7 +41,7 @@ namespace ASI.Basecode.Data.Interfaces
         /// </summary>
         /// <param name="orderID"></param>
         /// <returns></returns>
-        IEnumerable<PaymentLog> GetPaymentLogsByOrderId(int orderID);
+        IQueryable<PaymentLog> GetPaymentLogsByOrderId(int orderID);
 
         /// <summary>
         /// Get all payment logs for a specific user

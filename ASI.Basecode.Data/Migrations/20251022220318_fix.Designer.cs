@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASI.Basecode.Data.Migrations
 {
     [DbContext(typeof(AsiBasecodeDBContext))]
-    [Migration("20251013185205_ConvertEnumsToString")]
-    partial class ConvertEnumsToString
+    [Migration("20251022220318_fix")]
+    partial class fix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,15 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
                         .HasDefaultValue("Philippines");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("double");
@@ -167,6 +176,15 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("ProductID")
                         .HasColumnType("int");
 
@@ -194,6 +212,12 @@ namespace ASI.Basecode.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("EffectiveDate")
                         .HasColumnType("datetime(6)");
 
@@ -201,6 +225,9 @@ namespace ASI.Basecode.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("MaxDeliveryDistance")
                         .HasColumnType("int");
@@ -218,6 +245,45 @@ namespace ASI.Basecode.Data.Migrations
                     b.ToTable("DeliveryPolicies", (string)null);
                 });
 
+            modelBuilder.Entity("ASI.Basecode.Data.Models.EmailVerificationToken", b =>
+                {
+                    b.Property<int>("TokenID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TokenID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsUsed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("TokenID");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserID", "IsUsed");
+
+                    b.ToTable("EmailVerificationTokens");
+                });
+
             modelBuilder.Entity("ASI.Basecode.Data.Models.Order", b =>
                 {
                     b.Property<int>("OrderID")
@@ -230,7 +296,7 @@ namespace ASI.Basecode.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("OrderAddressID")
+                    b.Property<int?>("OrderAddressID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("OrderDate")
@@ -250,9 +316,8 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("longtext")
-                        .HasDefaultValue("CreditCard");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int?>("PromotionID")
                         .HasColumnType("int");
@@ -265,7 +330,7 @@ namespace ASI.Basecode.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("UserID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("OrderID");
@@ -319,7 +384,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<int>("OderID")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductID")
+                    b.Property<int?>("ProductID")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -355,7 +420,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<DateTime>("ProcessedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("UserID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("OrderProcessID");
@@ -366,6 +431,45 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("OrderProcessed", (string)null);
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.PasswordResetToken", b =>
+                {
+                    b.Property<int>("TokenID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TokenID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsUsed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("TokenID");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserID", "IsUsed");
+
+                    b.ToTable("PasswordResetTokens");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.PaymentLog", b =>
@@ -391,9 +495,8 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("longtext")
-                        .HasDefaultValue("CreditCard");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
@@ -402,14 +505,16 @@ namespace ASI.Basecode.Data.Migrations
                         .HasDefaultValue("Pending");
 
                     b.Property<string>("Remarks")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
                     b.Property<string>("TransactionReference")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<int>("UserID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("PaymentLogID");
@@ -432,7 +537,16 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<int>("CategoryID")
                         .HasColumnType("int");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("ProductDescription")
@@ -472,7 +586,16 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
                     b.HasKey("CategoryID");
@@ -488,6 +611,15 @@ namespace ASI.Basecode.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ProductOptionGroupID"));
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("IsRequired")
                         .HasColumnType("tinyint(1)");
 
@@ -499,7 +631,7 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<int>("ProductID")
+                    b.Property<int?>("ProductID")
                         .HasColumnType("int");
 
                     b.HasKey("ProductOptionGroupID");
@@ -520,6 +652,15 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<decimal>("AdditionalPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("OptionName")
                         .IsRequired()
@@ -549,8 +690,17 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("PromotionID")
                         .HasColumnType("int");
@@ -600,6 +750,12 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
@@ -608,6 +764,9 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -633,6 +792,15 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<int>("AddressID")
                         .HasColumnType("int");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("RestaurantID")
                         .HasColumnType("int");
 
@@ -655,6 +823,12 @@ namespace ASI.Basecode.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PromotionID"));
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DiscountType")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -672,6 +846,9 @@ namespace ASI.Basecode.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<decimal>("MinimumOrderAmount")
                         .HasPrecision(18, 2)
@@ -706,11 +883,20 @@ namespace ASI.Basecode.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("StaffID"));
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("longtext")
-                        .HasDefaultValue("Admin");
+                        .HasDefaultValue("Staff");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -722,9 +908,6 @@ namespace ASI.Basecode.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("StaffID");
-
-                    b.HasIndex("UserID")
-                        .IsUnique();
 
                     b.ToTable("RestaurantStaff", (string)null);
                 });
@@ -743,14 +926,19 @@ namespace ASI.Basecode.Data.Migrations
                         .HasColumnType("longtext")
                         .HasDefaultValue("Active");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("EmailHashToken")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsEmailVerified")
                         .ValueGeneratedOnAdd()
@@ -761,10 +949,6 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
-
-                    b.Property<string>("ResetPasswordHashToken")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("UserType")
                         .IsRequired()
@@ -796,18 +980,26 @@ namespace ASI.Basecode.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<bool>("IsDefault")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("UserAddressID");
 
-                    b.HasIndex("AddressID")
-                        .IsUnique();
+                    b.HasIndex("AddressID");
 
                     b.HasIndex("UserID");
 
@@ -826,10 +1018,19 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -941,13 +1142,23 @@ namespace ASI.Basecode.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ASI.Basecode.Data.Models.EmailVerificationToken", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.User", "User")
+                        .WithMany("EmailVerificationTokens")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ASI.Basecode.Data.Models.Order", b =>
                 {
                     b.HasOne("ASI.Basecode.Data.Models.Address", "Address")
                         .WithOne("Order")
                         .HasForeignKey("ASI.Basecode.Data.Models.Order", "OrderAddressID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ASI.Basecode.Data.Models.RestaurantPromotions", "RestaurantPromotion")
                         .WithMany("Order")
@@ -957,8 +1168,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasOne("ASI.Basecode.Data.Models.User", "User")
                         .WithMany("Order")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Address");
 
@@ -1005,8 +1215,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasOne("ASI.Basecode.Data.Models.Product", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Order");
 
@@ -1022,14 +1231,24 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ASI.Basecode.Data.Models.RestaurantStaff", "HandledBy")
-                        .WithMany("OrderProcessed")
+                        .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasPrincipalKey("UserID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("HandledBy");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("ASI.Basecode.Data.Models.PasswordResetToken", b =>
+                {
+                    b.HasOne("ASI.Basecode.Data.Models.User", "User")
+                        .WithMany("PasswordResetTokens")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.PaymentLog", b =>
@@ -1043,8 +1262,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasOne("ASI.Basecode.Data.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Order");
 
@@ -1067,8 +1285,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasOne("ASI.Basecode.Data.Models.Product", "Product")
                         .WithMany("ProductOptionGroup")
                         .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Product");
                 });
@@ -1139,8 +1356,8 @@ namespace ASI.Basecode.Data.Migrations
             modelBuilder.Entity("ASI.Basecode.Data.Models.UserAddress", b =>
                 {
                     b.HasOne("ASI.Basecode.Data.Models.Address", "Address")
-                        .WithOne("UserAddress")
-                        .HasForeignKey("ASI.Basecode.Data.Models.UserAddress", "AddressID")
+                        .WithMany("UserAddresses")
+                        .HasForeignKey("AddressID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1187,7 +1404,7 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Navigation("RestaurantAddress");
 
-                    b.Navigation("UserAddress");
+                    b.Navigation("UserAddresses");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Cart", b =>
@@ -1204,7 +1421,8 @@ namespace ASI.Basecode.Data.Migrations
                 {
                     b.Navigation("OrderItems");
 
-                    b.Navigation("OrderProcessed");
+                    b.Navigation("OrderProcessed")
+                        .IsRequired();
 
                     b.Navigation("PaymentLogs");
                 });
@@ -1258,18 +1476,17 @@ namespace ASI.Basecode.Data.Migrations
                     b.Navigation("PromotionCodes");
                 });
 
-            modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantStaff", b =>
-                {
-                    b.Navigation("OrderProcessed");
-                });
-
             modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>
                 {
                     b.Navigation("Cart");
 
                     b.Navigation("CustomerProductFavorites");
 
+                    b.Navigation("EmailVerificationTokens");
+
                     b.Navigation("Order");
+
+                    b.Navigation("PasswordResetTokens");
 
                     b.Navigation("RestaurantStaff");
 

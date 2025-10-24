@@ -313,9 +313,8 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("longtext")
-                        .HasDefaultValue("CreditCard");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int?>("PromotionID")
                         .HasColumnType("int");
@@ -418,7 +417,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<DateTime>("ProcessedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("StaffID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("OrderProcessID");
@@ -426,7 +425,7 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasIndex("OrderID")
                         .IsUnique();
 
-                    b.HasIndex("StaffID");
+                    b.HasIndex("UserID");
 
                     b.ToTable("OrderProcessed", (string)null);
                 });
@@ -493,15 +492,13 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("longtext")
-                        .HasDefaultValue("CreditCard");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("longtext")
-                        .HasDefaultValue("Pending");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Remarks")
                         .IsRequired()
@@ -908,9 +905,6 @@ namespace ASI.Basecode.Data.Migrations
 
                     b.HasKey("StaffID");
 
-                    b.HasIndex("UserID")
-                        .IsUnique();
-
                     b.ToTable("RestaurantStaff", (string)null);
                 });
 
@@ -1048,24 +1042,6 @@ namespace ASI.Basecode.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("UserProfiles", (string)null);
-                });
-
-            modelBuilder.Entity("PromotionProductsRestaurantPromotions", b =>
-                {
-                    b.Property<int>("RestaurantPromotionsPromotionID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PromotionProductsPromotionID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PromotionProductsProductID")
-                        .HasColumnType("int");
-
-                    b.HasKey("RestaurantPromotionsPromotionID", "PromotionProductsPromotionID", "PromotionProductsProductID");
-
-                    b.HasIndex("PromotionProductsPromotionID", "PromotionProductsProductID");
-
-                    b.ToTable("PromotionProductsRestaurantPromotions");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Cart", b =>
@@ -1233,8 +1209,9 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ASI.Basecode.Data.Models.RestaurantStaff", "HandledBy")
-                        .WithMany("OrderProcessed")
-                        .HasForeignKey("StaffID")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .HasPrincipalKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("HandledBy");
@@ -1321,7 +1298,15 @@ namespace ASI.Basecode.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ASI.Basecode.Data.Models.RestaurantPromotions", "RestaurantPromotion")
+                        .WithMany("PromotionProducts")
+                        .HasForeignKey("PromotionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Product");
+
+                    b.Navigation("RestaurantPromotion");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantAddress", b =>
@@ -1382,21 +1367,6 @@ namespace ASI.Basecode.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PromotionProductsRestaurantPromotions", b =>
-                {
-                    b.HasOne("ASI.Basecode.Data.Models.RestaurantPromotions", null)
-                        .WithMany()
-                        .HasForeignKey("RestaurantPromotionsPromotionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ASI.Basecode.Data.Models.PromotionProducts", null)
-                        .WithMany()
-                        .HasForeignKey("PromotionProductsPromotionID", "PromotionProductsProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.Address", b =>
@@ -1475,11 +1445,8 @@ namespace ASI.Basecode.Data.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("PromotionCodes");
-                });
 
-            modelBuilder.Entity("ASI.Basecode.Data.Models.RestaurantStaff", b =>
-                {
-                    b.Navigation("OrderProcessed");
+                    b.Navigation("PromotionProducts");
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.User", b =>

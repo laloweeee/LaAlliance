@@ -42,17 +42,29 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
             return View(promotions);
         }
 
-        public IActionResult CreatePromotion()
+        public IActionResult Create()
         {
             var products = _productService.GetActiveProducts();
             ViewBag.Products = products;
-            return View();
+            
+            // Initialize the model with default values
+            var model = new PromotionViewModel
+            {
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(30),
+                ExpirationDate = DateTime.Now.AddDays(30),
+                IsActive = true,
+                UsageLimit = 100
+            };
+            
+            return View(model);
         }
+
 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePromotion(PromotionViewModel model)
+        public async Task<IActionResult> Create(PromotionViewModel model)
         {
             try
             {

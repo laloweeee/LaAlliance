@@ -1,0 +1,254 @@
+@model ASI.Basecode.WebApp.Areas.Restaurant.Models.MenuViewModel
+
+@{
+    ViewData["Title"] = "Recently Deleted Items";
+}
+
+<div class="mt-4">
+    <!-- Header Section -->
+    <div class="bg-red-50 rounded-xl p-6 border-2 border-red-200 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-trash-restore text-red-600 mr-3"></i>
+                    Recently Deleted Items
+                </h1>
+                <p class="text-gray-600 mt-2">Manage and restore deleted products and categories</p>
+            </div>
+            <a asp-controller="Menu" asp-action="Index" asp-area="Restaurant"
+               class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg flex items-center transition-all duration-200 shadow-md hover:shadow-lg">
+                <i class="fas fa-arrow-left mr-2"></i>
+                <span class="font-medium">Back to Menu</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-gray-100 rounded-xl p-3 mb-6">
+        <div class="flex space-x-4">
+            <button id="deleted-products-tab"
+                    class="tab-button active bg-red-600 text-white whitespace-nowrap py-2 px-4 rounded-md font-medium text-sm focus:outline-none transition-colors duration-200">
+                <i class="fas fa-pizza-slice mr-2"></i>
+                Deleted Products
+                <span class="ml-2 bg-white text-red-600 rounded-full px-2 py-0.5 text-xs font-bold">@Model.Products.Count()</span>
+            </button>
+            <button id="deleted-categories-tab"
+                    class="tab-button bg-white text-gray-700 whitespace-nowrap py-2 px-4 rounded-md font-medium text-sm focus:outline-none transition-colors duration-200">
+                <i class="fas fa-tags mr-2"></i>
+                Deleted Categories
+                <span class="ml-2 bg-gray-200 text-gray-700 rounded-full px-2 py-0.5 text-xs font-bold">@Model.Categories.Count()</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Deleted Products Section -->
+    <div id="deleted-products-content" class="tab-content">
+        @if (Model.Products != null && Model.Products.Any())
+        {
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-box-open text-red-600 mr-2"></i>
+                        Deleted Products (@Model.Products.Count())
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 border-red-200 overflow-hidden group">
+                            <div class="relative aspect-w-16 aspect-h-9 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                                <img src="@(product.ProductImage ?? "https://via.placeholder.com/300x200")"
+                                     alt="@product.ProductName"
+                                     class="w-full h-48 object-cover opacity-60">
+
+                                <div class="absolute inset-0 bg-red-900/20 flex items-center justify-center">
+                                    <span class="bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
+                                        <i class="fas fa-trash mr-2"></i>DELETED
+                                    </span>
+                                </div>
+
+                                <div class="absolute top-3 left-3">
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white/90 text-gray-700 backdrop-blur-sm shadow-md">
+                                        <i class="fas fa-tag mr-1.5 text-red-600"></i>
+                                        @product.ProductCategory.CategoryName
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="p-5">
+                                <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem]">
+                                    @product.ProductName
+                                </h3>
+
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+                                    @product.ProductDescription
+                                </p>
+
+                                <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+                                    <div class="flex items-baseline">
+                                        <span class="text-2xl font-bold text-gray-400">₱@product.ProductPrice.ToString("N2")</span>
+                                    </div>
+                                    <div class="flex items-center text-gray-500 text-xs">
+                                        <i class="fas fa-hashtag mr-1"></i>
+                                        <span>@product.ProductID</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <button type="button"
+                                            data-confirm-restore  
+                                            data-item-id="@product.ProductID"
+                                            data-item-name="@product.ProductName"
+                                            data-url="@Url.Action("RecoverProduct", "Menu", new { area = "Restaurant" })"
+                                            class="confirm-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                                        <i class="fas fa-undo mr-2"></i>
+                                        <span class="btn-text">Restore Product</span>
+                                    </button>
+                                    <button type="button"
+                                            data-confirm-delete  
+                                            data-item-id="@product.ProductID"
+                                            data-item-name="@product.ProductName"
+                                            data-url="@Url.Action("HardDeleteProduct", "Menu", new { area = "Restaurant" })"
+                                            class="confirm-btn w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                                        <i class="fas fa-times mr-2"></i>
+                                        <span class="btn-text">Delete Permanently</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                <i class="fas fa-check-circle text-6xl text-emerald-500 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No Deleted Products</h3>
+                <p class="text-gray-500">All products are active or permanently removed</p>
+            </div>
+        }
+    </div>
+
+    <!-- Deleted Categories Section -->
+    <div id="deleted-categories-content" class="tab-content hidden">
+        @if (Model.Categories != null && Model.Categories.Any())
+        {
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-tags text-red-600 mr-2"></i>
+                        Deleted Categories (@Model.Categories.Count())
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 border-red-200 overflow-hidden group">
+                            <div class="relative bg-gradient-to-br from-red-50 to-red-100 p-6 border-b border-red-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-red-500 rounded-xl flex items-center justify-center shadow-lg opacity-60">
+                                        <i class="fas fa-tag text-white text-2xl"></i>
+                                    </div>
+                                    
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-red-600 text-white shadow-lg">
+                                        <i class="fas fa-trash text-[8px] mr-1.5"></i>
+                                        DELETED
+                                    </span>
+                                </div>
+                                
+                                <h3 class="text-xl font-bold text-gray-900 mb-1">
+                                    @category.CategoryName
+                                </h3>
+                                
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-white/60 text-gray-600 text-xs font-mono">
+                                        <i class="fas fa-hashtag text-[10px] mr-1"></i>
+                                        @category.CategoryID
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-6">
+                                <div class="flex flex-col gap-2">
+                                    <button type="button"
+                                            data-confirm-restore  
+                                            data-item-id="@category.CategoryID"
+                                            data-item-name="@category.CategoryName"
+                                            data-url="@Url.Action("RecoverCategory", "Menu", new { area = "Restaurant" })"
+                                            class="confirm-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                                        <i class="fas fa-undo mr-2"></i>
+                                        <span class="btn-text">Restore Category</span>
+                                    </button>
+                                    <button type="button"
+                                            data-confirm-delete  
+                                            data-item-id="@category.CategoryID"
+                                            data-item-name="@category.CategoryName"
+                                            data-url="@Url.Action("HardDeleteCategory", "Menu", new { area = "Restaurant" })"
+                                            class="confirm-btn w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                                        <i class="fas fa-times mr-2"></i>
+                                        <span class="btn-text">Delete Permanently</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                <i class="fas fa-check-circle text-6xl text-emerald-500 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No Deleted Categories</h3>
+                <p class="text-gray-500">All categories are active or permanently removed</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/js/confirmModal.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    // Remove active class from all tabs
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'bg-red-600', 'text-white');
+                        btn.classList.add('bg-white', 'text-gray-700');
+                        // Update badge colors
+                        const badge = btn.querySelector('span:last-child');
+                        if (badge) {
+                            badge.classList.remove('bg-white', 'text-red-600');
+                            badge.classList.add('bg-gray-200', 'text-gray-700');
+                        }
+                    });
+
+                    // Hide all content
+                    tabContents.forEach(content => content.classList.add('hidden'));
+
+                    // Add active class to clicked tab
+                    this.classList.add('active', 'bg-red-600', 'text-white');
+                    this.classList.remove('bg-white', 'text-gray-700');
+                    
+                    // Update badge for active tab
+                    const activeBadge = this.querySelector('span:last-child');
+                    if (activeBadge) {
+                        activeBadge.classList.add('bg-white', 'text-red-600');
+                        activeBadge.classList.remove('bg-gray-200', 'text-gray-700');
+                    }
+
+                    // Show corresponding content
+                    const targetTab = this.id.replace('-tab', '-content');
+                    document.getElementById(targetTab).classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+}

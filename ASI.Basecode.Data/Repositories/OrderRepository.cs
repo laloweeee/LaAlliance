@@ -88,6 +88,10 @@ namespace ASI.Basecode.Data.Repositories
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.OrderItemOption)
+                        .ThenInclude(oio => oio.ProductOptionGroup)  // ADD THIS LINE
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.OrderItemOption)
+                        .ThenInclude(oio => oio.ProductOptionItems)  // ADD THIS LINE
                 .Include(o => o.OrderProcessed)
                 .Include(o => o.PaymentLogs)
                 .ToList();
@@ -104,6 +108,10 @@ namespace ASI.Basecode.Data.Repositories
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.OrderItemOption)
+                        .ThenInclude(oio => oio.ProductOptionGroup)  // ADD THIS LINE
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.OrderItemOption)
+                        .ThenInclude(oio => oio.ProductOptionItems)  // ADD THIS LINE
                 .Include(o => o.OrderProcessed)
                 .Include(o => o.PaymentLogs)
                 .FirstOrDefault(o => o.OrderID == orderID);

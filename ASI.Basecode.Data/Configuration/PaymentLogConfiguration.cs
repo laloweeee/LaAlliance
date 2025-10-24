@@ -16,12 +16,12 @@ namespace ASI.Basecode.Data.Configuration
             builder.Property(pl => pl.PaymentMethod)
                 .IsRequired()
                 .HasConversion<string>()
-                .HasDefaultValue(PaymentMethod.CreditCard);
+                .HasMaxLength(50);
 
             builder.Property(pl => pl.PaymentStatus)
                 .IsRequired()
                 .HasConversion<string>()
-                .HasDefaultValue(PaymentStatus.Pending);
+                .HasMaxLength(50);
 
             builder.Property(pl => pl.TransactionReference)
                 .HasMaxLength(255);

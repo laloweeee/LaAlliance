@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using static ASI.Basecode.Resources.Constants.Enums;
 using System.Threading.Tasks;
+using ASI.Basecode.Resources.Constants;
 
 namespace ASI.Basecode.Services.Services
 {
@@ -22,6 +23,7 @@ namespace ASI.Basecode.Services.Services
         private readonly ICartRepository _cartRepository;
         private readonly IAddressService _addressService;
         private readonly IUserRepository _userRepository;
+        private readonly IPaymentLogRepository _paymentLogRepository;
         private readonly IHubContext<OrderHub> _orderHubContext;
 
 
@@ -33,7 +35,8 @@ namespace ASI.Basecode.Services.Services
             IAddressService addressService,
             IUserRepository userRepository,
             IOrderProcessedRepository orderProcessedRepository,
-            IHubContext<OrderHub> orderHubContext
+            IHubContext<OrderHub> orderHubContext,
+            IPaymentLogRepository paymentLogRepository
             )
         {
             _orderRepository = orderRepository;
@@ -42,6 +45,7 @@ namespace ASI.Basecode.Services.Services
             _userRepository = userRepository;
             _orderProcessedRepository = orderProcessedRepository;
             _orderHubContext = orderHubContext;
+            _paymentLogRepository = paymentLogRepository;
         }
 
         /// <summary>
@@ -61,7 +65,7 @@ namespace ASI.Basecode.Services.Services
 
             // Validate and get address for delivery orders
             int? addressId = null;
-            if (Enum.Parse<OrderType>(request.OrderType) == OrderType.Delivery)
+            if (request.OrderType == OrderType.Delivery)
             {
                 if (!request.SelectedAddressId.HasValue)
                 {
@@ -83,9 +87,11 @@ namespace ASI.Basecode.Services.Services
             decimal subtotal = cart.CartItem.Sum(item =>
                 item.Quantity * (item.UnitPrice + (item.CartItemOption?.Sum(opt => opt.ProductOptionItems?.AdditionalPrice ?? 0) ?? 0)));
 
-            decimal deliveryFee = Enum.Parse<OrderType>(request.OrderType) == OrderType.Delivery ? 50.00m : 0.00m;
-            decimal discountAmount = 0.00m; // TODO: Implement voucher/promotion logic
+            decimal deliveryFee = request.OrderType == OrderType.Delivery ? 50.00m : 0.00m;
+            decimal discountAmount = 0.00m;
             decimal totalAmount = subtotal + deliveryFee - discountAmount;
+
+            Console.WriteLine($"Order Placed with payment method: {request.PaymentMethod}");
 
             // Create the order
             var order = new Order
@@ -96,9 +102,9 @@ namespace ASI.Basecode.Services.Services
                 SubTotal = subtotal,
                 DiscountAmount = discountAmount,
                 TotalAmount = totalAmount,
-                OrderType = Enum.Parse<OrderType>(request.OrderType),
+                OrderType = request.OrderType,
                 OrderStatus = OrderStatus.Pending,
-                PaymentMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod),
+                PaymentMethod = request.PaymentMethod,
                 OrderItems = new List<OrderItems>()
             };
 
@@ -134,16 +140,16 @@ namespace ASI.Basecode.Services.Services
             var paymentLog = new PaymentLog
             {
                 UserID = request.UserID,
-                PaymentMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod),
-                TransactionReference = GenerateTransactionReference(),
+                PaymentMethod = request.PaymentMethod,
+                TransactionReference = request.PaymentMethod != PaymentMethod.CashOnDelivery ? GenerateTransactionReference() : "N/A",
                 PaymentAmount = totalAmount,
                 PaymentDate = DateTime.UtcNow,
-                Remarks = request.DeliveryNotes ?? "No remarks",
+                Remarks = "No Remarks",
                 CreatedAt = DateTime.UtcNow
             };
 
             // Set payment status based on payment method
-            if (request.PaymentMethod == "CashOnDelivery" && order.OrderType == OrderType.Delivery)
+            if (request.PaymentMethod == PaymentMethod.CashOnDelivery && order.OrderType == OrderType.Delivery)
             {
                 // Set payment status to pending for cash on delivery
                 paymentLog.PaymentStatus = PaymentStatus.Pending;
@@ -164,6 +170,7 @@ namespace ASI.Basecode.Services.Services
             _cartRepository.ClearCart(request.UserID);
 
             var orderViewModel = GetOrderById(order.OrderID);
+            
             // Notify restaurant of new order via SignalR        
             await NotifyRestaurantNewOrder(orderViewModel);
             await NotifyDashboardUpdate();
@@ -274,7 +281,15 @@ namespace ASI.Basecode.Services.Services
                     ProductName = oi.Product?.ProductName ?? "Unknown Product",
                     ProductImage = oi.Product?.ProductImage ?? "",
                     Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice
+                    UnitPrice = oi.UnitPrice,
+                    // ADD THIS SECTION TO INCLUDE OPTIONS:
+                    OrderItemOptions = oi.OrderItemOption?.Select(oio => new OrderItemOptionViewModel
+                    {
+                        OrderItemOptionID = oio.OrderItemOptionID,
+                        OptionGroupName = oio.ProductOptionGroup?.OptionGroupName ?? "",
+                        OptionName = oio.ProductOptionItems?.OptionName ?? "",
+                        AdditionalPrice = oio.ProductOptionItems?.AdditionalPrice ?? 0
+                    }).ToList() ?? new List<OrderItemOptionViewModel>()
                 }).ToList()
             }).ToList();
         }
@@ -308,7 +323,15 @@ namespace ASI.Basecode.Services.Services
                     ProductName = oi.Product?.ProductName ?? "Unknown Product",
                     ProductImage = oi.Product?.ProductImage ?? "",
                     Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice
+                    UnitPrice = oi.UnitPrice,
+                    // ADD THIS SECTION TO INCLUDE OPTIONS:
+                    OrderItemOptions = oi.OrderItemOption?.Select(oio => new OrderItemOptionViewModel
+                    {
+                        OrderItemOptionID = oio.OrderItemOptionID,
+                        OptionGroupName = oio.ProductOptionGroup?.OptionGroupName ?? "",
+                        OptionName = oio.ProductOptionItems?.OptionName ?? "",
+                        AdditionalPrice = oio.ProductOptionItems?.AdditionalPrice ?? 0
+                    }).ToList() ?? new List<OrderItemOptionViewModel>()
                 }).ToList()
             }).ToList();
         }
@@ -441,6 +464,20 @@ namespace ASI.Basecode.Services.Services
                 }
             }
 
+            if (newStatus == OrderStatus.Completed && order.PaymentMethod == PaymentMethod.CashOnDelivery)
+            {
+                var paymentLog = _paymentLogRepository.GetPaymentLogsByOrderId(orderID).AsQueryable().FirstOrDefault();
+                
+                if (paymentLog == null)
+                {
+                    Console.WriteLine($"✗ Payment log not found for Order {orderID}");
+                    return;
+                }
+
+                paymentLog.PaymentStatus = PaymentStatus.Completed;
+                _paymentLogRepository.UpdatePaymentLog(paymentLog);
+            }
+
             // Notifications
             try
             {
@@ -517,21 +554,23 @@ namespace ASI.Basecode.Services.Services
         {
             try
             {
+                // Get the order to find user ID
+                var order = _orderRepository.GetOrderById(orderID);
+                if (order == null) return;
+
+                var statusMessage = GetStatusMessage(newStatus);
+
+                // Notify order-specific group (for individual order tracking pages)
                 await _orderHubContext.Clients.Group($"Order-{orderID}")
                     .SendAsync("OrderStatusUpdated", new
                     {
                         orderId = orderID,
                         status = newStatus.ToString(),
-                        statusMessage = GetStatusMessage(newStatus),
+                        statusMessage = statusMessage,
                         timestamp = DateTime.UtcNow
                     });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending status update notification: {ex.Message}");
-            }
-        }
 
+<<<<<<< HEAD
         public async Task<DashboardStatsViewModel> GetDashboardStatsAsync()
         {
             try
@@ -766,16 +805,24 @@ namespace ASI.Basecode.Services.Services
             {
                 await _orderHubContext.Clients.Group("Restaurant")
                     .SendAsync("OrderStatusChanged", new
+=======
+                // Also notify user's orders group (for order activity page)
+                await _orderHubContext.Clients.Group($"UserOrders-{order.UserID}")
+                    .SendAsync("OrderStatusUpdated", new
+>>>>>>> origin/master
                     {
                         orderId = orderID,
-                        newStatus = newStatus.ToString(),
+                        status = newStatus.ToString(),
+                        statusMessage = statusMessage,
                         timestamp = DateTime.UtcNow
                     });
+
+                Console.WriteLine($"✓ Sent real-time update for order {orderID} to user {order.UserID}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending restaurant status update: {ex.Message}");
-            }*/
+                Console.WriteLine($"✗ Error sending status update notification: {ex.Message}");
+            }
         }
         
         /// <summary>

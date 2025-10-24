@@ -41,7 +41,7 @@ namespace ASI.Basecode.Data.Configuration
             builder.Property(o => o.PaymentMethod)
                 .IsRequired()
                 .HasConversion<string>()
-                .HasDefaultValue(PaymentMethod.CreditCard);
+                .HasMaxLength(50);
 
             // Relationships
             builder.HasOne(o => o.Address)

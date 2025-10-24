@@ -1,6 +1,7 @@
 using ASI.Basecode.Data.Interfaces;
 using ASI.Basecode.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static ASI.Basecode.Resources.Constants.Enums;
@@ -26,7 +27,7 @@ namespace ASI.Basecode.Data.Repositories
         public void AddPaymentLog(PaymentLog paymentLog)
         {
             _dbContext.PaymentLogs.Add(paymentLog);
-            UnitOfWork.SaveChanges();
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
@@ -71,13 +72,9 @@ namespace ASI.Basecode.Data.Repositories
         /// </summary>
         /// <param name="orderID"></param>
         /// <returns></returns>
-        public IEnumerable<PaymentLog> GetPaymentLogsByOrderId(int orderID)
+        public IQueryable<PaymentLog> GetPaymentLogsByOrderId(int orderID)
         {
-            return _dbContext.PaymentLogs
-                .Include(pl => pl.User)
-                .Where(pl => pl.OrderID == orderID)
-                .OrderByDescending(pl => pl.PaymentDate)
-                .ToList();
+            return _dbContext.PaymentLogs.Where(pl => pl.OrderID == orderID).AsQueryable();
         }
 
         /// <summary>

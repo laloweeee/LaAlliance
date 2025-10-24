@@ -21,6 +21,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         private readonly ICategoryService _categoryService;
         private new readonly ICartService _cartService;
         private readonly IFavoriteService _favoriteService; // ADDED
+        private readonly IPromotionService _promotionService;
 
         public HomeController(
             IHttpContextAccessor httpContextAccessor,
@@ -30,6 +31,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             ICategoryService categoryService,
             ICartService cartService,
             IFavoriteService favoriteService, // ADDED THIS PARAMETER
+            IPromotionService promotionService,
             IMapper mapper = null)
             : base(httpContextAccessor, loggerFactory, configuration, mapper, cartService)
         {
@@ -37,6 +39,7 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             _categoryService = categoryService;
             _cartService = cartService;
             _favoriteService = favoriteService; // ADDED THIS ASSIGNMENT
+            _promotionService = promotionService;
         }
 
         /// <summary>
@@ -48,7 +51,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
             var model = new Models.HomeViewModel
             {
                 Categories = _categoryService.GetAllCategories().ToList().AsQueryable(),
-                Products = _productService.GetActiveProducts()
+                Products = _productService.GetActiveProducts(),
+                Promotions = _promotionService.GetActivePromotions()
             };
 
             // ADDED: Safely load favorites with null check
@@ -123,9 +127,34 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 ViewBag.CartItemID = cartItemID;
                 ViewBag.ExistingQuantity = cartItem.Quantity;
                 
-                var selectedOptions = cartItem.CartItemOptions
-                    .GroupBy(o => o.ProductOptionGroupID)
-                    .ToDictionary(g => g.Key, g => g.Select(o => o.ProductOptionItemID).ToList());
+                // Initialize the dictionary with ALL option groups, even if they have no selections
+                var selectedOptions = new Dictionary<int, List<int>>();
+                
+                // First, add all product option groups with empty lists
+                if (product.CustomizationGroups != null)
+                {
+                    foreach (var group in product.CustomizationGroups)
+                    {
+                        selectedOptions[group.ProductOptionGroupID] = new List<int>();
+                    }
+                }
+                
+                // Then, populate with actual selected options from cart item
+                if (cartItem.CartItemOptions != null && cartItem.CartItemOptions.Any())
+                {
+                    foreach (var option in cartItem.CartItemOptions)
+                    {
+                        if (selectedOptions.ContainsKey(option.ProductOptionGroupID))
+                        {
+                            selectedOptions[option.ProductOptionGroupID].Add(option.ProductOptionItemID);
+                        }
+                        else
+                        {
+                            // If for some reason the group isn't in the product, add it
+                            selectedOptions[option.ProductOptionGroupID] = new List<int> { option.ProductOptionItemID };
+                        }
+                    }
+                }
                 
                 ViewBag.SelectedOptions = selectedOptions;
                 

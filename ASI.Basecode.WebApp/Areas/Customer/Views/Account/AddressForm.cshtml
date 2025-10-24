@@ -3,7 +3,7 @@
     ViewData["Title"] = Model?.UserAddressID > 0 ? "Edit Address - LaAlliancé" : "Add Address - LaAlliancé";
     var isEdit = Model?.UserAddressID > 0;
     var returnUrl = Context.Request.Query["returnUrl"].ToString();
-}
+    }
 
 <div class="min-h-screen bg-gray-50">
     <div class="p-6">
@@ -236,7 +236,6 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey"></script>
     <script src="~/js/maps.js"></script>
     <style>
