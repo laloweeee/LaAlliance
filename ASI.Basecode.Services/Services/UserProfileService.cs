@@ -40,11 +40,21 @@ namespace ASI.Basecode.Services.Services
         {
             ValidationHelper.ValidatePositiveInt(userID, "User ID");
 
-            var userProfile = _userProfileRepository.GetUserProfile(userID);
+            // Get user with profile data (includes email from User table)
+            var user = _userRepository.GetUserByID(userID);
+            ValidationHelper.ValidateNotNull(user, "User not found");
 
-            ValidationHelper.ValidateNotNull(userProfile, nameof(userProfile));
+            // Create UserProfileServiceModel with data from both User and UserProfile tables
+            var userProfileModel = new UserProfileServiceModel
+            {
+                UserID = user.UserID,
+                Email = user.Email, // Email comes from User table
+                FirstName = user.UserProfile?.FirstName ?? "",
+                LastName = user.UserProfile?.LastName ?? "",
+                ContactNumber = user.UserProfile?.ContactNumber ?? ""
+            };
 
-            return _mapper.ProjectTo<UserProfileServiceModel>(userProfile).FirstOrDefault();
+            return userProfileModel;
         }
 
         /// <summary>
@@ -64,12 +74,37 @@ namespace ASI.Basecode.Services.Services
             // Validate email format
             ValidationHelper.ValidateEmail(userProfile.Email);
 
-            var existingProfile = _userProfileRepository.GetUserProfile(userProfile.UserID).FirstOrDefault();
+            // Get the user with profile data
+            var user = _userRepository.GetUserByID(userProfile.UserID);
+            ValidationHelper.ValidateNotNull(user, "User not found");
 
-            ValidationHelper.ValidateNotNull(existingProfile, "User profile not found.");
+            // Update email in User table if it has changed
+            if (user.Email != userProfile.Email)
+            {
+                user.Email = userProfile.Email;
+                _userRepository.UpdateUser(user);
+            }
 
-            _mapper.Map(userProfile, existingProfile);
-            _userProfileRepository.UpdateUserProfile(existingProfile);
+            // Update UserProfile data
+            if (user.UserProfile != null)
+            {
+                user.UserProfile.FirstName = userProfile.FirstName;
+                user.UserProfile.LastName = userProfile.LastName;
+                user.UserProfile.ContactNumber = userProfile.ContactNumber;
+                _userProfileRepository.UpdateUserProfile(user.UserProfile);
+            }
+            else
+            {
+                // Create new UserProfile if it doesn't exist
+                var newProfile = new UserProfile
+                {
+                    UserID = userProfile.UserID,
+                    FirstName = userProfile.FirstName,
+                    LastName = userProfile.LastName,
+                    ContactNumber = userProfile.ContactNumber
+                };
+                _userProfileRepository.UpdateUserProfile(newProfile);
+            }
         }
 
         /// <summary>
