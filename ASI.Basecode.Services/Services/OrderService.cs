@@ -569,8 +569,13 @@ namespace ASI.Basecode.Services.Services
                         statusMessage = statusMessage,
                         timestamp = DateTime.UtcNow
                     });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending status update notification: {ex.Message}");
+            }
+        }
 
-<<<<<<< HEAD
         public async Task<DashboardStatsViewModel> GetDashboardStatsAsync()
         {
             try
@@ -805,11 +810,9 @@ namespace ASI.Basecode.Services.Services
             {
                 await _orderHubContext.Clients.Group("Restaurant")
                     .SendAsync("OrderStatusChanged", new
-=======
                 // Also notify user's orders group (for order activity page)
                 await _orderHubContext.Clients.Group($"UserOrders-{order.UserID}")
                     .SendAsync("OrderStatusUpdated", new
->>>>>>> origin/master
                     {
                         orderId = orderID,
                         status = newStatus.ToString(),
@@ -822,7 +825,7 @@ namespace ASI.Basecode.Services.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"✗ Error sending status update notification: {ex.Message}");
-            }
+            }*/
         }
         
         /// <summary>

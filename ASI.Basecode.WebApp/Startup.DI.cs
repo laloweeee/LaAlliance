@@ -69,11 +69,8 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IOrderRepository, OrderRepository>();
             this._services.AddScoped<IOrderProcessedRepository, OrderProcessedRepository>();
             this._services.AddScoped<IAddressRepository, AddressRepository>();
-<<<<<<< HEAD
             this._services.AddScoped<ICustomerProductFavoritesRepository, CustomerProductFavoritesRepository>();
-=======
             this._services.AddScoped<IPaymentLogRepository, PaymentLogRepository>();
->>>>>>> origin/master
 
 
             // Manager Class
