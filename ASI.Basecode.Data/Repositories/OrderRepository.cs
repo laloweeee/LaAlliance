@@ -11,11 +11,8 @@ namespace ASI.Basecode.Data.Repositories
     /// </summary>
     public class OrderRepository : BaseRepository, IOrderRepository
     {
-        private readonly AsiBasecodeDBContext _dbContext;
-
-        public OrderRepository(IUnitOfWork unitOfWork, AsiBasecodeDBContext dbContext) : base(unitOfWork)
+        public OrderRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _dbContext = dbContext;
         }
 
         /// <summary>
@@ -24,7 +21,7 @@ namespace ASI.Basecode.Data.Repositories
         /// <param name="order"></param>
         public void AddOrder(Order order)
         {
-            _dbContext.Orders.Add(order);
+            this.Context.Orders.Add(order);
             UnitOfWork.SaveChanges();
         }
 
@@ -32,26 +29,22 @@ namespace ASI.Basecode.Data.Repositories
         /// Update an existing order
         /// </summary>
         /// <param name="order"></param>
-        /// <summary>
-        /// Update an existing order - FIXED VERSION
-        /// </summary>
-        /// <param name="order"></param>
         public void UpdateOrder(Order order)
         {
             // Attach the entity and mark it as modified
-            var existingOrder = _dbContext.Orders.Find(order.OrderID);
+            var existingOrder = this.Context.Orders.Find(order.OrderID);
             
             if (existingOrder != null)
             {
                 // Update only the properties that are set
-                _dbContext.Entry(existingOrder).CurrentValues.SetValues(order);
+                this.Context.Entry(existingOrder).CurrentValues.SetValues(order);
                 UnitOfWork.SaveChanges();
             }
             else
             {
                 // If order doesn't exist in context, attach and update
-                _dbContext.Orders.Attach(order);
-                _dbContext.Entry(order).State = EntityState.Modified;
+                this.Context.Orders.Attach(order);
+                this.Context.Entry(order).State = EntityState.Modified;
                 UnitOfWork.SaveChanges();
             }
         }
@@ -62,10 +55,10 @@ namespace ASI.Basecode.Data.Repositories
         /// <param name="orderID"></param>
         public void DeleteOrder(int orderID)
         {
-            var order = _dbContext.Orders.Find(orderID);
+            var order = this.Context.Orders.Find(orderID);
             if (order != null)
             {
-                _dbContext.Orders.Remove(order);
+                this.Context.Orders.Remove(order);
                 UnitOfWork.SaveChanges();
             }
         }
@@ -76,7 +69,17 @@ namespace ASI.Basecode.Data.Repositories
         /// <returns></returns>
         public IEnumerable<Order> GetAllOrders()
         {
-            return _dbContext.Orders
+            if (this.Context == null)
+            {
+                throw new System.InvalidOperationException("Database context is not available.");
+            }
+
+            if (this.Context.Orders == null)
+            {
+                throw new System.InvalidOperationException("Orders DbSet is not available.");
+            }
+
+            return this.Context.Orders
                 .Include(o => o.User)
                     .ThenInclude(u => u.UserProfile)
                 .Include(o => o.Address)
@@ -86,12 +89,13 @@ namespace ASI.Basecode.Data.Repositories
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.OrderItemOption)
                 .Include(o => o.OrderProcessed)
-                .Include(o => o.PaymentLogs).ToList();
+                .Include(o => o.PaymentLogs)
+                .ToList();
         }
 
         public Order GetOrderById(int orderID)
         {
-            return _dbContext.Orders
+            return this.Context.Orders
                 .Include(o => o.User)
                     .ThenInclude(u => u.UserProfile)
                 .Include(o => o.Address)
@@ -104,15 +108,16 @@ namespace ASI.Basecode.Data.Repositories
                 .Include(o => o.PaymentLogs)
                 .FirstOrDefault(o => o.OrderID == orderID);
         }
-    
+
         /// <summary>
         /// Check if a product is included in any order
         /// </summary>
         /// <param name="productID"></param>
         /// <returns></returns>
-        public bool IsProductInAnyOrder(int productID)
+        public bool IsProductInAnyOrder(int productId)
         {
-            return _dbContext.OrderItems.Any(oi => oi.ProductID == productID);
+            return this.Context.OrderItems
+                .Any(oi => oi.ProductID == productId);
         }
     }
 }

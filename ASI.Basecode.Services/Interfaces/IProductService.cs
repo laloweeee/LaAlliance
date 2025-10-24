@@ -61,11 +61,15 @@ namespace ASI.Basecode.Services.Interfaces
         /// </summary>
         /// <param name="productID"></param>
         void RecoverProduct(int productID);
-        
+
         /// <summary>
         /// Permanently delete product
         /// </summary>
         /// <param name="productID"></param>
         void PermanentDelete(int productID);
+
+        // Methods for dashboard
+        Task<List<MostSellingItemViewModel>> GetMostSellingItemsAsync(int count = 5);
+        Task<List<MostFavoriteItemViewModel>> GetMostFavoriteItemsAsync(int count = 5);
     }
 }

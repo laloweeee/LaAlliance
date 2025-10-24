@@ -29,6 +29,7 @@ namespace ASI.Basecode.Services.Services
         private readonly ICategoryService _categoryService;
         private readonly IOrderRepository _orderRepository;
         private readonly ILogger<ProductService> _logger;
+        private readonly ICustomerProductFavoritesRepository _favoritesRepository;
 
         /// <summary>
         /// Constructor for ProductService.
@@ -44,7 +45,8 @@ namespace ASI.Basecode.Services.Services
                             IMapper mapper,
                             ICategoryService categoryService,
                             IOrderRepository orderRepository,
-                            ILogger<ProductService> logger)
+                            ILogger<ProductService> logger,
+                            ICustomerProductFavoritesRepository favoritesRepository)
         {
             _productRepository = productRepository;
             _userRepository = userRepository;
@@ -53,6 +55,7 @@ namespace ASI.Basecode.Services.Services
             _categoryService = categoryService;
             _orderRepository = orderRepository;
             _logger = logger;
+            _favoritesRepository = favoritesRepository;
         }
 
         /// <summary>
@@ -81,7 +84,7 @@ namespace ASI.Basecode.Services.Services
 
             if (product == null) throw new ArgumentException("The product does not exist.");
 
-            
+
             var model = _mapper.Map<ProductViewModel>(product);
             model.CategoryName = product.ProductCategory?.CategoryName;
 
@@ -422,5 +425,57 @@ namespace ASI.Basecode.Services.Services
             return false;
         }
 
+        public async Task<List<MostSellingItemViewModel>> GetMostSellingItemsAsync(int count = 5)
+        {
+            try
+            {
+                var orderItems = _orderRepository.GetAllOrders()
+                    .Where(o => o.OrderStatus != Resources.Constants.Enums.OrderStatus.Cancelled) // Exclude cancelled orders
+                    .SelectMany(o => o.OrderItems)
+                    .Where(oi => oi.ProductID.HasValue) 
+                    .GroupBy(oi => oi.ProductID.Value)
+                    .Select(g => new MostSellingItemViewModel
+                    {
+                        ProductID = g.Key,
+                        ProductName = g.First().Product?.ProductName ?? "Unknown Product",
+                        ProductImage = g.First().Product?.ProductImage ?? "",
+                        TotalQuantity = g.Sum(oi => oi.Quantity),
+                        Price = g.First().UnitPrice,
+                        TotalRevenue = g.Sum(oi => oi.Quantity * oi.UnitPrice)
+                    })
+                    .OrderByDescending(x => x.TotalQuantity)
+                    .Take(count)
+                    .ToList();
+
+                return orderItems;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting most selling items");
+                return new List<MostSellingItemViewModel>();
+            }
+        }
+
+        public async Task<List<MostFavoriteItemViewModel>> GetMostFavoriteItemsAsync(int count = 5)
+        {
+            var favoriteCounts = _favoritesRepository.GetFavoriteCountsByProduct();
+            var products = _productRepository.GetProducts().Where(p => p.IsActive).ToList();
+
+            var mostFavoriteItems = products
+                .Select(p => new MostFavoriteItemViewModel
+                {
+                    ProductID = p.ProductID,
+                    ProductName = p.ProductName,
+                    ProductImage = p.ProductImage,
+                    FavoriteCount = favoriteCounts.ContainsKey(p.ProductID) ? favoriteCounts[p.ProductID] : 0,
+                    Price = p.ProductPrice
+                })
+                .Where(x => x.FavoriteCount > 0)
+                .OrderByDescending(x => x.FavoriteCount)
+                .Take(count)
+                .ToList();
+
+            return mostFavoriteItems;
+        }
     }
 }

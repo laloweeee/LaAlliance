@@ -166,6 +166,7 @@ namespace ASI.Basecode.Services.Services
             var orderViewModel = GetOrderById(order.OrderID);
             // Notify restaurant of new order via SignalR        
             await NotifyRestaurantNewOrder(orderViewModel);
+            await NotifyDashboardUpdate();
 
             // Return order view model
             return orderViewModel;
@@ -378,21 +379,21 @@ namespace ASI.Basecode.Services.Services
             if (newStatus == OrderStatus.Processing)
             {
                 Console.WriteLine($"→ Attempting to create OrderProcessed for Order {orderID}");
-                
+
                 try
                 {
                     // Get the StaffID from RestaurantStaff table using the UserID
                     var staff = user.RestaurantStaff; // Assuming User has RestaurantStaff navigation property
-                    
+
                     if (staff == null)
                     {
                         Console.WriteLine($"✗ No RestaurantStaff found for UserID {userID}");
                         // Don't fail the entire operation
                         return;
                     }
-                    
+
                     Console.WriteLine($"→ Found StaffID: {staff.StaffID} for UserID: {userID}");
-                    
+
                     // Check if record already exists
                     var existingProcessed = _orderProcessedRepository.GetAllOrderProcesseds()
                         .FirstOrDefault(op => op.OrderID == orderID);
@@ -400,7 +401,7 @@ namespace ASI.Basecode.Services.Services
                     if (existingProcessed == null)
                     {
                         Console.WriteLine("→ Creating new OrderProcessed record...");
-                        
+
                         var orderProcessed = new OrderProcessed
                         {
                             OrderID = orderID,
@@ -410,19 +411,19 @@ namespace ASI.Basecode.Services.Services
                         };
 
                         _orderProcessedRepository.AddOrderProcessed(orderProcessed);
-                        
+
                         Console.WriteLine($"✓ OrderProcessed created successfully for OrderID: {orderID}");
                     }
                     else
                     {
                         Console.WriteLine("→ Updating existing OrderProcessed record...");
-                        
+
                         existingProcessed.UserID = staff.StaffID;  // ← CHANGED: Use StaffID
                         existingProcessed.ProcessedAt = DateTime.UtcNow;
                         existingProcessed.ElapsedTime = TimeOnly.FromDateTime(DateTime.UtcNow);
-                        
+
                         _orderProcessedRepository.UpdateOrderProcessed(existingProcessed);
-                        
+
                         Console.WriteLine($"✓ OrderProcessed updated for OrderID: {orderID}");
                     }
                 }
@@ -432,13 +433,11 @@ namespace ASI.Basecode.Services.Services
                     Console.WriteLine($"Error Message: {ex.Message}");
                     Console.WriteLine($"Error Type: {ex.GetType().Name}");
                     Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-                    
+
                     if (ex.InnerException != null)
                     {
                         Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
                     }
-                    
-                    // Don't throw - order was already accepted successfully
                 }
             }
 
@@ -446,6 +445,7 @@ namespace ASI.Basecode.Services.Services
             try
             {
                 await NotifyOrderStatusChange(orderID, newStatus);
+                await NotifyDashboardUpdate(); 
             }
             catch (Exception ex)
             {
@@ -529,6 +529,231 @@ namespace ASI.Basecode.Services.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error sending status update notification: {ex.Message}");
+            }
+        }
+
+        public async Task<DashboardStatsViewModel> GetDashboardStatsAsync()
+        {
+            try
+            {
+                var orders = _orderRepository.GetAllOrders();
+                var today = DateTime.Today;
+                
+                // Add null checks
+                if (orders == null)
+                {
+                    return new DashboardStatsViewModel();
+                }
+                
+                var todaysOrders = orders.Count(o => o.OrderDate.Date == today);
+                var totalOrders = orders.Count();
+                
+                // Get unique customers
+                var todaysCustomers = orders
+                    .Where(o => o.OrderDate.Date == today)
+                    .Select(o => o.UserID)
+                    .Where(userId => userId.HasValue)
+                    .Distinct()
+                    .Count();
+                    
+                var totalCustomers = orders
+                    .Select(o => o.UserID)
+                    .Where(userId => userId.HasValue)
+                    .Distinct()
+                    .Count();
+
+                var totalSales = await GetTotalSalesAsync();
+                var averageSalePerDay = await GetAverageSalePerDayAsync();
+                var averageProcessingTime = await GetAverageProcessingTimeAsync(); 
+
+                return new DashboardStatsViewModel
+                {
+                    TodaysOrders = todaysOrders,
+                    TotalOrders = totalOrders,
+                    TodaysCustomers = todaysCustomers,
+                    TotalCustomers = totalCustomers,
+                    TotalSales = totalSales,
+                    AverageSalePerDay = averageSalePerDay,
+                    AverageProcessingTime = averageProcessingTime
+                };
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return empty stats
+                Console.WriteLine($"Error getting dashboard stats: {ex.Message}");
+                return new DashboardStatsViewModel();
+            }
+        }
+
+        public async Task<OrderSummaryViewModel> GetOrderSummaryAsync()
+        {
+            try
+            {
+                var orders = _orderRepository.GetAllOrders();
+                
+                if (orders == null)
+                {
+                    return new OrderSummaryViewModel();
+                }
+                
+                return new OrderSummaryViewModel
+                {
+                    Pending = orders.Count(o => o.OrderStatus == OrderStatus.Pending),
+                    Processing = orders.Count(o => o.OrderStatus == OrderStatus.Processing),
+                    ReadyForDeliveryPickup = orders.Count(o => o.OrderStatus == OrderStatus.ReadyForDelivery || o.OrderStatus == OrderStatus.ReadyForPickup),
+                    Completed = orders.Count(o => o.OrderStatus == OrderStatus.Completed),
+                    Cancelled = orders.Count(o => o.OrderStatus == OrderStatus.Cancelled)
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting order summary: {ex.Message}");
+                return new OrderSummaryViewModel();
+            }
+        }
+
+        public async Task<decimal> GetTotalSalesAsync()
+        {
+            try
+            {
+                var orders = _orderRepository.GetAllOrders();
+                if (orders == null || !orders.Any())
+                    return 0;
+
+                return orders
+                    .Where(o => o.OrderStatus != OrderStatus.Cancelled)
+                    .Sum(o => o.TotalAmount);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting total sales: {ex.Message}");
+                return 0;
+            }
+        }
+
+        public async Task<decimal> GetAverageSalePerDayAsync()
+        {
+            try
+            {
+                var orders = _orderRepository.GetAllOrders();
+                if (orders == null || !orders.Any())
+                    return 0;
+
+                var completedOrders = orders.Where(o => o.OrderStatus != OrderStatus.Cancelled);
+                
+                if (!completedOrders.Any())
+                    return 0;
+
+                var orderDates = completedOrders.Select(o => o.OrderDate.Date).Distinct();
+                var totalDays = orderDates.Count();
+                
+                if (totalDays == 0) 
+                    return 0;
+                
+                return completedOrders.Sum(o => o.TotalAmount) / totalDays;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting average sales: {ex.Message}");
+                return 0;
+            }
+        }
+        
+        private async Task NotifyDashboardUpdate()
+        {
+            try
+            {
+                var stats = await GetDashboardStatsAsync();
+                var orderSummary = await GetOrderSummaryAsync();
+                
+                await _orderHubContext.Clients.Group("Dashboard")
+                    .SendAsync("DashboardUpdated", new
+                    {
+                        stats = new
+                        {
+                            todaysOrders = stats.TodaysOrders,
+                            totalOrders = stats.TotalOrders,
+                            todaysCustomers = stats.TodaysCustomers,
+                            totalCustomers = stats.TotalCustomers,
+                            totalSales = stats.TotalSales,
+                            averageSalePerDay = stats.AverageSalePerDay
+                        },
+                        orderSummary = new
+                        {
+                            pending = orderSummary.Pending,
+                            processing = orderSummary.Processing,
+                            readyForDeliveryPickup = orderSummary.ReadyForDeliveryPickup,
+                            completed = orderSummary.Completed,
+                            cancelled = orderSummary.Cancelled
+                        },
+                        timestamp = DateTime.UtcNow
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending dashboard update: {ex.Message}");
+            }
+        }
+
+        public async Task<List<StaffActivityViewModel>> GetRecentStaffActivitiesAsync(int count = 10)
+        {
+            try
+            {
+                var orderProcesseds = _orderProcessedRepository.GetAllOrderProcesseds()
+                    .OrderByDescending(op => op.ProcessedAt)
+                    .Take(count)
+                    .ToList();
+
+                var staffActivities = new List<StaffActivityViewModel>();
+
+                foreach (var processed in orderProcesseds)
+                {
+                    var staffActivity = new StaffActivityViewModel
+                    {
+                        OrderID = processed.OrderID,
+                        StaffName = processed.HandledBy?.User?.UserProfile?.FirstName + " " + 
+                                processed.HandledBy?.User?.UserProfile?.LastName ?? "Unknown Staff",
+                        ElapsedTime = processed.ElapsedTime.ToString(@"hh\:mm\:ss"),
+                        ProcessedAt = processed.ProcessedAt,
+                        CustomerName = processed.Order.User?.UserProfile?.FirstName + " " + 
+                                    processed.Order.User?.UserProfile?.LastName ?? "Unknown Customer",
+                        OrderType = processed.Order.OrderType.ToString()
+                    };
+
+                    staffActivities.Add(staffActivity);
+                }
+
+                return staffActivities;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting staff activities: {ex.Message}");
+                return new List<StaffActivityViewModel>();
+            }
+        }
+
+        public async Task<string> GetAverageProcessingTimeAsync()
+        {
+            try
+            {
+                var orderProcesseds = _orderProcessedRepository.GetAllOrderProcesseds().ToList();
+
+                if (!orderProcesseds.Any())
+                    return "00:00:00";
+
+                // Calculate average elapsed time
+                var totalSeconds = orderProcesseds.Average(op => 
+                    op.ElapsedTime.Hour * 3600 + 
+                    op.ElapsedTime.Minute * 60 + 
+                    op.ElapsedTime.Second);
+
+                var averageTimeSpan = TimeSpan.FromSeconds(totalSeconds);
+                return averageTimeSpan.ToString(@"hh\:mm\:ss");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calculating average processing time: {ex.Message}");
+                return "00:00:00";
             }
         }
 

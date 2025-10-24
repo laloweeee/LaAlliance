@@ -31,5 +31,15 @@ namespace ASI.Basecode.Services.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Order-{orderID}");
         }
+
+        public async Task JoinDashboardGroup()
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, "Dashboard");
+        }
+
+        public async Task LeaveDashboardGroup()
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Dashboard");
+        }
     }
 }
