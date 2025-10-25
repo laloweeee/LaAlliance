@@ -75,13 +75,13 @@
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Orders Summary</h3>
                 <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
-                    <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 bg-blue-500 text-white" data-period="today">
+                    <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="today">
                         Today
                     </button>
                     <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="weekly">
                         Weekly
                     </button>
-                    <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="monthly">
+                        <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 bg-blue-500 text-white" data-period="monthly">
                         Monthly
                     </button>
                 </div>
@@ -137,13 +137,13 @@
                 <div class="flex items-center space-x-2">
                     <span class="text-sm text-green-500 font-medium">+@(Model?.RevenueData?.MonthlyGrowth ?? 0)% this month</span>
                     <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
-                        <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 bg-blue-500 text-white" data-period="today">
+                        <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="today">
                             Today
                         </button>
                         <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="weekly">
                             Weekly
                         </button>
-                        <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="monthly">
+                            <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 bg-blue-500 text-white" data-period="monthly">
                             Monthly
                         </button>
                     </div>
