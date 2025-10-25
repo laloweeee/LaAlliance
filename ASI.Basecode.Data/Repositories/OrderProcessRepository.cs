@@ -22,8 +22,16 @@ namespace ASI.Basecode.Data.Repositories
         /// <returns></returns>
         public IEnumerable<OrderProcessed> GetAllOrderProcesseds()
         {
-            return _dbContext.OrderProcesseds.ToList();
+            return _dbContext.OrderProcesseds
+                .Include(op => op.Order)
+                    .ThenInclude(o => o.User)
+                        .ThenInclude(u => u.UserProfile)
+                .Include(op => op.HandledBy) // This links to RestaurantStaff
+                    .ThenInclude(s => s.User) // From RestaurantStaff to User
+                        .ThenInclude(u => u.UserProfile) // From User to UserProfile
+                .ToList();
         }
+        
         /// <summary>
         /// Get OrderProcessed by ID
         /// </summary>

@@ -22,7 +22,6 @@ namespace ASI.Basecode.Data.Configuration
             builder.HasOne(op => op.HandledBy)
                 .WithMany()  // No navigation property on the other side
                 .HasForeignKey(op => op.UserID)
-                .HasPrincipalKey(rs => rs.UserID)  // Reference RestaurantStaff.UserID
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Table Name

@@ -25,7 +25,7 @@ namespace ASI.Basecode.Services.Services
         private readonly IUserRepository _userRepository;
         private readonly IPaymentLogRepository _paymentLogRepository;
         private readonly IHubContext<OrderHub> _orderHubContext;
-
+        private readonly IStaffRepository _staffRepository;
 
         private readonly IOrderProcessedRepository _orderProcessedRepository;
 
@@ -36,7 +36,8 @@ namespace ASI.Basecode.Services.Services
             IUserRepository userRepository,
             IOrderProcessedRepository orderProcessedRepository,
             IHubContext<OrderHub> orderHubContext,
-            IPaymentLogRepository paymentLogRepository
+            IPaymentLogRepository paymentLogRepository,
+            IStaffRepository staffRepository
             )
         {
             _orderRepository = orderRepository;
@@ -46,6 +47,7 @@ namespace ASI.Basecode.Services.Services
             _orderProcessedRepository = orderProcessedRepository;
             _orderHubContext = orderHubContext;
             _paymentLogRepository = paymentLogRepository;
+            _staffRepository = staffRepository;
         }
 
         /// <summary>
@@ -752,16 +754,39 @@ namespace ASI.Basecode.Services.Services
 
                 foreach (var processed in orderProcesseds)
                 {
+                    // Manually get staff information using the UserID (which is actually StaffID)
+                    string staffName = "Unassigned";
+                    if (processed.UserID.HasValue)
+                    {
+                        var staff = _staffRepository.GetStaffByID(processed.UserID.Value);
+                        if (staff != null && staff.User != null)
+                        {
+                            var userProfile = staff.User.UserProfile;
+                            staffName = $"{userProfile?.FirstName} {userProfile?.LastName}".Trim();
+                            
+                            if (string.IsNullOrEmpty(staffName))
+                            {
+                                staffName = staff.User.Email ?? "Unknown Staff";
+                            }
+                        }
+                    }
+
+                    // Get customer name
+                    string customerName = "Unknown Customer";
+                    if (processed.Order?.User?.UserProfile != null)
+                    {
+                        var customerProfile = processed.Order.User.UserProfile;
+                        customerName = $"{customerProfile.FirstName} {customerProfile.LastName}".Trim();
+                    }
+
                     var staffActivity = new StaffActivityViewModel
                     {
                         OrderID = processed.OrderID,
-                        StaffName = processed.HandledBy?.User?.UserProfile?.FirstName + " " + 
-                                processed.HandledBy?.User?.UserProfile?.LastName ?? "Unknown Staff",
+                        StaffName = staffName,
                         ElapsedTime = processed.ElapsedTime.ToString(@"hh\:mm\:ss"),
                         ProcessedAt = processed.ProcessedAt,
-                        CustomerName = processed.Order.User?.UserProfile?.FirstName + " " + 
-                                    processed.Order.User?.UserProfile?.LastName ?? "Unknown Customer",
-                        OrderType = processed.Order.OrderType.ToString()
+                        CustomerName = customerName,
+                        OrderType = processed.Order?.OrderType.ToString() ?? "Unknown"
                     };
 
                     staffActivities.Add(staffActivity);

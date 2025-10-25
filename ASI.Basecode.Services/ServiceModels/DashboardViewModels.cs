@@ -46,10 +46,10 @@ namespace ASI.Basecode.Services.ServiceModels
     {
         public int OrderID { get; set; }
         public string StaffName { get; set; }
-        public string ElapsedTime { get; set; }
-        public DateTime ProcessedAt { get; set; }
         public string CustomerName { get; set; }
         public string OrderType { get; set; }
+        public string ElapsedTime { get; set; }
+        public DateTime ProcessedAt { get; set; }
     }
 
     public class DashboardDataViewModel
