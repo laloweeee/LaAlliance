@@ -150,5 +150,45 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 return Content($"Debug error: {ex.Message}");
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllDashboardData()
+        {
+            try
+            {
+                // Get data for all periods
+                var todayData = await GetDashboardDataByPeriodInternal("today");
+                var weeklyData = await GetDashboardDataByPeriodInternal("weekly");
+                var monthlyData = await GetDashboardDataByPeriodInternal("monthly");
+
+                return Ok(new
+                {
+                    today = todayData,
+                    weekly = weeklyData,
+                    monthly = monthlyData
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading all dashboard data");
+                return StatusCode(500, new { error = "Error loading dashboard data" });
+            }
+        }
+
+        private async Task<DashboardDataViewModel> GetDashboardDataByPeriodInternal(string period)
+        {
+            var stats = await _orderService.GetDashboardStatsAsync(period);
+            var orderSummary = await _orderService.GetOrderSummaryAsync(period);
+            var revenueData = await _orderService.GetRevenueDataAsync(period);
+            var monthlyRevenue = await _orderService.GetMonthlyRevenueAsync(period);
+
+            return new DashboardDataViewModel
+            {
+                Stats = stats,
+                OrderSummary = orderSummary,
+                RevenueData = revenueData,
+                MonthlyRevenue = monthlyRevenue ?? new List<MonthlyRevenueViewModel>()
+            };
+        }
     }
 }

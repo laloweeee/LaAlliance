@@ -153,11 +153,11 @@
             <!-- Revenue Stats -->
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="text-center p-4 bg-gray-50 rounded-lg">
-                    <p class="text-sm text-gray-600 mb-1">Income</p>
+                    <p class="text-sm text-gray-600 mb-1">Total Income</p>
                     <p class="text-2xl font-bold text-gray-800 revenue-income">₱@((Model?.RevenueData?.TotalRevenue ?? 0).ToString("N2"))</p>
                 </div>
                 <div class="text-center p-4 bg-gray-50 rounded-lg">
-                    <p class="text-sm text-gray-600 mb-1">Expense</p>
+                    <p class="text-sm text-gray-600 mb-1">Total Expense</p>
                     <p class="text-2xl font-bold text-gray-800 revenue-expense">₱@((Model?.RevenueData?.TotalExpenses ?? 0).ToString("N2"))</p>
                 </div>
             </div>
@@ -304,22 +304,59 @@
 </div>
 
 @section Scripts {
-    <!-- Using CDN instead of local SignalR -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     
     <script>
-        // Initialize Charts
+        // Global variables to store all data
+        let allDashboardData = {};
         let orderSummaryChart, revenueChart;
+        let currentOrderPeriod = 'monthly';
+        let currentRevenuePeriod = 'monthly';
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM loaded, initializing dashboard...');
+            
+            // Load all data first
+            await loadAllDashboardData();
+            
+            // Initialize charts with current data
+            initializeCharts();
+            
+            // Set up filter handlers
+            initializePanelFilters();
+        });
+
+        // Load ALL data for all periods at once
+        async function loadAllDashboardData() {
+            try {
+                console.log('Loading all dashboard data...');
+                const response = await fetch('/Restaurant/Dashboard/GetAllDashboardData');
+                
+                if (!response.ok) throw new Error('Failed to fetch dashboard data');
+                
+                allDashboardData = await response.json();
+                console.log('All dashboard data loaded successfully:', allDashboardData);
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Fallback: use current server-rendered data
+                allDashboardData = {
+                    monthly: {
+                        stats: @Json.Serialize(Model?.Stats),
+                        orderSummary: @Json.Serialize(Model?.OrderSummary),
+                        revenueData: @Json.Serialize(Model?.RevenueData),
+                        monthlyRevenue: @Json.Serialize(Model?.MonthlyRevenue)
+                    }
+                };
+            }
+        }
 
         function initializeCharts() {
             console.log('Initializing charts...');
             
-            // Check if canvas elements exist
             const orderCanvas = document.getElementById('orderSummaryChart');
             const revenueCanvas = document.getElementById('revenueChart');
-            
-            console.log('Order canvas found:', !!orderCanvas);
-            console.log('Revenue canvas found:', !!revenueCanvas);
             
             if (!orderCanvas || !revenueCanvas) {
                 console.error('Canvas elements not found!');
@@ -329,22 +366,21 @@
             // Order Summary Pie Chart
             try {
                 const orderCtx = orderCanvas.getContext('2d');
+                const currentOrderData = allDashboardData[currentOrderPeriod] || allDashboardData.monthly;
+                
                 orderSummaryChart = new Chart(orderCtx, {
                     type: 'doughnut',
                     data: {
                         labels: ['New Orders', 'On Delivery', 'Delivered', 'Cancelled'],
                         datasets: [{
                             data: [
-                                @(Model?.OrderSummary?.Pending ?? 0),
-                                @(Model?.OrderSummary?.Processing ?? 0),
-                                @(Model?.OrderSummary?.Completed ?? 0),
-                                @(Model?.OrderSummary?.Cancelled ?? 0)
+                                currentOrderData.orderSummary.pending || 0,
+                                currentOrderData.orderSummary.processing || 0,
+                                currentOrderData.orderSummary.completed || 0,
+                                currentOrderData.orderSummary.cancelled || 0
                             ],
                             backgroundColor: [
-                                '#3b82f6', // blue
-                                '#8b5cf6', // purple
-                                '#10b981', // green
-                                '#ef4444'  // red
+                                '#3b82f6', '#8b5cf6', '#10b981', '#ef4444'
                             ],
                             borderWidth: 2,
                             borderColor: '#fff'
@@ -353,11 +389,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
+                        plugins: { legend: { display: false } },
                         cutout: '70%'
                     }
                 });
@@ -369,7 +401,8 @@
             // Revenue Line Chart
             try {
                 const revenueCtx = revenueCanvas.getContext('2d');
-                const monthlyRevenue = @Html.Raw(Json.Serialize(Model?.MonthlyRevenue ?? new List<MonthlyRevenueViewModel>()));
+                const currentRevenueData = allDashboardData[currentRevenuePeriod] || allDashboardData.monthly;
+                const monthlyRevenue = currentRevenueData.monthlyRevenue || [];
                 
                 revenueChart = new Chart(revenueCtx, {
                     type: 'line',
@@ -388,28 +421,18 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                grid: {
-                                    drawBorder: false
-                                },
+                                grid: { drawBorder: false },
                                 ticks: {
                                     callback: function(value) {
                                         return '₱' + value.toLocaleString();
                                     }
                                 }
                             },
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
+                            x: { grid: { display: false } }
                         }
                     }
                 });
@@ -419,27 +442,82 @@
             }
         }
 
-        // Separate filter functionality for each panel
         function initializePanelFilters() {
-            // Order Summary filters
+            // Order Summary filters - INSTANT switching
             const orderSummaryFilters = document.querySelectorAll('.order-summary-filter');
             orderSummaryFilters.forEach(button => {
                 button.addEventListener('click', function() {
                     const period = this.getAttribute('data-period');
                     updateFilterButtons(orderSummaryFilters, this);
-                    loadOrderSummaryData(period);
+                    switchOrderSummaryData(period); // INSTANT switch
                 });
             });
 
-            // Revenue filters
+            // Revenue filters - INSTANT switching
             const revenueFilters = document.querySelectorAll('.revenue-filter');
             revenueFilters.forEach(button => {
                 button.addEventListener('click', function() {
                     const period = this.getAttribute('data-period');
                     updateFilterButtons(revenueFilters, this);
-                    loadRevenueData(period);
+                    switchRevenueData(period); // INSTANT switch
                 });
             });
+        }
+
+        // INSTANT switching functions (no API calls)
+        function switchOrderSummaryData(period) {
+            if (!allDashboardData[period]) {
+                console.warn(`No data available for period: ${period}`);
+                return;
+            }
+
+            currentOrderPeriod = period;
+            const data = allDashboardData[period];
+
+            // Update order summary stats instantly
+            updateElementText('[data-stat="pending"]', data.orderSummary.pending || 0);
+            updateElementText('[data-stat="processing"]', data.orderSummary.processing || 0);
+            updateElementText('[data-stat="completed"]', data.orderSummary.completed || 0);
+            updateElementText('[data-stat="cancelled"]', data.orderSummary.cancelled || 0);
+            
+            // Update order summary chart instantly
+            if (orderSummaryChart) {
+                orderSummaryChart.data.datasets[0].data = [
+                    data.orderSummary.pending || 0,
+                    data.orderSummary.processing || 0,
+                    data.orderSummary.completed || 0,
+                    data.orderSummary.cancelled || 0
+                ];
+                orderSummaryChart.update('none'); // 'none' for instant update
+            }
+
+            console.log(`Switched order summary to ${period} period`);
+        }
+
+        function switchRevenueData(period) {
+            if (!allDashboardData[period]) {
+                console.warn(`No data available for period: ${period}`);
+                return;
+            }
+
+            currentRevenuePeriod = period;
+            const data = allDashboardData[period];
+
+            // Update revenue data instantly
+            const incomeElement = document.querySelector('.revenue-income');
+            const expenseElement = document.querySelector('.revenue-expense');
+            
+            if (incomeElement) incomeElement.textContent = '₱' + formatCurrency(data.revenueData.totalRevenue || 0);
+            if (expenseElement) expenseElement.textContent = '₱' + formatCurrency(data.revenueData.totalExpenses || 0);
+            
+            // Update revenue chart instantly
+            if (revenueChart && data.monthlyRevenue) {
+                revenueChart.data.labels = data.monthlyRevenue.map(m => m.monthName);
+                revenueChart.data.datasets[0].data = data.monthlyRevenue.map(m => m.revenue);
+                revenueChart.update('none'); // 'none' for instant update
+            }
+
+            console.log(`Switched revenue to ${period} period`);
         }
 
         function updateFilterButtons(buttons, activeButton) {
@@ -450,59 +528,6 @@
             
             activeButton.classList.add('active', 'bg-blue-500', 'text-white');
             activeButton.classList.remove('text-gray-600', 'hover:text-gray-800', 'hover:bg-white');
-        }
-
-        async function loadOrderSummaryData(period) {
-            try {
-                const response = await fetch(`/Restaurant/Dashboard/GetDashboardDataByPeriod?period=${period}`);
-                if (!response.ok) throw new Error('Failed to fetch order summary data');
-                
-                const data = await response.json();
-                
-                // Update order summary stats
-                updateElementText('[data-stat="pending"]', data.orderSummary.pending);
-                updateElementText('[data-stat="processing"]', data.orderSummary.processing);
-                updateElementText('[data-stat="completed"]', data.orderSummary.completed);
-                updateElementText('[data-stat="cancelled"]', data.orderSummary.cancelled);
-                
-                // Update order summary chart
-                if (orderSummaryChart) {
-                    orderSummaryChart.data.datasets[0].data = [
-                        data.orderSummary.pending,
-                        data.orderSummary.processing,
-                        data.orderSummary.completed,
-                        data.orderSummary.cancelled
-                    ];
-                    orderSummaryChart.update('active');
-                }
-            } catch (error) {
-                console.error('Error loading order summary data:', error);
-            }
-        }
-
-        async function loadRevenueData(period) {
-            try {
-                const response = await fetch(`/Restaurant/Dashboard/GetDashboardDataByPeriod?period=${period}`);
-                if (!response.ok) throw new Error('Failed to fetch revenue data');
-                
-                const data = await response.json();
-                
-                // Update revenue data
-                const incomeElement = document.querySelector('.revenue-income');
-                const expenseElement = document.querySelector('.revenue-expense');
-                
-                if (incomeElement) incomeElement.textContent = '₱' + formatCurrency(data.revenueData.totalRevenue);
-                if (expenseElement) expenseElement.textContent = '₱' + formatCurrency(data.revenueData.totalExpenses);
-                
-                // Update revenue chart
-                if (revenueChart && data.monthlyRevenue) {
-                    revenueChart.data.labels = data.monthlyRevenue.map(m => m.monthName);
-                    revenueChart.data.datasets[0].data = data.monthlyRevenue.map(m => m.revenue);
-                    revenueChart.update('active');
-                }
-            } catch (error) {
-                console.error('Error loading revenue data:', error);
-            }
         }
 
         function updateElementText(selector, value) {
@@ -519,11 +544,18 @@
             });
         }
 
-        // Initialize everything when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing charts and filters');
-            initializeCharts();
-            initializePanelFilters();
-        });
+        // Optional: Add smooth transition effects
+        function addSmoothTransitions() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .chart-transition {
+                    transition: opacity 0.3s ease-in-out;
+                }
+                .chart-updating {
+                    opacity: 0.7;
+                }
+            `;
+            document.head.appendChild(style);
+        }
     </script>
 }
