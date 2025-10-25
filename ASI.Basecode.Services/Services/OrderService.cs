@@ -743,6 +743,7 @@ namespace ASI.Basecode.Services.Services
                 var orderSummary = await GetOrderSummaryAsync(period);
                 var revenueData = await GetRevenueDataAsync(period);
                 var monthlyRevenue = await GetMonthlyRevenueAsync(period);
+                var staffActivities = await GetRecentStaffActivitiesAsync();
                 
                 await _orderHubContext.Clients.Group("Dashboard")
                     .SendAsync("DashboardUpdated", new
@@ -754,7 +755,7 @@ namespace ASI.Basecode.Services.Services
                             totalOrders = stats.TotalOrders,
                             todaysCustomers = stats.TodaysCustomers,
                             totalCustomers = stats.TotalCustomers,
-                            totalSales = stats.TotalSales, // This now has lifetime sales
+                            totalSales = stats.TotalSales,
                             averageSalePerDay = stats.AverageSalePerDay,
                             averageProcessingTime = stats.AverageProcessingTime
                         },
@@ -768,7 +769,7 @@ namespace ASI.Basecode.Services.Services
                         },
                         revenueData = new
                         {
-                            totalRevenue = revenueData.TotalRevenue, // This now has lifetime revenue
+                            totalRevenue = revenueData.TotalRevenue,
                             totalExpenses = revenueData.TotalExpenses,
                             netIncome = revenueData.NetIncome,
                             monthlyGrowth = revenueData.MonthlyGrowth
@@ -777,6 +778,15 @@ namespace ASI.Basecode.Services.Services
                         {
                             monthName = mr.MonthName,
                             revenue = mr.Revenue
+                        }).ToList(),
+                        staffActivities = staffActivities.Select(sa => new
+                        {
+                            orderId = sa.OrderID,
+                            staffName = sa.StaffName,
+                            customerName = sa.CustomerName,
+                            elapsedTime = sa.ElapsedTime, // This should match the property name
+                            processedAt = sa.ProcessedAt,
+                            orderType = sa.OrderType
                         }).ToList(),
                         timestamp = DateTime.UtcNow
                     });
@@ -829,10 +839,10 @@ namespace ASI.Basecode.Services.Services
                     {
                         OrderID = processed.OrderID,
                         StaffName = staffName,
-                        ElapsedTime = processed.ElapsedTime.ToString(@"hh\:mm\:ss"),
-                        ProcessedAt = processed.ProcessedAt,
                         CustomerName = customerName,
-                        OrderType = processed.Order?.OrderType.ToString() ?? "Unknown"
+                        OrderType = processed.Order?.OrderType.ToString() ?? "Unknown",
+                        ElapsedTime = processed.ElapsedTime.ToString(@"hh\:mm\:ss"), // This should work now
+                        ProcessedAt = processed.ProcessedAt
                     };
 
                     staffActivities.Add(staffActivity);

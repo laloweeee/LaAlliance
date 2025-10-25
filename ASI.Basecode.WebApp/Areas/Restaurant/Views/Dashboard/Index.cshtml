@@ -264,26 +264,25 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Elapsed Time</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processed At</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200" id="staff-activities-body">
                         @if (Model?.StaffActivities?.Any() == true)
                         {
-                            @foreach (var activity in Model.StaffActivities.Take(6))
+                            @foreach (var activity in Model.StaffActivities.Take(10))
                             {
-                                <tr class="hover:bg-gray-50 transition-colors">
+                                <tr class="hover:bg-gray-50 transition-colors" data-order-id="@activity.OrderID">
                                     <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#@activity.OrderID</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">@activity.StaffName</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">@activity.CustomerName</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                            @(activity.OrderType == "Delivery" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800")">
-                                            @activity.OrderType
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 elapsed-time">
+                                            @activity.ElapsedTime
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">@activity.ProcessedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 processed-at">@activity.ProcessedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
                                 </tr>
                             }
                         }
@@ -313,6 +312,93 @@
         let currentOrderPeriod = 'monthly';
         let currentRevenuePeriod = 'monthly';
 
+        // Real-time SignalR connection for staff activities
+        function initializeRealTimeUpdates() {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/orderHub")
+                .build();
+
+            connection.on("DashboardUpdated", function (data) {
+                console.log("Dashboard updated via SignalR", data);
+                updateStaffActivities(data.staffActivities);
+            });
+
+            connection.on("StaffActivityUpdated", function (updatedActivity) {
+                console.log("Staff activity updated", updatedActivity);
+                updateSingleStaffActivity(updatedActivity);
+            });
+
+            connection.start()
+                .then(() => {
+                    console.log("SignalR Connected to Dashboard group");
+                    connection.invoke("JoinDashboardGroup").catch(err => console.error(err));
+                })
+                .catch(err => console.error("SignalR Connection Error: ", err));
+
+            return connection;
+        }
+
+        function updateStaffActivities(activities) {
+            if (!activities || !Array.isArray(activities)) return;
+            
+            const tbody = document.getElementById('staff-activities-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            
+            activities.slice(0, 6).forEach(activity => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                row.setAttribute('data-order-id', activity.orderId);
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#${activity.orderId}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${activity.staffName}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${activity.customerName}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 elapsed-time">
+                            ${activity.elapsedTime}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 processed-at">
+                        ${new Date(activity.processedAt).toLocaleString('en-US', { 
+                            month: 'short', 
+                            day: '2-digit', 
+                            year: 'numeric',
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: true 
+                        })}
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateSingleStaffActivity(activity) {
+            const existingRow = document.querySelector(`tr[data-order-id="${activity.orderId}"]`);
+            
+            if (existingRow) {
+                // Update existing row
+                const elapsedTimeCell = existingRow.querySelector('.elapsed-time');
+                const processedAtCell = existingRow.querySelector('.processed-at');
+                
+                if (elapsedTimeCell) elapsedTimeCell.textContent = activity.elapsedTime;
+                if (processedAtCell) processedAtCell.textContent = new Date(activity.processedAt).toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+            } else {
+                // Add new row at the top and remove the last one if we have more than 6
+                updateStaffActivities([activity, ...(allDashboardData.staffActivities || [])]);
+            }
+        }
+
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing dashboard...');
@@ -325,6 +411,9 @@
             
             // Set up filter handlers
             initializePanelFilters();
+
+            // Initialize real-time updates
+            initializeRealTimeUpdates();
         });
 
         // Load ALL data for all periods at once

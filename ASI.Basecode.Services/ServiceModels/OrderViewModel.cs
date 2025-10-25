@@ -84,7 +84,7 @@ namespace ASI.Basecode.Services.ServiceModels
         public string Province { get; set; }
         public int ZipCode { get; set; }
         public string Country { get; set; } = "Philippines";
-        
+
         // Formatted full address
         public string FullAddress => $"{Street}, {Barangay}, {City}, {Province} {ZipCode}";
     }
