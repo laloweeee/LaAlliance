@@ -42,13 +42,14 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
 
             try
             {
-                var stats = await _orderService.GetDashboardStatsAsync();
-                var orderSummary = await _orderService.GetOrderSummaryAsync();
-                var mostSellingItems = await _productService.GetMostSellingItemsAsync();
-                var mostFavoriteItems = await _productService.GetMostFavoriteItemsAsync();
+                // Default period "monthly" 
+                var stats = await _orderService.GetDashboardStatsAsync("monthly");
+                var orderSummary = await _orderService.GetOrderSummaryAsync("monthly");
+                var mostSellingItems = await _productService.GetMostSellingItemsAsync("monthly");
+                var mostFavoriteItems = await _productService.GetMostFavoriteItemsAsync("monthly");
                 var staffActivities = await _orderService.GetRecentStaffActivitiesAsync();
-                var revenueData = await _orderService.GetRevenueDataAsync(); // Add this
-                var monthlyRevenue = await _orderService.GetMonthlyRevenueAsync(); // Add this
+                var revenueData = await _orderService.GetRevenueDataAsync("monthly");
+                var monthlyRevenue = await _orderService.GetMonthlyRevenueAsync("monthly");
 
                 var dashboardData = new DashboardDataViewModel
                 {
@@ -57,8 +58,8 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                     MostSellingItems = mostSellingItems ?? new List<MostSellingItemViewModel>(),
                     MostFavoriteItems = mostFavoriteItems ?? new List<MostFavoriteItemViewModel>(),
                     StaffActivities = staffActivities ?? new List<StaffActivityViewModel>(),
-                    RevenueData = revenueData, // Add this
-                    MonthlyRevenue = monthlyRevenue ?? new List<MonthlyRevenueViewModel>() // Add this
+                    RevenueData = revenueData,
+                    MonthlyRevenue = monthlyRevenue ?? new List<MonthlyRevenueViewModel>()
                 };
 
                 return View(dashboardData);
@@ -75,8 +76,8 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                     MostSellingItems = new List<MostSellingItemViewModel>(),
                     MostFavoriteItems = new List<MostFavoriteItemViewModel>(),
                     StaffActivities = new List<StaffActivityViewModel>(),
-                    RevenueData = new RevenueViewModel(), // Add this
-                    MonthlyRevenue = new List<MonthlyRevenueViewModel>() // Add this
+                    RevenueData = new RevenueViewModel(),
+                    MonthlyRevenue = new List<MonthlyRevenueViewModel>()
                 };
 
                 return View(emptyDashboardData);
@@ -100,6 +101,54 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 MostFavoriteItems = mostFavoriteItems,
                 StaffActivities = staffActivities // Add this
             });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardDataByPeriod(string period = "today")
+        {
+            try
+            {
+                // Apply period to relevant data
+                var stats = await _orderService.GetDashboardStatsAsync(period);
+                var orderSummary = await _orderService.GetOrderSummaryAsync(period);
+                var mostSellingItems = await _productService.GetMostSellingItemsAsync(period); // Apply period here
+                var mostFavoriteItems = await _productService.GetMostFavoriteItemsAsync(); // Keep as overall
+                var staffActivities = await _orderService.GetRecentStaffActivitiesAsync();
+                var revenueData = await _orderService.GetRevenueDataAsync(period);
+                var monthlyRevenue = await _orderService.GetMonthlyRevenueAsync(period);
+
+                var dashboardData = new DashboardDataViewModel
+                {
+                    Stats = stats,
+                    OrderSummary = orderSummary,
+                    MostSellingItems = mostSellingItems ?? new List<MostSellingItemViewModel>(),
+                    MostFavoriteItems = mostFavoriteItems ?? new List<MostFavoriteItemViewModel>(),
+                    StaffActivities = staffActivities ?? new List<StaffActivityViewModel>(),
+                    RevenueData = revenueData,
+                    MonthlyRevenue = monthlyRevenue ?? new List<MonthlyRevenueViewModel>()
+                };
+
+                return Ok(dashboardData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading dashboard data for period: {Period}", period);
+                return StatusCode(500, new { error = "Error loading dashboard data" });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult DebugOrders()
+        {
+            try
+            {
+                _orderService.DebugOrderData();
+                return Content("Order debug data printed to console. Check your server logs.");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Debug error: {ex.Message}");
+            }
         }
     }
 }

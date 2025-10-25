@@ -69,7 +69,7 @@ namespace ASI.Basecode.Services.Interfaces
         void PermanentDelete(int productID);
 
         // Methods for dashboard
-        Task<List<MostSellingItemViewModel>> GetMostSellingItemsAsync(int count = 5);
-        Task<List<MostFavoriteItemViewModel>> GetMostFavoriteItemsAsync(int count = 5);
+        Task<List<MostSellingItemViewModel>> GetMostSellingItemsAsync(string period = "today", int count = 5);
+        Task<List<MostFavoriteItemViewModel>> GetMostFavoriteItemsAsync(string period = "today", int count = 5);
     }
 }

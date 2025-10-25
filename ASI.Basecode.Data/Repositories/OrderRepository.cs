@@ -88,12 +88,13 @@ namespace ASI.Basecode.Data.Repositories
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.OrderItemOption)
-                        .ThenInclude(oio => oio.ProductOptionGroup)  // ADD THIS LINE
+                        .ThenInclude(oio => oio.ProductOptionGroup)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.OrderItemOption)
-                        .ThenInclude(oio => oio.ProductOptionItems)  // ADD THIS LINE
+                        .ThenInclude(oio => oio.ProductOptionItems)
                 .Include(o => o.OrderProcessed)
                 .Include(o => o.PaymentLogs)
+                .AsNoTracking() // Add this for performance
                 .ToList();
         }
 

@@ -425,57 +425,128 @@ namespace ASI.Basecode.Services.Services
             return false;
         }
 
-        public async Task<List<MostSellingItemViewModel>> GetMostSellingItemsAsync(int count = 5)
+        public async Task<List<MostSellingItemViewModel>> GetMostSellingItemsAsync(string period = "today", int count = 5)
         {
             try
             {
-                var orderItems = _orderRepository.GetAllOrders()
-                    .Where(o => o.OrderStatus != Resources.Constants.Enums.OrderStatus.Cancelled) // Exclude cancelled orders
+                Console.WriteLine($"=== GetMostSellingItemsAsync START for period: {period} ===");
+                
+                var orders = _orderRepository.GetAllOrders()
+                    .Where(o => o.OrderStatus != Resources.Constants.Enums.OrderStatus.Cancelled)
+                    .ToList();
+
+                Console.WriteLine($"Total non-cancelled orders: {orders.Count}");
+
+                // Apply period filtering
+                var filteredOrders = FilterOrdersByPeriod(orders, period).ToList();
+                Console.WriteLine($"Filtered orders for {period}: {filteredOrders.Count}");
+
+                if (!filteredOrders.Any())
+                {
+                    Console.WriteLine("No filtered orders found for MostSellingItems");
+                    // Return empty list instead of sample data for now
+                    return new List<MostSellingItemViewModel>();
+                }
+
+                // Get all order items from filtered orders
+                var orderItems = filteredOrders
                     .SelectMany(o => o.OrderItems)
-                    .Where(oi => oi.ProductID.HasValue) 
+                    .Where(oi => oi.ProductID.HasValue)
+                    .ToList();
+
+                Console.WriteLine($"Total order items found: {orderItems.Count}");
+
+                if (!orderItems.Any())
+                {
+                    Console.WriteLine("No order items found in filtered orders");
+                    // Debug: Check what's in the orders
+                    Console.WriteLine("Debug order items structure:");
+                    foreach (var order in filteredOrders.Take(3))
+                    {
+                        Console.WriteLine($"Order {order.OrderID} has {order.OrderItems.Count} items");
+                        foreach (var item in order.OrderItems)
+                        {
+                            Console.WriteLine($"  Item: ProductID={item.ProductID}, ProductName={item.Product?.ProductName}, Quantity={item.Quantity}, UnitPrice={item.UnitPrice}");
+                        }
+                    }
+                    return new List<MostSellingItemViewModel>();
+                }
+
+                // Group by product and calculate totals
+                var mostSelling = orderItems
                     .GroupBy(oi => oi.ProductID.Value)
                     .Select(g => new MostSellingItemViewModel
                     {
                         ProductID = g.Key,
-                        ProductName = g.First().Product?.ProductName ?? "Unknown Product",
+                        ProductName = g.First().Product?.ProductName ?? $"Product {g.Key}",
                         ProductImage = g.First().Product?.ProductImage ?? "",
                         TotalQuantity = g.Sum(oi => oi.Quantity),
                         Price = g.First().UnitPrice,
                         TotalRevenue = g.Sum(oi => oi.Quantity * oi.UnitPrice)
                     })
+                    .Where(x => x.TotalQuantity > 0) // Only include products that were actually sold
                     .OrderByDescending(x => x.TotalQuantity)
                     .Take(count)
                     .ToList();
 
-                return orderItems;
+                Console.WriteLine($"Most selling items found: {mostSelling.Count}");
+                foreach (var item in mostSelling)
+                {
+                    Console.WriteLine($"- {item.ProductName}: {item.TotalQuantity} sold, ₱{item.TotalRevenue}");
+                }
+
+                return mostSelling;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting most selling items");
+                Console.WriteLine($"MostSellingItems ERROR: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<MostSellingItemViewModel>();
             }
         }
 
-        public async Task<List<MostFavoriteItemViewModel>> GetMostFavoriteItemsAsync(int count = 5)
+        public async Task<List<MostFavoriteItemViewModel>> GetMostFavoriteItemsAsync(string period = "today", int count = 5)
         {
-            var favoriteCounts = _favoritesRepository.GetFavoriteCountsByProduct();
-            var products = _productRepository.GetProducts().Where(p => p.IsActive).ToList();
+            try
+            {
+                var favoriteCounts = _favoritesRepository.GetFavoriteCountsByProduct();
+                var products = _productRepository.GetProducts().Where(p => p.IsActive).ToList();
 
-            var mostFavoriteItems = products
-                .Select(p => new MostFavoriteItemViewModel
-                {
-                    ProductID = p.ProductID,
-                    ProductName = p.ProductName,
-                    ProductImage = p.ProductImage,
-                    FavoriteCount = favoriteCounts.ContainsKey(p.ProductID) ? favoriteCounts[p.ProductID] : 0,
-                    Price = p.ProductPrice
-                })
-                .Where(x => x.FavoriteCount > 0)
-                .OrderByDescending(x => x.FavoriteCount)
-                .Take(count)
-                .ToList();
+                var mostFavoriteItems = products
+                    .Select(p => new MostFavoriteItemViewModel
+                    {
+                        ProductID = p.ProductID,
+                        ProductName = p.ProductName,
+                        ProductImage = p.ProductImage,
+                        FavoriteCount = favoriteCounts.ContainsKey(p.ProductID) ? favoriteCounts[p.ProductID] : 0,
+                        Price = p.ProductPrice
+                    })
+                    .Where(x => x.FavoriteCount > 0)
+                    .OrderByDescending(x => x.FavoriteCount)
+                    .Take(count)
+                    .ToList();
 
-            return mostFavoriteItems;
+                return mostFavoriteItems;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting most favorite items");
+                return new List<MostFavoriteItemViewModel>();
+            }
+        }
+
+        private IEnumerable<Order> FilterOrdersByPeriod(IEnumerable<Order> orders, string period)
+        {
+            var now = DateTime.Now;
+            
+            return period.ToLower() switch
+            {
+                "today" => orders.Where(o => o.OrderDate.Date == now.Date),
+                "weekly" => orders.Where(o => o.OrderDate >= now.AddDays(-7)),
+                "monthly" => orders.Where(o => o.OrderDate >= now.AddDays(-30)),
+                _ => orders.Where(o => o.OrderDate.Date == now.Date)
+            };
         }
     }
 }

@@ -74,7 +74,17 @@
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Orders Summary</h3>
-                <span class="text-sm text-gray-500">Real-time Updates</span>
+                <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                    <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 bg-blue-500 text-white" data-period="today">
+                        Today
+                    </button>
+                    <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="weekly">
+                        Weekly
+                    </button>
+                    <button class="order-summary-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="monthly">
+                        Monthly
+                    </button>
+                </div>
             </div>
             
             <div class="grid grid-cols-2 gap-6">
@@ -124,18 +134,31 @@
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Revenue</h3>
-                <span class="text-sm text-green-500 font-medium">+@(Model?.RevenueData?.MonthlyGrowth ?? 0)% this month</span>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-green-500 font-medium">+@(Model?.RevenueData?.MonthlyGrowth ?? 0)% this month</span>
+                    <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                        <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 bg-blue-500 text-white" data-period="today">
+                            Today
+                        </button>
+                        <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="weekly">
+                            Weekly
+                        </button>
+                        <button class="revenue-filter px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-white" data-period="monthly">
+                            Monthly
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <!-- Revenue Stats -->
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="text-center p-4 bg-gray-50 rounded-lg">
                     <p class="text-sm text-gray-600 mb-1">Income</p>
-                    <p class="text-2xl font-bold text-gray-800">₱@((Model?.RevenueData?.TotalRevenue ?? 0).ToString("N2"))</p>
+                    <p class="text-2xl font-bold text-gray-800 revenue-income">₱@((Model?.RevenueData?.TotalRevenue ?? 0).ToString("N2"))</p>
                 </div>
                 <div class="text-center p-4 bg-gray-50 rounded-lg">
                     <p class="text-sm text-gray-600 mb-1">Expense</p>
-                    <p class="text-2xl font-bold text-gray-800">₱@((Model?.RevenueData?.TotalExpenses ?? 0).ToString("N2"))</p>
+                    <p class="text-2xl font-bold text-gray-800 revenue-expense">₱@((Model?.RevenueData?.TotalExpenses ?? 0).ToString("N2"))</p>
                 </div>
             </div>
             
@@ -281,7 +304,7 @@
 </div>
 
 @section Scripts {
-    <!-- Use CDN instead of local SignalR -->
+    <!-- Using CDN instead of local SignalR -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     
     <script>
@@ -396,76 +419,89 @@
             }
         }
 
-        // SignalR Connection with error handling
-        function initializeSignalR() {
-            if (typeof signalR === 'undefined') {
-                console.error('SignalR not loaded');
-                return;
-            }
-
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/orderHub")
-                .withAutomaticReconnect()
-                .build();
-
-            connection.start().then(function () {
-                console.log("SignalR Connected to OrderHub");
-                return connection.invoke("JoinDashboardGroup");
-            }).then(function () {
-                console.log("Joined Dashboard group");
-            }).catch(function (err) {
-                console.error("SignalR Connection Error: ", err.toString());
+        // Separate filter functionality for each panel
+        function initializePanelFilters() {
+            // Order Summary filters
+            const orderSummaryFilters = document.querySelectorAll('.order-summary-filter');
+            orderSummaryFilters.forEach(button => {
+                button.addEventListener('click', function() {
+                    const period = this.getAttribute('data-period');
+                    updateFilterButtons(orderSummaryFilters, this);
+                    loadOrderSummaryData(period);
+                });
             });
 
-            // Listen for dashboard updates
-            connection.on("DashboardUpdated", function (data) {
-                console.log("Dashboard update received", data);
-                updateDashboardUI(data);
-                updateCharts(data);
+            // Revenue filters
+            const revenueFilters = document.querySelectorAll('.revenue-filter');
+            revenueFilters.forEach(button => {
+                button.addEventListener('click', function() {
+                    const period = this.getAttribute('data-period');
+                    updateFilterButtons(revenueFilters, this);
+                    loadRevenueData(period);
+                });
             });
-
-            return connection;
         }
 
-        function updateDashboardUI(data) {
-            // Update stats cards
-            updateElementText('[data-stat="todays-orders"]', data.stats.todaysOrders);
-            updateElementText('[data-stat="todays-customers"]', data.stats.todaysCustomers);
-            updateElementText('[data-stat="total-sales"]', '₱' + formatCurrency(data.stats.totalSales));
-            updateElementText('[data-stat="avg-processing-time"]', data.stats.averageProcessingTime);
+        function updateFilterButtons(buttons, activeButton) {
+            buttons.forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-500', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:text-gray-800', 'hover:bg-white');
+            });
+            
+            activeButton.classList.add('active', 'bg-blue-500', 'text-white');
+            activeButton.classList.remove('text-gray-600', 'hover:text-gray-800', 'hover:bg-white');
+        }
 
-            // Update order summary
-            updateElementText('[data-stat="pending"]', data.orderSummary.pending);
-            updateElementText('[data-stat="processing"]', data.orderSummary.processing);
-            updateElementText('[data-stat="completed"]', data.orderSummary.completed);
-            updateElementText('[data-stat="cancelled"]', data.orderSummary.cancelled);
-
-            // Update revenue growth indicator if available
-            if (data.revenueData) {
-                const growthElement = document.querySelector('.text-green-500.font-medium');
-                if (growthElement) {
-                    growthElement.textContent = `+${data.revenueData.monthlyGrowth}% this month`;
+        async function loadOrderSummaryData(period) {
+            try {
+                const response = await fetch(`/Restaurant/Dashboard/GetDashboardDataByPeriod?period=${period}`);
+                if (!response.ok) throw new Error('Failed to fetch order summary data');
+                
+                const data = await response.json();
+                
+                // Update order summary stats
+                updateElementText('[data-stat="pending"]', data.orderSummary.pending);
+                updateElementText('[data-stat="processing"]', data.orderSummary.processing);
+                updateElementText('[data-stat="completed"]', data.orderSummary.completed);
+                updateElementText('[data-stat="cancelled"]', data.orderSummary.cancelled);
+                
+                // Update order summary chart
+                if (orderSummaryChart) {
+                    orderSummaryChart.data.datasets[0].data = [
+                        data.orderSummary.pending,
+                        data.orderSummary.processing,
+                        data.orderSummary.completed,
+                        data.orderSummary.cancelled
+                    ];
+                    orderSummaryChart.update('active');
                 }
+            } catch (error) {
+                console.error('Error loading order summary data:', error);
             }
         }
 
-        function updateCharts(data) {
-            // Update order summary chart
-            if (orderSummaryChart) {
-                orderSummaryChart.data.datasets[0].data = [
-                    data.orderSummary.pending,
-                    data.orderSummary.processing,
-                    data.orderSummary.completed,
-                    data.orderSummary.cancelled
-                ];
-                orderSummaryChart.update('active');
-            }
-
-            // Update revenue chart if monthly revenue data is available
-            if (revenueChart && data.monthlyRevenue) {
-                revenueChart.data.labels = data.monthlyRevenue.map(m => m.monthName);
-                revenueChart.data.datasets[0].data = data.monthlyRevenue.map(m => m.revenue);
-                revenueChart.update('active');
+        async function loadRevenueData(period) {
+            try {
+                const response = await fetch(`/Restaurant/Dashboard/GetDashboardDataByPeriod?period=${period}`);
+                if (!response.ok) throw new Error('Failed to fetch revenue data');
+                
+                const data = await response.json();
+                
+                // Update revenue data
+                const incomeElement = document.querySelector('.revenue-income');
+                const expenseElement = document.querySelector('.revenue-expense');
+                
+                if (incomeElement) incomeElement.textContent = '₱' + formatCurrency(data.revenueData.totalRevenue);
+                if (expenseElement) expenseElement.textContent = '₱' + formatCurrency(data.revenueData.totalExpenses);
+                
+                // Update revenue chart
+                if (revenueChart && data.monthlyRevenue) {
+                    revenueChart.data.labels = data.monthlyRevenue.map(m => m.monthName);
+                    revenueChart.data.datasets[0].data = data.monthlyRevenue.map(m => m.revenue);
+                    revenueChart.update('active');
+                }
+            } catch (error) {
+                console.error('Error loading revenue data:', error);
             }
         }
 
@@ -485,9 +521,9 @@
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing charts and SignalR');
+            console.log('DOM loaded, initializing charts and filters');
             initializeCharts();
-            initializeSignalR();
+            initializePanelFilters();
         });
     </script>
 }

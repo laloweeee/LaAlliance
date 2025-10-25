@@ -578,39 +578,64 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public async Task<DashboardStatsViewModel> GetDashboardStatsAsync()
+        public async Task<DashboardStatsViewModel> GetDashboardStatsAsync(string period = "today")
         {
             try
             {
-                var orders = _orderRepository.GetAllOrders();
-                var today = DateTime.Today;
+                Console.WriteLine($"=== GetDashboardStatsAsync START for period: {period} ===");
                 
-                // Add null checks
-                if (orders == null)
+                var orders = _orderRepository.GetAllOrders().ToList();
+                Console.WriteLine($"Total orders retrieved from database: {orders.Count}");
+
+                if (!orders.Any())
                 {
+                    Console.WriteLine("NO ORDERS FOUND IN DATABASE!");
                     return new DashboardStatsViewModel();
                 }
-                
-                var todaysOrders = orders.Count(o => o.OrderDate.Date == today);
-                var totalOrders = orders.Count();
-                
-                // Get unique customers
-                var todaysCustomers = orders
-                    .Where(o => o.OrderDate.Date == today)
+
+                var filteredOrders = FilterOrdersByPeriod(orders, period).ToList();
+                Console.WriteLine($"Orders after {period} filter: {filteredOrders.Count}");
+
+                // Using ALL orders for total counts, but only non-cancelled for meaningful stats
+                var allNonCancelledOrders = orders.Where(o => o.OrderStatus != Enums.OrderStatus.Cancelled).ToList();
+                var periodNonCancelledOrders = filteredOrders.Where(o => o.OrderStatus != Enums.OrderStatus.Cancelled).ToList();
+
+                Console.WriteLine($"All non-cancelled orders: {allNonCancelledOrders.Count}");
+                Console.WriteLine($"Period non-cancelled orders: {periodNonCancelledOrders.Count}");
+
+                // Calculate stats
+                var todaysOrders = periodNonCancelledOrders.Count(o => o.OrderDate.Date == DateTime.Today);
+                var totalOrders = allNonCancelledOrders.Count;
+
+                var todaysCustomers = periodNonCancelledOrders
+                    .Where(o => o.OrderDate.Date == DateTime.Today)
                     .Select(o => o.UserID)
                     .Where(userId => userId.HasValue)
                     .Distinct()
                     .Count();
                     
-                var totalCustomers = orders
+                var totalCustomers = allNonCancelledOrders
                     .Select(o => o.UserID)
                     .Where(userId => userId.HasValue)
                     .Distinct()
                     .Count();
 
-                var totalSales = await GetTotalSalesAsync();
-                var averageSalePerDay = await GetAverageSalePerDayAsync();
-                var averageProcessingTime = await GetAverageProcessingTimeAsync(); 
+                // Total Sales 
+                var totalSales = allNonCancelledOrders.Sum(o => o.TotalAmount);
+                
+                var averageSalePerDay = periodNonCancelledOrders.Any() 
+                    ? periodNonCancelledOrders.Sum(o => o.TotalAmount) / Math.Max(1, periodNonCancelledOrders.Select(o => o.OrderDate.Date).Distinct().Count())
+                    : 0;
+
+                var averageProcessingTime = await GetAverageProcessingTimeAsync(period);
+
+                Console.WriteLine($"=== CALCULATED STATS ===");
+                Console.WriteLine($"Today's Orders: {todaysOrders}");
+                Console.WriteLine($"Total Orders: {totalOrders}");
+                Console.WriteLine($"Today's Customers: {todaysCustomers}");
+                Console.WriteLine($"Total Customers: {totalCustomers}");
+                Console.WriteLine($"Total Sales (LIFETIME): {totalSales}");
+                Console.WriteLine($"Average Sale Per Day: {averageSalePerDay}");
 
                 return new DashboardStatsViewModel
                 {
@@ -625,30 +650,31 @@ namespace ASI.Basecode.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error and return empty stats
-                Console.WriteLine($"Error getting dashboard stats: {ex.Message}");
+                Console.WriteLine($"ERROR in GetDashboardStatsAsync: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new DashboardStatsViewModel();
             }
         }
 
-        public async Task<OrderSummaryViewModel> GetOrderSummaryAsync()
+        public async Task<OrderSummaryViewModel> GetOrderSummaryAsync(string period = "today")
         {
             try
             {
                 var orders = _orderRepository.GetAllOrders();
+                var filteredOrders = FilterOrdersByPeriod(orders, period);
                 
-                if (orders == null)
+                if (filteredOrders == null)
                 {
                     return new OrderSummaryViewModel();
                 }
                 
                 return new OrderSummaryViewModel
                 {
-                    Pending = orders.Count(o => o.OrderStatus == OrderStatus.Pending),
-                    Processing = orders.Count(o => o.OrderStatus == OrderStatus.Processing),
-                    ReadyForDeliveryPickup = orders.Count(o => o.OrderStatus == OrderStatus.ReadyForDelivery || o.OrderStatus == OrderStatus.ReadyForPickup),
-                    Completed = orders.Count(o => o.OrderStatus == OrderStatus.Completed),
-                    Cancelled = orders.Count(o => o.OrderStatus == OrderStatus.Cancelled)
+                    Pending = filteredOrders.Count(o => o.OrderStatus == OrderStatus.Pending),
+                    Processing = filteredOrders.Count(o => o.OrderStatus == OrderStatus.Processing),
+                    ReadyForDeliveryPickup = filteredOrders.Count(o => o.OrderStatus == OrderStatus.ReadyForDelivery || o.OrderStatus == OrderStatus.ReadyForPickup),
+                    Completed = filteredOrders.Count(o => o.OrderStatus == OrderStatus.Completed),
+                    Cancelled = filteredOrders.Count(o => o.OrderStatus == OrderStatus.Cancelled)
                 };
             }
             catch (Exception ex)
@@ -658,15 +684,17 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public async Task<decimal> GetTotalSalesAsync()
+        public async Task<decimal> GetTotalSalesAsync(string period = "today")
         {
             try
             {
                 var orders = _orderRepository.GetAllOrders();
-                if (orders == null || !orders.Any())
+                var filteredOrders = FilterOrdersByPeriod(orders, period);
+                
+                if (filteredOrders == null || !filteredOrders.Any())
                     return 0;
 
-                return orders
+                return filteredOrders
                     .Where(o => o.OrderStatus != OrderStatus.Cancelled)
                     .Sum(o => o.TotalAmount);
             }
@@ -677,15 +705,17 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public async Task<decimal> GetAverageSalePerDayAsync()
+        public async Task<decimal> GetAverageSalePerDayAsync(string period = "today")
         {
             try
             {
                 var orders = _orderRepository.GetAllOrders();
-                if (orders == null || !orders.Any())
+                var filteredOrders = FilterOrdersByPeriod(orders, period);
+                
+                if (filteredOrders == null || !filteredOrders.Any())
                     return 0;
 
-                var completedOrders = orders.Where(o => o.OrderStatus != OrderStatus.Cancelled);
+                var completedOrders = filteredOrders.Where(o => o.OrderStatus != OrderStatus.Cancelled);
                 
                 if (!completedOrders.Any())
                     return 0;
@@ -705,25 +735,26 @@ namespace ASI.Basecode.Services.Services
             }
         }
         
-        private async Task NotifyDashboardUpdate()
+        private async Task NotifyDashboardUpdate(string period = "today")
         {
             try
             {
-                var stats = await GetDashboardStatsAsync();
-                var orderSummary = await GetOrderSummaryAsync();
-                var revenueData = await GetRevenueDataAsync(); // Add this
-                var monthlyRevenue = await GetMonthlyRevenueAsync(); // Add this
+                var stats = await GetDashboardStatsAsync(period);
+                var orderSummary = await GetOrderSummaryAsync(period);
+                var revenueData = await GetRevenueDataAsync(period);
+                var monthlyRevenue = await GetMonthlyRevenueAsync(period);
                 
                 await _orderHubContext.Clients.Group("Dashboard")
                     .SendAsync("DashboardUpdated", new
                     {
+                        period = period,
                         stats = new
                         {
                             todaysOrders = stats.TodaysOrders,
                             totalOrders = stats.TotalOrders,
                             todaysCustomers = stats.TodaysCustomers,
                             totalCustomers = stats.TotalCustomers,
-                            totalSales = stats.TotalSales,
+                            totalSales = stats.TotalSales, // This now has lifetime sales
                             averageSalePerDay = stats.AverageSalePerDay,
                             averageProcessingTime = stats.AverageProcessingTime
                         },
@@ -735,14 +766,14 @@ namespace ASI.Basecode.Services.Services
                             completed = orderSummary.Completed,
                             cancelled = orderSummary.Cancelled
                         },
-                        revenueData = new // Add this section
+                        revenueData = new
                         {
-                            totalRevenue = revenueData.TotalRevenue,
+                            totalRevenue = revenueData.TotalRevenue, // This now has lifetime revenue
                             totalExpenses = revenueData.TotalExpenses,
                             netIncome = revenueData.NetIncome,
                             monthlyGrowth = revenueData.MonthlyGrowth
                         },
-                        monthlyRevenue = monthlyRevenue.Select(mr => new // Add this for chart updates
+                        monthlyRevenue = monthlyRevenue.Select(mr => new
                         {
                             monthName = mr.MonthName,
                             revenue = mr.Revenue
@@ -816,7 +847,7 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public async Task<string> GetAverageProcessingTimeAsync()
+        public async Task<string> GetAverageProcessingTimeAsync(string period = "today")
         {
             try
             {
@@ -894,23 +925,32 @@ namespace ASI.Basecode.Services.Services
             return $"TXN-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
         }
 
-        public async Task<RevenueViewModel> GetRevenueDataAsync()
+        public async Task<RevenueViewModel> GetRevenueDataAsync(string period = "today")
         {
             try
             {
-                var orders = _orderRepository.GetAllOrders();
-                var completedOrders = orders.Where(o => o.OrderStatus == Enums.OrderStatus.Completed);
+                var orders = _orderRepository.GetAllOrders().ToList();
+                var filteredOrders = FilterOrdersByPeriod(orders, period).ToList();
+                var completedOrders = filteredOrders.Where(o => o.OrderStatus == Enums.OrderStatus.Completed);
                 
-                var totalRevenue = completedOrders.Sum(o => o.TotalAmount);
-                var totalExpenses = totalRevenue * 0.3m; // Example: 30% expenses
+                // Using lifetime revenue for the main display
+                var allNonCancelledOrders = orders.Where(o => o.OrderStatus != Enums.OrderStatus.Cancelled).ToList();
+                var totalRevenue = allNonCancelledOrders.Sum(o => o.TotalAmount);
+                
+                var totalExpenses = totalRevenue * 0.3m; // 30% expenses for calculation
                 var netIncome = totalRevenue - totalExpenses;
+                
+                Console.WriteLine($"=== Revenue Data ===");
+                Console.WriteLine($"Total Revenue (Lifetime): {totalRevenue}");
+                Console.WriteLine($"Total Expenses: {totalExpenses}");
+                Console.WriteLine($"Net Income: {netIncome}");
                 
                 return new RevenueViewModel
                 {
                     TotalRevenue = totalRevenue,
                     TotalExpenses = totalExpenses,
                     NetIncome = netIncome,
-                    MonthlyGrowth = 15.5m // Example growth percentage
+                    MonthlyGrowth = 15.5m
                 };
             }
             catch (Exception ex)
@@ -920,13 +960,14 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public async Task<List<MonthlyRevenueViewModel>> GetMonthlyRevenueAsync()
+        public async Task<List<MonthlyRevenueViewModel>> GetMonthlyRevenueAsync(string period = "today")
         {
             try
             {
                 var orders = _orderRepository.GetAllOrders();
-                var completedOrders = orders.Where(o => o.OrderStatus == Enums.OrderStatus.Completed);
-                
+                var filteredOrders = FilterOrdersByPeriod(orders, period);
+                var completedOrders = filteredOrders.Where(o => o.OrderStatus == Enums.OrderStatus.Completed);
+
                 var monthlyData = completedOrders
                     .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
                     .Select(g => new MonthlyRevenueViewModel
@@ -938,7 +979,7 @@ namespace ASI.Basecode.Services.Services
                         Orders = g.Count()
                     })
                     .OrderBy(x => x.Year).ThenBy(x => x.Month)
-                    .Take(12) // Last 12 months
+                    .Take(12)
                     .ToList();
 
                 return monthlyData;
@@ -947,6 +988,114 @@ namespace ASI.Basecode.Services.Services
             {
                 Console.WriteLine($"Error getting monthly revenue: {ex.Message}");
                 return new List<MonthlyRevenueViewModel>();
+            }
+        }
+
+        private IEnumerable<Order> FilterOrdersByPeriod(IEnumerable<Order> orders, string period)
+        {
+            var now = DateTime.Now;
+
+            Console.WriteLine($"=== FilterOrdersByPeriod: {period} ===");
+            Console.WriteLine($"Current server time: {now}");
+            Console.WriteLine($"Today's date: {now.Date}");
+
+            var filtered = period.ToLower() switch
+            {
+                "today" => orders.Where(o => o.OrderDate.Date == now.Date),
+                "weekly" => orders.Where(o => o.OrderDate >= now.AddDays(-7)),
+                "monthly" => orders.Where(o => o.OrderDate >= now.AddDays(-30)),
+                _ => orders.Where(o => o.OrderDate.Date == now.Date)
+            };
+
+            var filteredList = filtered.ToList();
+
+            Console.WriteLine($"Orders after {period} filtering: {filteredList.Count}");
+
+            if (filteredList.Any())
+            {
+                var minDate = filteredList.Min(o => o.OrderDate);
+                var maxDate = filteredList.Max(o => o.OrderDate);
+                Console.WriteLine($"Date range in filtered orders: {minDate} to {maxDate}");
+
+                // Show first few orders for debugging
+                Console.WriteLine("First 3 filtered orders:");
+                foreach (var order in filteredList.Take(3))
+                {
+                    Console.WriteLine($"  Order {order.OrderID}: Date={order.OrderDate}, Status={order.OrderStatus}, Total={order.TotalAmount}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("NO ORDERS MATCH THE FILTER CRITERIA!");
+                // Let's see what dates we have in the original orders
+                var allDates = orders.Select(o => o.OrderDate.Date).Distinct().OrderBy(d => d).ToList();
+                Console.WriteLine($"Available dates in all orders: {string.Join(", ", allDates)}");
+            }
+
+            return filteredList;
+        }
+
+        public void DebugOrderData()
+        {
+            try
+            {
+                var orders = _orderRepository.GetAllOrders().ToList();
+                Console.WriteLine($"=== COMPREHENSIVE ORDER DATA DEBUG ===");
+                Console.WriteLine($"Total orders in database: {orders.Count}");
+                
+                if (orders.Any())
+                {
+                    // Order status breakdown
+                    var statusGroups = orders.GroupBy(o => o.OrderStatus)
+                        .Select(g => new { Status = g.Key, Count = g.Count(), Total = g.Sum(o => o.TotalAmount) });
+                    
+                    Console.WriteLine("ORDER STATUS BREAKDOWN:");
+                    foreach (var group in statusGroups)
+                    {
+                        Console.WriteLine($"  {group.Status}: {group.Count} orders, Total: ₱{group.Total:N2}");
+                    }
+
+                    // Date analysis
+                    var dates = orders.Select(o => o.OrderDate.Date).Distinct().OrderBy(d => d).ToList();
+                    Console.WriteLine($"Date range: {dates.First()} to {dates.Last()}");
+                    Console.WriteLine($"Unique dates: {dates.Count}");
+                    
+                    // Today's analysis
+                    var today = DateTime.Today;
+                    var todayOrders = orders.Where(o => o.OrderDate.Date == today).ToList();
+                    Console.WriteLine($"Today's orders ({today:yyyy-MM-dd}): {todayOrders.Count}");
+                    
+                    // Customer analysis
+                    var customers = orders.Where(o => o.UserID.HasValue).Select(o => o.UserID.Value).Distinct().ToList();
+                    Console.WriteLine($"Unique customers: {customers.Count}");
+                    
+                    // Sales analysis (non-cancelled only)
+                    var nonCancelled = orders.Where(o => o.OrderStatus != Enums.OrderStatus.Cancelled).ToList();
+                    Console.WriteLine($"Non-cancelled orders: {nonCancelled.Count}");
+                    Console.WriteLine($"Total sales (non-cancelled): ₱{nonCancelled.Sum(o => o.TotalAmount):N2}");
+                    
+                    // Sample data
+                    Console.WriteLine("SAMPLE ORDERS (first 5):");
+                    foreach (var order in orders.Take(5))
+                    {
+                        Console.WriteLine($"  Order {order.OrderID}:");
+                        Console.WriteLine($"    Date: {order.OrderDate}");
+                        Console.WriteLine($"    Status: {order.OrderStatus}");
+                        Console.WriteLine($"    UserID: {order.UserID}");
+                        Console.WriteLine($"    Total: ₱{order.TotalAmount:N2}");
+                        Console.WriteLine($"    Items: {order.OrderItems.Count}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("NO ORDERS FOUND IN DATABASE!");
+                }
+                Console.WriteLine($"=== END DEBUG ===");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DEBUG ERROR: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
     }

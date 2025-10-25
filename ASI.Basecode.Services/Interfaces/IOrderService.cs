@@ -14,15 +14,17 @@ namespace ASI.Basecode.Services.Interfaces
         void CancelOrder(int orderID, int userID);
         Task UpdateOrderStatus(int orderID, int userID, OrderStatus newStatus);
         
-        // Methods for dashboard
-        Task<DashboardStatsViewModel> GetDashboardStatsAsync();
-        Task<OrderSummaryViewModel> GetOrderSummaryAsync();
-        Task<decimal> GetTotalSalesAsync();
-        Task<decimal> GetAverageSalePerDayAsync();
+        // Methods for dashboard - updated with period parameter
+        Task<DashboardStatsViewModel> GetDashboardStatsAsync(string period = "today");
+        Task<OrderSummaryViewModel> GetOrderSummaryAsync(string period = "today");
+        Task<decimal> GetTotalSalesAsync(string period = "today");
+        Task<decimal> GetAverageSalePerDayAsync(string period = "today");
 
         Task<List<StaffActivityViewModel>> GetRecentStaffActivitiesAsync(int count = 10);
-        Task<string> GetAverageProcessingTimeAsync();
-        Task<RevenueViewModel> GetRevenueDataAsync();
-        Task<List<MonthlyRevenueViewModel>> GetMonthlyRevenueAsync();
+        Task<string> GetAverageProcessingTimeAsync(string period = "today");
+        Task<RevenueViewModel> GetRevenueDataAsync(string period = "today");
+        Task<List<MonthlyRevenueViewModel>> GetMonthlyRevenueAsync(string period = "today");
+
+        void DebugOrderData();
     }
 }
