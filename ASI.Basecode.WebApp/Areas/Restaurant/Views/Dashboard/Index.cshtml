@@ -170,126 +170,129 @@
     </div>
 
     <!-- Bottom Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Most Selling Items -->
-        <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Most Selling Items</h3>
-            <div class="space-y-4">
-                @if (Model?.MostSellingItems?.Any() == true)
-                {
-                    @foreach (var item in Model.MostSellingItems.Take(5))
+    <div class="space-y-8">
+        <!-- Most Selling Items and Most Favorites Items -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Most Selling Items -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Most Selling Items</h3>
+                <div class="space-y-4">
+                    @if (Model?.MostSellingItems?.Any() == true)
                     {
-                        <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                            <div class="flex items-center">
-                                @if (!string.IsNullOrEmpty(item.ProductImage))
-                                {
-                                    <img src="@item.ProductImage" alt="@item.ProductName" class="w-12 h-12 rounded-lg object-cover mr-3">
-                                }
-                                else
-                                {
-                                    <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-image text-gray-400"></i>
+                        @foreach (var item in Model.MostSellingItems.Take(5))
+                        {
+                            <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                <div class="flex items-center min-w-0 flex-1">
+                                    @if (!string.IsNullOrEmpty(item.ProductImage))
+                                    {
+                                        <img src="@item.ProductImage" alt="@item.ProductName" class="w-12 h-12 rounded-lg object-cover mr-3 flex-shrink-0">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        </div>
+                                    }
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-medium text-gray-800 truncate">@item.ProductName</p>
+                                        <p class="text-sm text-gray-600">@item.TotalQuantity sold</p>
                                     </div>
-                                }
-                                <div>
-                                    <p class="font-medium text-gray-800">@item.ProductName</p>
-                                    <p class="text-sm text-gray-600">@item.TotalQuantity sold</p>
+                                </div>
+                                <div class="text-right ml-4 flex-shrink-0">
+                                    <p class="font-semibold text-gray-800 whitespace-nowrap">₱@item.TotalRevenue.ToString("N2")</p>
+                                    <p class="text-sm text-gray-600 whitespace-nowrap">₱@item.Price.ToString("N2") each</p>
                                 </div>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-gray-800">₱@item.TotalRevenue.ToString("N2")</p>
-                                <p class="text-sm text-gray-600">₱@item.Price.ToString("N2") each</p>
-                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-chart-bar text-3xl mb-3"></i>
+                            <p>No sales data available</p>
                         </div>
                     }
-                }
-                else
-                {
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-chart-bar text-3xl mb-3"></i>
-                        <p>No sales data available</p>
-                    </div>
-                }
+                </div>
+            </div>
+
+            <!-- Most Favorites Items -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Most Favorites Items</h3>
+                <div class="space-y-4">
+                    @if (Model?.MostFavoriteItems?.Any() == true)
+                    {
+                        @foreach (var item in Model.MostFavoriteItems.Take(5))
+                        {
+                            <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                <div class="flex items-center min-w-0 flex-1">
+                                    @if (!string.IsNullOrEmpty(item.ProductImage))
+                                    {
+                                        <img src="@item.ProductImage" alt="@item.ProductName" class="w-12 h-12 rounded-lg object-cover mr-3 flex-shrink-0">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        </div>
+                                    }
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-medium text-gray-800 truncate">@item.ProductName</p>
+                                        <p class="text-sm text-gray-600">@item.FavoriteCount favorites</p>
+                                    </div>
+                                </div>
+                                <div class="text-right ml-4 flex-shrink-0">
+                                    <span class="font-semibold text-gray-800 whitespace-nowrap">₱@item.Price.ToString("N2")</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-heart text-3xl mb-3"></i>
+                            <p>No favorite items yet</p>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
-        <!-- Most Favorites Items -->
+        <!-- Recent Staff Activities -->
         <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Most Favorites Items</h3>
-            <div class="space-y-4">
-                @if (Model?.MostFavoriteItems?.Any() == true)
-                {
-                    @foreach (var item in Model.MostFavoriteItems.Take(5))
-                    {
-                        <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                            <div class="flex items-center">
-                                @if (!string.IsNullOrEmpty(item.ProductImage))
-                                {
-                                    <img src="@item.ProductImage" alt="@item.ProductName" class="w-12 h-12 rounded-lg object-cover mr-3">
-                                }
-                                else
-                                {
-                                    <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-image text-gray-400"></i>
-                                    </div>
-                                }
-                                <div>
-                                    <p class="font-medium text-gray-800">@item.ProductName</p>
-                                    <p class="text-sm text-gray-600">@item.FavoriteCount favorites</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-semibold text-gray-800">₱@item.Price.ToString("N2")</span>
-                            </div>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-heart text-3xl mb-3"></i>
-                        <p>No favorite items yet</p>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <!-- Staff Activities -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 lg:col-span-2">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Staff Activities</h3>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Elapsed Time</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processed At</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Elapsed Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processed At</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="staff-activities-body">
                         @if (Model?.StaffActivities?.Any() == true)
                         {
-                            @foreach (var activity in Model.StaffActivities.Take(10))
+                            @foreach (var activity in Model.StaffActivities.Take(6))
                             {
                                 <tr class="hover:bg-gray-50 transition-colors" data-order-id="@activity.OrderID">
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#@activity.OrderID</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">@activity.StaffName</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">@activity.CustomerName</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 elapsed-time">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#@activity.OrderID</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@activity.StaffName</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@activity.CustomerName</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 elapsed-time">
                                             @activity.ElapsedTime
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 processed-at">@activity.ProcessedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 processed-at">@activity.ProcessedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">
+                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
                                     <i class="fas fa-clipboard-list text-2xl mb-2"></i>
                                     <p>No staff activities recorded yet</p>
                                 </td>
