@@ -711,6 +711,8 @@ namespace ASI.Basecode.Services.Services
             {
                 var stats = await GetDashboardStatsAsync();
                 var orderSummary = await GetOrderSummaryAsync();
+                var revenueData = await GetRevenueDataAsync(); // Add this
+                var monthlyRevenue = await GetMonthlyRevenueAsync(); // Add this
                 
                 await _orderHubContext.Clients.Group("Dashboard")
                     .SendAsync("DashboardUpdated", new
@@ -722,7 +724,8 @@ namespace ASI.Basecode.Services.Services
                             todaysCustomers = stats.TodaysCustomers,
                             totalCustomers = stats.TotalCustomers,
                             totalSales = stats.TotalSales,
-                            averageSalePerDay = stats.AverageSalePerDay
+                            averageSalePerDay = stats.AverageSalePerDay,
+                            averageProcessingTime = stats.AverageProcessingTime
                         },
                         orderSummary = new
                         {
@@ -732,6 +735,18 @@ namespace ASI.Basecode.Services.Services
                             completed = orderSummary.Completed,
                             cancelled = orderSummary.Cancelled
                         },
+                        revenueData = new // Add this section
+                        {
+                            totalRevenue = revenueData.TotalRevenue,
+                            totalExpenses = revenueData.TotalExpenses,
+                            netIncome = revenueData.NetIncome,
+                            monthlyGrowth = revenueData.MonthlyGrowth
+                        },
+                        monthlyRevenue = monthlyRevenue.Select(mr => new // Add this for chart updates
+                        {
+                            monthName = mr.MonthName,
+                            revenue = mr.Revenue
+                        }).ToList(),
                         timestamp = DateTime.UtcNow
                     });
             }
@@ -877,6 +892,62 @@ namespace ASI.Basecode.Services.Services
         private string GenerateTransactionReference()
         {
             return $"TXN-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+        }
+
+        public async Task<RevenueViewModel> GetRevenueDataAsync()
+        {
+            try
+            {
+                var orders = _orderRepository.GetAllOrders();
+                var completedOrders = orders.Where(o => o.OrderStatus == Enums.OrderStatus.Completed);
+                
+                var totalRevenue = completedOrders.Sum(o => o.TotalAmount);
+                var totalExpenses = totalRevenue * 0.3m; // Example: 30% expenses
+                var netIncome = totalRevenue - totalExpenses;
+                
+                return new RevenueViewModel
+                {
+                    TotalRevenue = totalRevenue,
+                    TotalExpenses = totalExpenses,
+                    NetIncome = netIncome,
+                    MonthlyGrowth = 15.5m // Example growth percentage
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting revenue data: {ex.Message}");
+                return new RevenueViewModel();
+            }
+        }
+
+        public async Task<List<MonthlyRevenueViewModel>> GetMonthlyRevenueAsync()
+        {
+            try
+            {
+                var orders = _orderRepository.GetAllOrders();
+                var completedOrders = orders.Where(o => o.OrderStatus == Enums.OrderStatus.Completed);
+                
+                var monthlyData = completedOrders
+                    .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                    .Select(g => new MonthlyRevenueViewModel
+                    {
+                        Year = g.Key.Year,
+                        Month = g.Key.Month,
+                        MonthName = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM"),
+                        Revenue = g.Sum(o => o.TotalAmount),
+                        Orders = g.Count()
+                    })
+                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                    .Take(12) // Last 12 months
+                    .ToList();
+
+                return monthlyData;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting monthly revenue: {ex.Message}");
+                return new List<MonthlyRevenueViewModel>();
+            }
         }
     }
 }

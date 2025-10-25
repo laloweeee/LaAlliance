@@ -46,7 +46,9 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                 var orderSummary = await _orderService.GetOrderSummaryAsync();
                 var mostSellingItems = await _productService.GetMostSellingItemsAsync();
                 var mostFavoriteItems = await _productService.GetMostFavoriteItemsAsync();
-                var staffActivities = await _orderService.GetRecentStaffActivitiesAsync(); // Add this
+                var staffActivities = await _orderService.GetRecentStaffActivitiesAsync();
+                var revenueData = await _orderService.GetRevenueDataAsync(); // Add this
+                var monthlyRevenue = await _orderService.GetMonthlyRevenueAsync(); // Add this
 
                 var dashboardData = new DashboardDataViewModel
                 {
@@ -54,7 +56,9 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                     OrderSummary = orderSummary,
                     MostSellingItems = mostSellingItems ?? new List<MostSellingItemViewModel>(),
                     MostFavoriteItems = mostFavoriteItems ?? new List<MostFavoriteItemViewModel>(),
-                    StaffActivities = staffActivities ?? new List<StaffActivityViewModel>() // Add this
+                    StaffActivities = staffActivities ?? new List<StaffActivityViewModel>(),
+                    RevenueData = revenueData, // Add this
+                    MonthlyRevenue = monthlyRevenue ?? new List<MonthlyRevenueViewModel>() // Add this
                 };
 
                 return View(dashboardData);
@@ -70,7 +74,9 @@ namespace ASI.Basecode.WebApp.Areas.Restaurant.Controllers
                     OrderSummary = new OrderSummaryViewModel(),
                     MostSellingItems = new List<MostSellingItemViewModel>(),
                     MostFavoriteItems = new List<MostFavoriteItemViewModel>(),
-                    StaffActivities = new List<StaffActivityViewModel>() // Add this
+                    StaffActivities = new List<StaffActivityViewModel>(),
+                    RevenueData = new RevenueViewModel(), // Add this
+                    MonthlyRevenue = new List<MonthlyRevenueViewModel>() // Add this
                 };
 
                 return View(emptyDashboardData);

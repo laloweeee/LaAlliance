@@ -59,5 +59,32 @@ namespace ASI.Basecode.Services.ServiceModels
         public List<MostSellingItemViewModel> MostSellingItems { get; set; }
         public List<MostFavoriteItemViewModel> MostFavoriteItems { get; set; }
         public List<StaffActivityViewModel> StaffActivities { get; set; }
+        public RevenueViewModel RevenueData { get; set; } // Add this
+        public List<MonthlyRevenueViewModel> MonthlyRevenue { get; set; }
+    }
+
+    public class RevenueViewModel
+    {
+        public decimal TotalRevenue { get; set; }
+        public decimal TotalExpenses { get; set; }
+        public decimal NetIncome { get; set; }
+        public decimal MonthlyGrowth { get; set; }
+    }
+
+    public class MonthlyRevenueViewModel
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public string MonthName { get; set; }
+        public decimal Revenue { get; set; }
+        public int Orders { get; set; }
+    }
+
+    public class ChartOrderSummaryViewModel
+    {
+        public List<string> Labels { get; set; } = new List<string>();
+        public List<int> Data { get; set; } = new List<int>();
+        public List<string> Colors { get; set; } = new List<string>();
+        public int TotalOrders { get; set; }
     }
 }

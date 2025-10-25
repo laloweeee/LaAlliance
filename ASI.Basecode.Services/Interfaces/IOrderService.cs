@@ -22,5 +22,7 @@ namespace ASI.Basecode.Services.Interfaces
 
         Task<List<StaffActivityViewModel>> GetRecentStaffActivitiesAsync(int count = 10);
         Task<string> GetAverageProcessingTimeAsync();
+        Task<RevenueViewModel> GetRevenueDataAsync();
+        Task<List<MonthlyRevenueViewModel>> GetMonthlyRevenueAsync();
     }
 }
