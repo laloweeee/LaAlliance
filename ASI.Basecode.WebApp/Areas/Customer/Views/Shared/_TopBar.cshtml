@@ -11,29 +11,63 @@
         
         <!-- NAVIGATION LINKS -->
         <div class="flex items-center gap-2">
-            <!-- MENU -->
-            <a asp-area="Customer" asp-controller="Home" asp-action="Index" 
-               class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
-                <i class="fa-solid fa-utensils text-base"></i>
-                <span class="text-sm font-semibold">Menu</span>
-            </a>
+            @if (User.IsInRole("Restaurant"))
+            {
+                <!-- RESTAURANT NAVIGATION -->
+                <a asp-area="Restaurant" asp-controller="Dashboard" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-tachometer-alt text-base"></i>
+                    <span class="text-sm font-semibold">Dashboard</span>
+                </a>
 
-            <!-- ACTIVITY (Replaced Notifications) -->
-            <a asp-area="Customer" asp-controller="Order" asp-action="Index" 
-               class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
-                <i class="fa-solid fa-clock text-base"></i>
-                <span class="text-sm font-semibold hidden lg:block">Activity</span>
-            </a>
+                <a asp-area="Restaurant" asp-controller="MenuBook" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-book text-base"></i>
+                    <span class="text-sm font-semibold">Menu Book</span>
+                </a>
 
-            <!-- CART -->
-            <a asp-area="Customer" asp-controller="Cart" asp-action="Index" 
-               class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group relative border border-transparent hover:border-green-200">
-                <i class="fa-solid fa-shopping-bag text-base"></i>
-                <span class="text-sm font-semibold hidden lg:block">Cart</span>
-                <span id="cartBadge" class="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-sm">
-                    @(ViewBag.CartCount ?? 0)
-                </span>
-            </a>
+                <a asp-area="Restaurant" asp-controller="Restaurant" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-store text-base"></i>
+                    <span class="text-sm font-semibold">Restaurant</span>
+                </a>
+
+                <a asp-area="Restaurant" asp-controller="Promotions" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-tags text-base"></i>
+                    <span class="text-sm font-semibold">Promotions</span>
+                </a>
+
+                <a asp-area="Restaurant" asp-controller="Staff" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-users text-base"></i>
+                    <span class="text-sm font-semibold">Staff</span>
+                </a>
+            }
+            else
+            {
+                <!-- CUSTOMER NAVIGATION -->
+                <a asp-area="Customer" asp-controller="Home" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-utensils text-base"></i>
+                    <span class="text-sm font-semibold">Menu</span>
+                </a>
+
+                <a asp-area="Customer" asp-controller="Order" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-clock text-base"></i>
+                    <span class="text-sm font-semibold hidden lg:block">Activity</span>
+                </a>
+
+                <a asp-area="Customer" asp-controller="Cart" asp-action="Index" 
+                   class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium group relative border border-transparent hover:border-green-200">
+                    <i class="fa-solid fa-shopping-bag text-base"></i>
+                    <span class="text-sm font-semibold hidden lg:block">Cart</span>
+                    <span id="cartBadge" class="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-sm">
+                        @(ViewBag.CartCount ?? 0)
+                    </span>
+                </a>
+            }
 
             <!-- PROFILE DROPDOWN -->
             <div class="relative">
@@ -47,7 +81,7 @@
                             <p class="text-sm font-semibold text-gray-800 truncate max-w-[100px]">
                                 @((ViewBag.UserName ?? "Guest"))
                             </p>
-                            <p class="text-xs text-gray-500">Customer</p>
+                            <p class="text-xs text-gray-500">@(User.IsInRole("Restaurant") ? "Admin Restaurant" : "Customer")</p>
                         </div>
                     </div>
                     <i id="chevron" class="fa fa-chevron-down text-gray-500 text-xs transition-transform duration-200 ml-1"></i>
@@ -70,28 +104,41 @@
 
                     <!-- Menu Items -->
                     <div class="py-2">
-                        <a asp-area="Customer" asp-controller="Account" asp-action="Index" 
-                            class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500">
-                            <div class="w-7 h-7 bg-green-100 rounded flex items-center justify-center">
-                                <i class="fa fa-user text-green-600 text-xs"></i>
-                            </div>
-                            <span class="text-sm font-medium">Profile</span>
-                        </a>
+                        @if (User.IsInRole("Restaurant"))
+                        {
+                            <a asp-area="Restaurant" asp-controller="User" asp-action="Profile" 
+                                class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500">
+                                <div class="w-7 h-7 bg-green-100 rounded flex items-center justify-center">
+                                    <i class="fa fa-user text-green-600 text-xs"></i>
+                                </div>
+                                <span class="text-sm font-medium">Profile</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-area="Customer" asp-controller="Account" asp-action="Index" 
+                                class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-green-50 transition-colors group border-l-2 border-transparent hover:border-green-500">
+                                <div class="w-7 h-7 bg-green-100 rounded flex items-center justify-center">
+                                    <i class="fa fa-user text-green-600 text-xs"></i>
+                                </div>
+                                <span class="text-sm font-medium">Profile</span>
+                            </a>
 
-                        <!-- Keep Favorites in dropdown too for easy access -->
-                        <a href="@Url.Action("Index", "Favorites", new { area = "Customer" })" 
-                            class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-rose-50 transition-colors group border-l-2 border-transparent hover:border-rose-500">
-                            <div class="w-7 h-7 bg-rose-100 rounded flex items-center justify-center">
-                                <i class="fas fa-heart text-rose-600 text-xs"></i>
-                            </div>
-                            <span class="text-sm font-medium">Favorites</span>
-                            @if (ViewBag.FavoriteCount > 0)
-                            {
-                                <span class="favorite-count bg-rose-500 text-white text-xs rounded-full px-2 py-1 ml-auto">
-                                    @ViewBag.FavoriteCount
-                                </span>
-                            }
-                        </a>
+                            <!-- Keep Favorites in dropdown too for easy access -->
+                            <a href="@Url.Action("Index", "Favorites", new { area = "Customer" })" 
+                                class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-rose-50 transition-colors group border-l-2 border-transparent hover:border-rose-500">
+                                <div class="w-7 h-7 bg-rose-100 rounded flex items-center justify-center">
+                                    <i class="fas fa-heart text-rose-600 text-xs"></i>
+                                </div>
+                                <span class="text-sm font-medium">Favorites</span>
+                                @if (ViewBag.FavoriteCount > 0)
+                                {
+                                    <span class="favorite-count bg-rose-500 text-white text-xs rounded-full px-2 py-1 ml-auto">
+                                        @ViewBag.FavoriteCount
+                                    </span>
+                                }
+                            </a>
+                        }
 
                         <div class="border-t border-gray-200 my-1"></div>
 

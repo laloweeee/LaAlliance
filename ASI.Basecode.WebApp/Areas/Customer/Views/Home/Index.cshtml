@@ -169,15 +169,24 @@
                             <!-- Products Grid -->
                             <div class="products-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-category="@category.CategoryID">
                                 @foreach (var product in productsInCategory)
-                                {
-                                    <div class="product-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                {
+                    var hasDiscount = Model.ProductDiscounts != null && Model.ProductDiscounts.ContainsKey(product.ProductID);
+                    var effectivePrice = hasDiscount ? Model.ProductDiscounts[product.ProductID] : product.ProductPrice;
+                                        <div class="product-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                                          data-product-name="@product.ProductName.ToLower()"
                                          data-product-description="@product.ProductDescription.ToLower()"
-                                         data-product-price="@product.ProductPrice"
+                                         data-product-price="@effectivePrice"
                                          data-product-id="@product.ProductID"
                                          data-category="@product.CategoryID">
                                         <!-- Product Image -->
                                         <div class="h-40 bg-gray-100 overflow-hidden relative">
+                                            @if (hasDiscount)
+                                            {
+                                                var original = product.ProductPrice;
+                                                var discounted = effectivePrice;
+                                                var percentOff = original > 0 ? (int)Math.Round((original - discounted) / original * 100) : 0;
+                                                <div class="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-md discount-badge">@percentOff% OFF</div>
+                                            }
                                             @if (!string.IsNullOrEmpty(product.ProductImage))
                                             {
                                                 <img src="@product.ProductImage"
@@ -212,7 +221,17 @@
                                             </div>
 
                                             <div class="flex items-center justify-between">
-                                                <span class="text-lg font-bold text-green-600 product-price">₱@product.ProductPrice.ToString("0.00")</span>
+                                                @if (Model.ProductDiscounts != null && Model.ProductDiscounts.ContainsKey(product.ProductID))
+                                                {
+                                                    <div>
+                                                        <span class="text-sm text-gray-400 line-through mr-2">₱@product.ProductPrice.ToString("0.00")</span>
+                                                        <span class="text-lg font-bold text-green-600 product-price">₱@Model.ProductDiscounts[product.ProductID].ToString("0.00")</span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-lg font-bold text-green-600 product-price">₱@product.ProductPrice.ToString("0.00")</span>
+                                                }
                                                 <a asp-action="ProductToCart" asp-controller="Home" asp-area="Customer"
                                                 asp-route-productID="@product.ProductID"
                                                 class="bg-green-500 text-white px-3 py-2 rounded-md font-semibold hover:bg-green-600 transition-colors flex items-center gap-1">
@@ -279,6 +298,12 @@
     @@keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .discount-badge {
+        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        z-index: 20;
+        transform: translateZ(0);
     }
 </style>
 

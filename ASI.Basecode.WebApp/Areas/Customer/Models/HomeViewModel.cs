@@ -18,5 +18,8 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Models
 
         // Add promotions for the banner
         public IEnumerable<RestaurantPromotions> Promotions { get; set; } = new List<RestaurantPromotions>();
+
+        // Map of ProductID -> discounted price (effective price after promotion). If not present, no discount.
+        public System.Collections.Generic.IDictionary<int, decimal> ProductDiscounts { get; set; } = new System.Collections.Generic.Dictionary<int, decimal>();
     }
 }

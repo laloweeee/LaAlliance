@@ -28,6 +28,7 @@ namespace ASI.Basecode.Services.Services
         private readonly IStaffRepository _staffRepository;
 
         private readonly IOrderProcessedRepository _orderProcessedRepository;
+    private readonly IPromotionService _promotionService;
 
         public OrderService(
             IOrderRepository orderRepository,
@@ -38,6 +39,7 @@ namespace ASI.Basecode.Services.Services
             IHubContext<OrderHub> orderHubContext,
             IPaymentLogRepository paymentLogRepository,
             IStaffRepository staffRepository
+            , IPromotionService promotionService
             )
         {
             _orderRepository = orderRepository;
@@ -48,6 +50,7 @@ namespace ASI.Basecode.Services.Services
             _orderHubContext = orderHubContext;
             _paymentLogRepository = paymentLogRepository;
             _staffRepository = staffRepository;
+            _promotionService = promotionService;
         }
 
         /// <summary>
@@ -91,6 +94,62 @@ namespace ASI.Basecode.Services.Services
 
             decimal deliveryFee = request.OrderType == OrderType.Delivery ? 50.00m : 0.00m;
             decimal discountAmount = 0.00m;
+
+            // If voucher code provided, validate and compute discount based on cart
+            if (!string.IsNullOrWhiteSpace(request.VoucherCode))
+            {
+                try
+                {
+                    // Build a lightweight CartViewModel from cart entity
+                    var cartView = new ASI.Basecode.Services.ServiceModels.CartViewModel
+                    {
+                        CartID = cart.CartID,
+                           UserID = cart.UserID,
+                        CartItems = cart.CartItem?.Select(ci => new ASI.Basecode.Services.ServiceModels.CartItemViewModel
+                        {
+                            CartItemID = ci.CartItemID,
+                               ProductID = ci.ProductID,
+                            ProductName = ci.Product?.ProductName ?? "",
+                            ProductImage = ci.Product?.ProductImage ?? "",
+                            Quantity = ci.Quantity,
+                            UnitPrice = ci.UnitPrice,
+                            CartItemOptions = ci.CartItemOption?.Select(opt => new ASI.Basecode.Services.ServiceModels.CartItemOptionViewModel
+                            {
+                                CartItemOptionID = opt.CartItemOptionID,
+                                ProductOptionGroupID = opt.ProductOptionGroupID,
+                                ProductOptionItemID = opt.ProductOptionItemID,
+                                OptionGroupName = opt.ProductOptionGroup?.OptionGroupName,
+                                OptionName = opt.ProductOptionItems?.OptionName,
+                                AdditionalPrice = opt.ProductOptionItems?.AdditionalPrice ?? 0m
+                            }).ToList() ?? new System.Collections.Generic.List<ASI.Basecode.Services.ServiceModels.CartItemOptionViewModel>()
+                        }).ToList() ?? new System.Collections.Generic.List<ASI.Basecode.Services.ServiceModels.CartItemViewModel>()
+                    };
+
+                    var validation = _promotionService.ValidatePromotionCode(request.VoucherCode, cartView);
+                    if (validation != null && validation.IsValid)
+                    {
+                        discountAmount = validation.DiscountAmount;
+
+                        // Attempt to consume the code (will throw if usage limit reached)
+                        try
+                        {
+                            _promotionService.ConsumePromotionCode(request.VoucherCode);
+                        }
+                        catch (Exception ex)
+                        {
+                            // If consuming fails, log and set discount to 0
+                            Console.WriteLine($"Failed to consume promotion code: {ex.Message}");
+                            discountAmount = 0m;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error validating voucher: {ex.Message}");
+                    discountAmount = 0m;
+                }
+            }
+
             decimal totalAmount = subtotal + deliveryFee - discountAmount;
 
             Console.WriteLine($"Order Placed with payment method: {request.PaymentMethod}");

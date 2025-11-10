@@ -464,4 +464,118 @@
             });
         });
     </script>
+    <script>
+        // Apply voucher button handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const applyBtn = document.getElementById('applyVoucherBtn');
+            const voucherInput = document.querySelector('input[name="VoucherCode"]');
+
+            if (!applyBtn || !voucherInput) return;
+
+            applyBtn.addEventListener('click', function() {
+                const code = voucherInput.value?.trim();
+                if (!code) {
+                    showToast('Please enter a voucher code', 'Error');
+                    return;
+                }
+
+                // Prepare form data including antiforgery token
+                const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                const fd = new FormData();
+                fd.append('code', code);
+                if (tokenInput) fd.append('__RequestVerificationToken', tokenInput.value);
+
+                fetch('@Url.Action("ApplyVoucher","Cart", new { area = "Customer" })', {
+                    method: 'POST',
+                    body: fd,
+                    credentials: 'same-origin'
+                })
+                .then(r => r.json())
+                .then(json => {
+                    if (!json) return;
+
+                        if (!json.success) {
+                        // show error toast
+                        showToast(json.message || 'Voucher invalid', 'Error');
+                        // clear any displayed discount
+                        const discountRow = document.getElementById('discountRow');
+                        if (discountRow) discountRow.remove();
+                        // reset total/subtotal display
+                        document.getElementById('subtotalAmount').innerText = '₱' + window.checkoutSubtotal.toFixed(2);
+                        document.getElementById('totalAmount').innerText = '₱' + (window.checkoutSubtotal + window.deliveryFee).toFixed(2);
+                        return;
+                    }
+
+                    // success - update summary
+                    const discountAmount = parseFloat(json.discountAmount) || 0;
+                    const subtotalElem = document.getElementById('subtotalAmount');
+                    const totalElem = document.getElementById('totalAmount');
+                    const deliveryElem = document.getElementById('deliveryFeeAmount');
+
+                    // show or update discount row
+                    let discountRow = document.getElementById('discountRow');
+                    if (!discountRow) {
+                        discountRow = document.createElement('div');
+                        discountRow.className = 'flex justify-between text-sm text-green-600';
+                        discountRow.id = 'discountRow';
+                        discountRow.innerHTML = '<span>Voucher Discount</span><span id="discountAmount">-₱' + discountAmount.toFixed(2) + '</span>';
+                        // insert before total block
+                        const totalsContainer = document.querySelector('.space-y-3.pt-4.border-t');
+                        if (totalsContainer) totalsContainer.insertBefore(discountRow, totalsContainer.querySelector('div.flex.justify-between.text-lg.font-bold.pt-3.border-t'));
+                    } else {
+                        const discAmt = document.getElementById('discountAmount');
+                        if (discAmt) discAmt.innerText = '-₱' + discountAmount.toFixed(2);
+                    }
+
+                    // update subtotal and total displays
+                    if (subtotalElem) subtotalElem.innerText = '₱' + window.checkoutSubtotal.toFixed(2);
+                    const newTotal = Math.max(0, window.checkoutSubtotal + window.deliveryFee - discountAmount);
+                    if (totalElem) totalElem.innerText = '₱' + newTotal.toFixed(2);
+
+                    // set VoucherCode input so it will be submitted with the form
+                    voucherInput.value = code;
+
+                    // show success
+                    showToast(json.message || 'Voucher applied', 'Success');
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('Failed to apply voucher', 'Error');
+                });
+            });
+        });
+        
+        // Small client-side toast utility that mirrors server-side toast styling
+        function showToast(message, type) {
+            try {
+                type = (type || 'Info');
+                const toastContainer = document.createElement('div');
+                toastContainer.className = 'fixed top-4 right-4 z-50 animate-fade-in';
+
+                const bgClass = type === 'Success' ? 'bg-green-50' : type === 'Error' ? 'bg-red-50' : type === 'Warning' ? 'bg-yellow-50' : 'bg-blue-50';
+                const borderClass = type === 'Success' ? 'border-green-200' : type === 'Error' ? 'border-red-200' : type === 'Warning' ? 'border-yellow-200' : 'border-blue-200';
+                const textClass = type === 'Success' ? 'text-green-800' : type === 'Error' ? 'text-red-800' : type === 'Warning' ? 'text-yellow-800' : 'text-blue-800';
+                const iconBg = type === 'Success' ? 'bg-green-500' : type === 'Error' ? 'bg-red-500' : type === 'Warning' ? 'bg-yellow-500' : 'bg-blue-500';
+                const iconClass = type === 'Success' ? 'fas fa-check' : type === 'Error' ? 'fas fa-trash' : type === 'Warning' ? 'fas fa-exclamation' : 'fas fa-info';
+
+                toastContainer.innerHTML = `
+                    <div class="mb-6 p-4 ${bgClass} border ${borderClass} ${textClass} rounded-xl shadow-sm flex items-center gap-3">
+                        <div class="w-6 h-6 ${iconBg} rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="${iconClass} text-white text-xs"></i>
+                        </div>
+                        <span class="font-medium">${message}</span>
+                    </div>`;
+
+                document.body.appendChild(toastContainer);
+
+                setTimeout(() => {
+                    toastContainer.style.opacity = '0';
+                    toastContainer.style.transform = 'translateY(-10px)';
+                    setTimeout(() => toastContainer.remove(), 300);
+                }, 3500);
+            } catch (e) {
+                console.warn('showToast failed', e);
+            }
+        }
+    </script>
 }

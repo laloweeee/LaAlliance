@@ -167,5 +167,22 @@ namespace ASI.Basecode.Services.Services
             user.IsEmailVerified = true;
             _repository.UpdateUser(user);
         }
+
+        /// <summary>
+        /// Delete a user and all related data
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <exception cref="InvalidDataException"></exception>
+        public void DeleteUser(int userID)
+        {
+            var user = GetUserByID(userID);
+
+            if (user == null)
+            {
+                throw new InvalidDataException("User not found.");
+            }
+
+            _repository.DeleteUser(userID);
+        }
     }
 }

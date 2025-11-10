@@ -70,5 +70,43 @@ namespace ASI.Basecode.Data.Repositories
             _dbContext.Users.Update(user);
             UnitOfWork.SaveChanges();
         }
+
+        /// <summary>
+        /// Delete a user and all related data
+        /// </summary>
+        /// <param name="userID"></param>
+        public void DeleteUser(int userID)
+        {
+            var user = _dbContext.Users
+                .Include(u => u.UserProfile)
+                .Include(u => u.RestaurantStaff)
+                .FirstOrDefault(u => u.UserID == userID);
+
+            if (user != null)
+            {
+                // Manually cascade delete in the correct order
+                
+                // 1. Delete RestaurantStaff record first (has FK to User)
+                if (user.RestaurantStaff != null)
+                {
+                    _dbContext.RestaurantStaff.Remove(user.RestaurantStaff);
+                }
+                
+                // 2. Delete UserProfile if exists (has FK to User)
+                if (user.UserProfile != null)
+                {
+                    _dbContext.UserProfiles.Remove(user.UserProfile);
+                }
+                
+                // 3. Delete User record last
+                _dbContext.Users.Remove(user);
+                
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new ArgumentException("User not found.");
+            }
+        }
     }
 }

@@ -143,5 +143,21 @@ namespace ASI.Basecode.Data.Repositories
                     .ThenInclude(pp => pp.Product)
                 .FirstOrDefault(p => p.PromotionCodes.Code == code);
         }
+
+        /// <summary>
+        /// Atomically increments UsedCount for the given promotion code if UsageLimit not reached.
+        /// Returns true if the update succeeded (UsedCount incremented), false otherwise.
+        /// Uses a single SQL UPDATE to avoid race conditions.
+        /// </summary>
+        public bool TryConsumePromotionCode(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code)) return false;
+
+            // Use parameterized raw SQL to increment UsedCount only when UsedCount < UsageLimit
+            // Works with MySQL: update PromotionCodes set UsedCount = UsedCount + 1 where Code = @p0 and (UsageLimit = 0 OR UsedCount < UsageLimit)
+            var sql = "UPDATE PromotionCodes SET UsedCount = UsedCount + 1 WHERE Code = {0} AND (UsageLimit = 0 OR UsedCount < UsageLimit)";
+            var affected = _dbContext.Database.ExecuteSqlRaw(sql, code);
+            return affected > 0;
+        }
     }
 }

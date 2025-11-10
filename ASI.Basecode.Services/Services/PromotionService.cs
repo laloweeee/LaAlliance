@@ -234,5 +234,154 @@ namespace ASI.Basecode.Services.Services
         {
             return _promotionRepository.GetPromotionByCode(code);
         }
+
+        /// <summary>
+        /// Returns a mapping of ProductID -> applicable active promotion (if any).
+        /// If multiple promotions apply to the same product, choose the one with higher DiscountValue.
+        /// </summary>
+        public System.Collections.Generic.IDictionary<int, RestaurantPromotions> GetActivePromotionProductMap()
+        {
+            var map = new System.Collections.Generic.Dictionary<int, RestaurantPromotions>();
+            var active = GetActivePromotions() ?? new System.Collections.Generic.List<RestaurantPromotions>();
+
+            foreach (var promo in active)
+            {
+                if (promo.PromotionProducts == null) continue;
+                foreach (var pp in promo.PromotionProducts)
+                {
+                    if (pp?.ProductID == null) continue;
+                    var pid = pp.ProductID.Value;
+                    if (!map.ContainsKey(pid))
+                    {
+                        map[pid] = promo;
+                    }
+                    else
+                    {
+                        // prefer the promotion with higher DiscountValue
+                        var existing = map[pid];
+                        if (promo.DiscountValue > existing.DiscountValue)
+                        {
+                            map[pid] = promo;
+                        }
+                    }
+                }
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        /// Validate a promotion code against the cart. Returns discount amount if valid.
+        /// </summary>
+        public ServiceModels.PromotionValidationResult ValidatePromotionCode(string code, ServiceModels.CartViewModel cart)
+        {
+            var result = new ServiceModels.PromotionValidationResult
+            {
+                IsValid = false,
+                Message = "Invalid promotion code",
+                DiscountAmount = 0
+            };
+
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                result.Message = "Please provide a voucher code.";
+                return result;
+            }
+
+            var norm = code.Trim().ToUpper();
+            var promo = _promotionRepository.GetPromotionByCode(norm);
+            if (promo == null)
+            {
+                result.Message = "Promotion code not found.";
+                return result;
+            }
+
+            // find the exact code entry
+            var promoCode = promo.PromotionCodes;
+            if (promoCode == null || !string.Equals(promoCode.Code, norm, StringComparison.OrdinalIgnoreCase))
+            {
+                result.Message = "Promotion code not found.";
+                return result;
+            }
+
+            var now = DateTime.Now;
+            if (!promo.IsActive || promo.StartDate > now || promo.EndDate < now)
+            {
+                result.Message = "Promotion is not active.";
+                return result;
+            }
+
+            if (promoCode.ExpirationDate != null && promoCode.ExpirationDate < now)
+            {
+                result.Message = "Promotion code has expired.";
+                return result;
+            }
+
+            if (promo.MinimumOrderAmount > (cart?.SubTotal ?? 0))
+            {
+                result.Message = $"This promotion requires a minimum order of {promo.MinimumOrderAmount:C2}.";
+                return result;
+            }
+
+            if (promoCode.UsageLimit > 0 && promoCode.UsedCount >= promoCode.UsageLimit)
+            {
+                result.Message = "This promotion code has reached its usage limit.";
+                return result;
+            }
+
+            // compute applicable subtotal: if promo has product restrictions only apply to those products
+            decimal applicable = 0m;
+            if (promo.PromotionProducts != null && promo.PromotionProducts.Any())
+            {
+                var eligible = promo.PromotionProducts.Select(pp => pp.ProductID).ToHashSet();
+                applicable = cart?.CartItems?.Where(ci => eligible.Contains(ci.ProductID)).Sum(ci => ci.TotalPrice) ?? 0m;
+            }
+            else
+            {
+                applicable = cart?.SubTotal ?? 0m;
+            }
+
+            if (applicable <= 0)
+            {
+                result.Message = "No items in the cart are eligible for this promotion.";
+                return result;
+            }
+
+            decimal discount = 0m;
+            // apply discount
+            if (promo.DiscountType == Resources.Constants.Enums.DiscountType.Percentage)
+            {
+                discount = Math.Round(applicable * (promo.DiscountValue / 100m), 2);
+            }
+            else // Fixed amount
+            {
+                discount = Math.Min(applicable, promo.DiscountValue);
+            }
+
+            result.IsValid = true;
+            result.Message = "Promotion applied successfully.";
+            result.DiscountAmount = discount;
+            result.PromotionID = promo.PromotionID;
+            result.PromotionCodeID = promoCode.PromotionCodeID;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Increment UsedCount for a promotion code (transactional at repository level).
+        /// Throws if not found or usage limit reached.
+        /// </summary>
+        public void ConsumePromotionCode(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code)) throw new ArgumentException("Invalid code");
+            var norm = code.Trim().ToUpper();
+
+            // Use repository atomic consume to avoid race conditions
+            var consumed = _promotionRepository.TryConsumePromotionCode(norm);
+            if (!consumed)
+            {
+                throw new InvalidOperationException("Promotion code could not be consumed (may have reached usage limit).");
+            }
+        }
     }
 }
