@@ -19,5 +19,8 @@ namespace ASI.Basecode.Services.Interfaces
         User GetUserByEmail(string email);
         bool IsEmailAvailable(string email);
         void UpdateEmail(int userID, string newEmail);
+        
+        // User deletion
+        void DeleteUser(int userID);
     }
 }

@@ -63,5 +63,26 @@ namespace ASI.Basecode.Services.Interfaces
         /// <param name="code"></param>
         /// <returns></returns>
         RestaurantPromotions GetPromotionByCode(string code);
+
+    /// <summary>
+    /// Returns a mapping of ProductID -> applicable active promotion (if any).
+    /// If multiple promotions apply to the same product, the one with higher DiscountValue is chosen.
+    /// </summary>
+    /// <returns></returns>
+    System.Collections.Generic.IDictionary<int, RestaurantPromotions> GetActivePromotionProductMap();
+
+    /// <summary>
+    /// Validate a promotion code against the user's cart. Returns discount amount and message.
+    /// </summary>
+    /// <param name="code"></param>
+    /// <param name="cart"></param>
+    /// <returns></returns>
+    ServiceModels.PromotionValidationResult ValidatePromotionCode(string code, ServiceModels.CartViewModel cart);
+
+    /// <summary>
+    /// Consume (increment UsedCount) for a promotion code. Throws if invalid or usage limit reached.
+    /// </summary>
+    /// <param name="code"></param>
+    void ConsumePromotionCode(string code);
     }
 }

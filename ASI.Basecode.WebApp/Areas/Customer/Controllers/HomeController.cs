@@ -55,6 +55,43 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
                 Promotions = _promotionService.GetActivePromotions()
             };
 
+            try
+            {
+                // Build a product -> discounted price map for the view
+                var promoMap = _promotionService.GetActivePromotionProductMap();
+                var discounts = new System.Collections.Generic.Dictionary<int, decimal>();
+
+                foreach (var product in model.Products)
+                {
+                    if (product == null) continue;
+                    if (promoMap != null && promoMap.TryGetValue(product.ProductID, out var promo))
+                    {
+                        var price = product.ProductPrice;
+                        decimal discounted = price;
+
+                        if (promo.DiscountType == Resources.Constants.Enums.DiscountType.Percentage)
+                        {
+                            discounted = Math.Round(price * (1 - (promo.DiscountValue / 100m)), 2);
+                        }
+                        else
+                        {
+                            discounted = Math.Max(0m, Math.Round(price - promo.DiscountValue, 2));
+                        }
+
+                        if (discounted < price)
+                        {
+                            discounts[product.ProductID] = discounted;
+                        }
+                    }
+                }
+
+                model.ProductDiscounts = discounts;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error computing product discounts");
+            }
+
             // ADDED: Safely load favorites with null check
             if (_favoriteService != null)
             {

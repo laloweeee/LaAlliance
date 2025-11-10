@@ -72,5 +72,13 @@ namespace ASI.Basecode.Data.Interfaces
         /// <param name="code"></param>
         /// <returns></returns>
         RestaurantPromotions GetPromotionByCode(string code);
+
+    /// <summary>
+    /// Attempts to atomically consume (increment UsedCount) for a promotion code identified by the code string.
+    /// Returns true when the UsedCount was incremented (i.e. usage limit not exceeded), false otherwise.
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    bool TryConsumePromotionCode(string code);
     }
 }

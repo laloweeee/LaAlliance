@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageReference Include="xunit" Version="2.6.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.6.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ASI.Basecode.Services\ASI.Basecode.Services.csproj" />
+    <ProjectReference Include="..\ASI.Basecode.Data\ASI.Basecode.Data.csproj" />
+  </ItemGroup>
+</Project>

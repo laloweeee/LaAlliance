@@ -65,6 +65,36 @@ namespace ASI.Basecode.WebApp.Areas.Customer.Controllers
         /// <param name="quantity"></param>
         /// <returns></returns>
         [HttpPost]
+        public IActionResult ApplyVoucher(string code)
+        {
+            try
+            {
+                if (UserId == 0) return Json(new { success = false, message = "Please log in to apply voucher." });
+
+                var cart = _cartService.GetOrCreateCart(UserId);
+                var validation = _promotionService.ValidatePromotionCode(code, cart);
+
+                if (!validation.IsValid)
+                {
+                    return Json(new { success = false, message = validation.Message });
+                }
+
+                var newTotal = Math.Max(0, cart.Total - validation.DiscountAmount);
+
+                return Json(new
+                {
+                    success = true,
+                    discountAmount = validation.DiscountAmount,
+                    newTotal = newTotal,
+                    message = validation.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Failed to apply voucher: " + ex.Message });
+            }
+        }
+
         [ValidateAntiForgeryToken]
         public IActionResult UpdateQuantity(int cartItemID, int quantity)
         {
