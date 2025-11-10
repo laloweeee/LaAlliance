@@ -13,8 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASI.Basecode.Resources", "ASI.Basecode.Resources\ASI.Basecode.Resources.csproj", "{ED0C96A6-749E-413B-BF4D-8E405BEB172E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASI.Basecode.Services.Tests", "ASI.Basecode.Services.Tests\ASI.Basecode.Services.Tests.csproj", "{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}"
-EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,18 +72,7 @@ Global
 		{ED0C96A6-749E-413B-BF4D-8E405BEB172E}.Release|x64.Build.0 = Release|Any CPU
 		{ED0C96A6-749E-413B-BF4D-8E405BEB172E}.Release|x86.ActiveCfg = Release|Any CPU
 		{ED0C96A6-749E-413B-BF4D-8E405BEB172E}.Release|x86.Build.0 = Release|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Debug|x64.Build.0 = Debug|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Debug|x86.Build.0 = Debug|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Release|x64.ActiveCfg = Release|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Release|x64.Build.0 = Release|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Release|x86.ActiveCfg = Release|Any CPU
-		{9D5B14B9-3F2A-4CD5-A55B-536F7D9E1B5C}.Release|x86.Build.0 = Release|Any CPU
+
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
